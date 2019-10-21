@@ -286,7 +286,8 @@ bool             p11_rpc_message_write_byte_array        (p11_rpc_message *msg,
                                                           CK_ULONG num);
 
 bool             p11_rpc_message_write_ulong_buffer      (p11_rpc_message *msg,
-                                                          CK_ULONG count);
+                                                          CK_ULONG_PTR arr,
+                                                          CK_ULONG_PTR num);
 
 bool             p11_rpc_message_write_ulong_array       (p11_rpc_message *msg,
                                                           CK_ULONG_PTR arr,
