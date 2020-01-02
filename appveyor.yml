@@ -1,0 +1,42 @@
+image: Visual Studio 2017
+
+environment:
+  global:
+    GETOPT_INCLUDE_DIR: C:\wingetopt\src
+    GETOPT_LIBRARY: C:\wingetopt\build\wingetopt.lib
+    WINGETOPT_VER: v0.95
+  matrix:
+    - arch: x86
+      compiler: msvc2017
+
+platform:
+  - x64
+
+install:
+  # Set paths to dependencies (based on architecture)
+  - cmd: if %arch%==x86 (set PYTHON_ROOT=C:\python37) else (set PYTHON_ROOT=C:\python37-x64)
+  # Print out dependency paths
+  - cmd: echo Using Python at %PYTHON_ROOT%
+  # Add necessary paths to PATH variable
+  - cmd: set PATH=%cd%;%PYTHON_ROOT%;%PYTHON_ROOT%\Scripts;%PATH%
+  # Install meson and ninja
+  - cmd: pip install ninja meson
+  # Set up the build environment
+  - cmd: if %compiler%==msvc2017 ( call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %arch% )
+  - cmd: git clone https://github.com/alex85k/wingetopt -b %WINGETOPT_VER% C:\wingetopt
+
+before_build:
+  - cmd: cd C:\wingetopt
+  - cmd: mkdir build
+  - cmd: cd build
+  - cmd: cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=%build_type%
+  - cmd: nmake
+
+build_script:
+  - cmd: cd C:\projects\p11-kit
+  - cmd: echo Building on %arch% with %compiler%
+  - cmd: meson --backend=ninja builddir -Dc_args=-I%GETOPT_INCLUDE_DIR% -Dc_link_args=%GETOPT_LIBRARY%
+  - cmd: ninja -C builddir -v
+
+test_script:
+  - cmd: ninja -C builddir test
