@@ -126,6 +126,14 @@ void              p11_debug_precond             (const char *format,
 #ifdef P11_DEBUG_FLAG
 #ifdef WITH_DEBUG
 
+#if !defined(__GNUC__)
+#if __STDC_VERSION__ >= 199901L
+#define __PRETTY_FUNCTION__ __func__
+#else
+#define __PRETTY_FUNCTION__ "unknown"
+#endif
+#endif
+
 #undef p11_debug
 #define p11_debug(format, ...) do { \
 	if (P11_DEBUG_FLAG & p11_debug_current_flags) \
