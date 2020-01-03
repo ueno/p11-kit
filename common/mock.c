@@ -54,7 +54,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif
+
+#ifdef OS_WIN32
+#include <process.h>
+#endif
 
 /* -------------------------------------------------------------------
  * GLOBALS and SUPPORT STUFF
