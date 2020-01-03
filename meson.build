@@ -136,6 +136,10 @@ if host_system != 'windows'
     endif
   endif
 
+  if cc.has_type('ssize_t', prefix: '#include <sys/types.h>')
+    conf.set('HAVE_TYPE_SSIZE_T', 1)
+  endif
+
   # These are things we can work around
   headers = [
     'sys/resource.h',

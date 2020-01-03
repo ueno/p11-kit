@@ -89,6 +89,10 @@ char *       mkdtemp     (char *template);
 
 #endif /* HAVE_MKDTEMP */
 
+#ifndef HAVE_TYPE_SSIZE_T
+typedef int ssize_t;
+#endif /* HAVE_TYPE_SSIZE_T */
+
 char *       strdup_path_mangle (const char *template);
 
 void         p11_dl_close       (void * dl);
