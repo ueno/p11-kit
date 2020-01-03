@@ -93,6 +93,10 @@ char *       mkdtemp     (char *template);
 typedef int ssize_t;
 #endif /* HAVE_TYPE_SSIZE_T */
 
+#ifndef HAVE_TYPE_PID_T
+typedef int pid_t;
+#endif /* HAVE_TYPE_PID_T */
+
 char *       strdup_path_mangle (const char *template);
 
 void         p11_dl_close       (void * dl);

@@ -140,6 +140,10 @@ if host_system != 'windows'
     conf.set('HAVE_TYPE_SSIZE_T', 1)
   endif
 
+  if cc.has_type('pid_t', prefix: '#include <sys/types.h>')
+    conf.set('HAVE_TYPE_PID_T', 1)
+  endif
+
   # These are things we can work around
   headers = [
     'sys/resource.h',
