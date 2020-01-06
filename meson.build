@@ -242,6 +242,7 @@ endif
 # These are things we can work around
 headers = [
   'dirent.h',
+  'sys/param.h',
 ]
 
 foreach h : headers

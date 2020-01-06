@@ -45,7 +45,9 @@
 #include "path.h"
 #include "private.h"
 
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif /* HAVE_SYS_PARAM_H */
 #include <sys/stat.h>
 #include <sys/types.h>
 
