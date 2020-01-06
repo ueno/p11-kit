@@ -933,7 +933,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	}
 
 	/* Save the original stdin and stdout */
-	fds[0] = dup (STDIN_FILENO);
+	fds[0] = dup (_fileno (stdin));
 	if (fds[0] == -1) {
 		p11_message_err (errno, "failed to duplicate stdin");
 		rv = CKR_DEVICE_ERROR;
@@ -941,7 +941,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	}
 	/* FIXME: Shouldn't we close STDIN_FILENO? */
 
-	fds[1] = dup (STDOUT_FILENO);
+	fds[1] = dup (_fileno (stdout));
 	if (fds[1] == -1) {
 		p11_message_err (errno, "failed to duplicate stdout");
 		rv = CKR_DEVICE_ERROR;
@@ -950,8 +950,8 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	/* FIXME: Shouldn't we close STDOUT_FILENO */
 
 	/* Temporarily redirect pipe descriptors to stdin/stdout for child */
-	if (dup2 (pw[0], STDIN_FILENO) == -1 ||
-	    dup2 (pr[1], STDOUT_FILENO) == -1) {
+	if (dup2 (pw[0], _fileno (stdin)) == -1 ||
+	    dup2 (pr[1], _fileno (stdout)) == -1) {
 		p11_message_err (errno, "failed to duplicate child end of pipe");
 		rv = CKR_DEVICE_ERROR;
 		goto out;
@@ -973,8 +973,8 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	pr[1] = -1;
 
 	/* Restore the original stdin and stdout */
-	if (dup2 (fds[0], STDIN_FILENO) == -1 ||
-	    dup2 (fds[1], STDOUT_FILENO) == -1) {
+	if (dup2 (fds[0], _fileno (stdin)) == -1 ||
+	    dup2 (fds[1], _fileno (stdout)) == -1) {
 		p11_message_err (errno, "failed to restore file descriptors");
 		rv = CKR_DEVICE_ERROR;
 		goto out;
