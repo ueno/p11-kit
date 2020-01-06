@@ -87,7 +87,7 @@ static void
 test_initialize (void)
 {
 	CK_FUNCTION_LIST_PTR module;
-	Override over = { };
+	Override over;
 	CK_RV rv;
 
 	p11_virtual_init (&over.virt, &p11_virtual_stack, &mock_x_module_no_slots, test_destroyer);
@@ -109,7 +109,7 @@ static void
 test_fall_through (void)
 {
 	CK_FUNCTION_LIST_PTR module;
-	Override over = { };
+	Override over;
 	p11_virtual base;
 	CK_RV rv;
 
