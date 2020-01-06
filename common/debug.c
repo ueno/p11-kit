@@ -47,7 +47,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif
 
 #define P11_DEBUG_MESSAGE_MAX 512
 
