@@ -60,7 +60,9 @@
 
 #include <assert.h>
 #include <ctype.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif /* HAVE_DIRENT_H */
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
