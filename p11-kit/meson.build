@@ -189,22 +189,24 @@ endif
 
 # Check if compilation succeeds with CRYPTOKI_GNU=1
 
-pkcs11_gnu_headers = [
-  'iter.h',
-  'pin.h',
-  'uri.h'
-]
+if host_system != 'windows'
+  pkcs11_gnu_headers = [
+    'iter.h',
+    'pin.h',
+    'uri.h'
+  ]
 
-gnu_h_gen = generator(find_program('gen-pkcs11-gnu.sh'),
-                      output: 'pkcs11-gnu-@BASENAME@.h',
-                      arguments: ['@INPUT@', '@OUTPUT@'])
+  gnu_h_gen = generator(find_program('gen-pkcs11-gnu.sh'),
+                        output: 'pkcs11-gnu-@BASENAME@.h',
+                        arguments: ['@INPUT@', '@OUTPUT@'])
 
-gnu_h = gnu_h_gen.process(pkcs11_gnu_headers)
+  gnu_h = gnu_h_gen.process(pkcs11_gnu_headers)
 
-static_library('p11-kit-pkcs11-gnu',
-               gnu_h,
-               'pkcs11-gnu.c',
-               include_directories: [configinc, commoninc])
+  static_library('p11-kit-pkcs11-gnu',
+                 gnu_h,
+                 'pkcs11-gnu.c',
+                 include_directories: [configinc, commoninc])
+endif
 
 # Tests ----------------------------------------------------------------
 
