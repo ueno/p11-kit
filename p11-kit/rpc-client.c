@@ -48,7 +48,9 @@
 
 #include <assert.h>
 #include <string.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif /* OS_UNIX */
 
 /* The error used by us when parsing of rpc message fails */
 #define PARSE_ERROR   CKR_DEVICE_ERROR
