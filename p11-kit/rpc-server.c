@@ -51,7 +51,9 @@
 #include "uri.h"
 
 #include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif /* HAVE_SYS_PARAM_H */
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
