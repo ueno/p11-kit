@@ -175,6 +175,10 @@ void        p11_mmap_close  (p11_mmap *map);
 #define setenv(n, v, z) _putenv_s(n, v)
 #endif /* HAVE_SETENV */
 
+#ifndef S_ISDIR
+#define S_ISDIR(m) (m & _S_IFDIR) == _S_IFDIR
+#endif /* S_ISDIR */
+
 #endif /* OS_WIN32 */
 
 /* ----------------------------------------------------------------------------
