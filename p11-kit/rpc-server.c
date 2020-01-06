@@ -58,7 +58,9 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif /* OS_UNIX */
 
 /* The error returned on protocol failures */
 #define PARSE_ERROR CKR_DEVICE_ERROR

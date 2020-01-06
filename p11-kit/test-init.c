@@ -49,7 +49,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif /* OS_UNIX */
 
 static CK_FUNCTION_LIST module;
 static p11_mutex_t race_mutex;

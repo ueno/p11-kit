@@ -42,7 +42,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif /* OS_UNIX */
 
 #include "message.h"
 #include "p11-kit.h"

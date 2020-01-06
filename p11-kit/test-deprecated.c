@@ -52,7 +52,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#ifdef OS_UNIX
 #include <unistd.h>
+#endif /* OS_UNIX */
 
 static CK_FUNCTION_LIST_PTR_PTR
 initialize_and_get_modules (void)
