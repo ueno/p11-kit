@@ -1256,7 +1256,7 @@ test_simultaneous_functions (void)
 {
 	CK_FUNCTION_LIST real_module;
 	CK_FUNCTION_LIST *rpc_module;
-	const int num_threads = 128;
+#define num_threads 128
 	p11_thread_t threads[num_threads];
 	int i, ret;
 
