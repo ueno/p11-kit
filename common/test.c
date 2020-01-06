@@ -43,6 +43,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <getopt.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
