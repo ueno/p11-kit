@@ -386,4 +386,19 @@ int        fdwalk           (int (* cb) (void *data, int fd),
 int        p11_ascii_tolower (int c);
 int        p11_ascii_toupper (int c);
 
+#ifndef HAVE_OPENDIR
+
+typedef struct DIR DIR;
+
+struct dirent
+{
+	char *d_name;
+};
+
+DIR      *opendir (const char *);
+int       closedir (DIR *);
+struct dirent *readdir (DIR *);
+
+#endif /* HAVE_OPENDIR */
+
 #endif /* __COMPAT_H__ */

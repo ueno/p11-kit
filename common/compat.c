@@ -44,7 +44,9 @@
 #include "debug.h"
 
 #include <assert.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif /* HAVE_DIRENT_H */
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -982,3 +984,111 @@ p11_ascii_toupper (int c)
 		return 'A' + (c - 'a');
 	return c;
 }
+
+#ifndef HAVE_OPENDIR
+
+#ifdef OS_WIN32
+
+/*
+
+    Copyright Kevlin Henney, 1997, 2003, 2012. All rights reserved.
+
+    Permission to use, copy, modify, and distribute this software and its
+    documentation for any purpose is hereby granted without fee, provided
+    that this copyright and permissions notice appear in all copies and
+    derivatives.
+
+    This software is supplied "as is" without express or implied warranty.
+
+    But that said, if there are any problems please get in touch.
+
+*/
+
+struct DIR
+{
+	ptrdiff_t handle; /* -1 for failed rewind */
+	struct _finddata_t info;
+	struct dirent result; /* d_name null iff first time */
+	char *name;  /* null-terminated char string */
+};
+
+DIR *
+opendir (const char *name)
+{
+	DIR *dir = 0;
+
+	if (name && name[0]) {
+		size_t base_length = strlen (name);
+		/* search pattern must end with suitable wildcard */
+		const char *all =
+			strchr ("/\\", name[base_length - 1]) ? "*" : "/*";
+
+		if ((dir = (DIR *) malloc (sizeof *dir)) != 0 &&
+		    (dir->name = (char *) malloc (base_length + strlen(all) + 1)) != 0) {
+			strcat (strcpy (dir->name, name), all);
+
+			if((dir->handle =
+			    (ptrdiff_t) _findfirst (dir->name, &dir->info)) != -1) {
+				dir->result.d_name = 0;
+			}
+			else { /* rollback */
+				free(dir->name);
+				free(dir);
+				dir = 0;
+			}
+		} else { /* rollback */
+			free(dir);
+			dir = 0;
+			errno = ENOMEM;
+		}
+	} else {
+		errno = EINVAL;
+	}
+
+	return dir;
+}
+
+int
+closedir (DIR *dir)
+{
+	int result = -1;
+
+	if (dir) {
+	    if(dir->handle != -1)
+		    result = _findclose (dir->handle);
+
+	    free (dir->name);
+	    free (dir);
+	}
+
+	if (result == -1) /* map all errors to EBADF */
+		errno = EBADF;
+
+	return result;
+}
+
+struct dirent *
+readdir (DIR *dir)
+{
+	struct dirent *result = 0;
+
+	if (dir && dir->handle != -1) {
+		if(!dir->result.d_name ||
+		   _findnext (dir->handle, &dir->info) != -1) {
+			result = &dir->result;
+			result->d_name = dir->info.name;
+		}
+	} else {
+		errno = EBADF;
+	}
+
+	return result;
+}
+
+#else
+
+#error "<dirent.h> compatibility code is not available on this platform"
+
+#endif
+
+#endif /* HAVE_OPENDIR */

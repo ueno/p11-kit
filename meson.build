@@ -239,10 +239,22 @@ int main (void) { __libc_enable_secure = 0; return 0; }
   endforeach
 endif
 
+# These are things we can work around
+headers = [
+  'dirent.h',
+]
+
+foreach h : headers
+  if cc.has_header(h)
+    conf.set('HAVE_' + h.underscorify().to_upper(), 1)
+  endif
+endforeach
+
 functions = [
   'asprintf',
   'basename',
   'memdup',
+  'opendir',
   'reallocarray',
   'secure_getenv',
   'setenv',

@@ -160,6 +160,9 @@ fi
 AC_CHECK_FUNCS([asprintf vasprintf vsnprintf])
 AC_CHECK_DECLS([asprintf, vasprintf], [], [], [[#include <stdio.h>]])
 
+AC_CHECK_HEADERS([dirent.h])
+AC_CHECK_FUNCS([opendir])
+
 AC_CHECK_LIB(intl, dgettext)
 
 # ------------------------------------------------------------------------------
