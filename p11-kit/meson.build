@@ -18,7 +18,7 @@ libp11_kit_internal_sources = [
 libp11_kit_internal_sources += custom_target('generate virtual-fixed-generated.h',
                                              output: 'virtual-fixed-generated.h',
                                              command: [
-                                               meson.current_source_dir() / 'gen-virtual-fixed.sh',
+                                               'sh', meson.current_source_dir() / 'gen-virtual-fixed.sh',
                                                '@OUTPUT@', '64'
                                              ])
 libp11_kit_internal_sources += 'virtual.c'
