@@ -666,7 +666,7 @@ _gettemp (char *path,
 {
 	static const char padchar[] =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	static const int maxpathlen = 1024;
+#define maxpathlen 1024
 
 	char *start, *trv, *suffp, *carryp;
 	char *pad;
