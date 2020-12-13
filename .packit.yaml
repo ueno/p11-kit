@@ -9,6 +9,7 @@ downstream_package_name: p11-kit
 actions:
   post-upstream-clone:
     - wget https://src.fedoraproject.org/rpms/p11-kit/raw/master/f/p11-kit.spec
+    - sed -i 's/^Release:[[:space:]]*[[:digit:]]*/Release: 1/' p11-kit.spec
     - wget https://src.fedoraproject.org/rpms/p11-kit/raw/master/f/p11-kit-client.service
     - wget https://src.fedoraproject.org/rpms/p11-kit/raw/master/f/trust-extract-compat
   get-current-version:
