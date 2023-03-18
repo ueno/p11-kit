@@ -53,14 +53,14 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 static char *
 format_uri (p11_enumerate *ex,
-            int flags)
+            int            flags)
 {
 	CK_ATTRIBUTE *attr;
 	p11_kit_uri *uri;
@@ -69,8 +69,8 @@ format_uri (p11_enumerate *ex,
 	uri = p11_kit_uri_new ();
 
 	memcpy (p11_kit_uri_get_token_info (uri),
-	        p11_kit_iter_get_token (ex->iter),
-	        sizeof (CK_TOKEN_INFO));
+		p11_kit_iter_get_token (ex->iter),
+		sizeof (CK_TOKEN_INFO));
 
 	attr = p11_attrs_find (ex->attrs, CKA_CLASS);
 	if (attr != NULL)
@@ -101,7 +101,7 @@ dump_iterate (p11_enumerate *ex)
 
 	while ((rv = p11_kit_iter_next (ex->iter)) == CKR_OK) {
 		if (!p11_buffer_reset (&buf, 8192))
-		         return_val_if_reached (false);
+			return_val_if_reached (false);
 
 		string = format_uri (ex, P11_KIT_URI_FOR_OBJECT);
 		if (string) {
@@ -125,7 +125,7 @@ dump_iterate (p11_enumerate *ex)
 }
 
 int
-p11_trust_dump (int argc,
+p11_trust_dump (int    argc,
                 char **argv)
 {
 	p11_enumerate ex;
@@ -153,8 +153,7 @@ p11_trust_dump (int argc,
 		  "filter of what to export\n"
 		  "  pkcs11:object=xx  a PKCS#11 URI\n"
 		  "  all               all objects",
-		  "what",
-		},
+		  "what", },
 		{ opt_verbose, "show verbose debug output", },
 		{ opt_quiet, "suppress command output", },
 		{ 0 },
@@ -164,22 +163,22 @@ p11_trust_dump (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_verbose:
-		case opt_quiet:
-			break;
+			case opt_verbose:
+			case opt_quiet:
+				break;
 
-		case opt_filter:
-			if (!p11_enumerate_opt_filter (&ex, optarg))
+			case opt_filter:
+				if (!p11_enumerate_opt_filter (&ex, optarg))
+					exit (2);
+				break;
+			case 'h':
+				p11_tool_usage (usages, options);
+				exit (0);
+			case '?':
 				exit (2);
-			break;
-		case 'h':
-			p11_tool_usage (usages, options);
-			exit (0);
-		case '?':
-			exit (2);
-		default:
-			assert_not_reached ();
-			break;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 

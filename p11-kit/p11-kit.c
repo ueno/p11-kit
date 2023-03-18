@@ -51,7 +51,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -59,17 +59,17 @@
 
 #include "tool.h"
 
-int       p11_kit_list_modules    (int argc,
-                                   char *argv[]);
+int       p11_kit_list_modules (int   argc,
+				char *argv[]);
 
-int       p11_kit_print_config    (int argc,
-                                   char *argv[]);
+int       p11_kit_print_config (int   argc,
+				char *argv[]);
 
-int       p11_kit_trust           (int argc,
-                                   char *argv[]);
+int       p11_kit_trust (int   argc,
+			 char *argv[]);
 
-int       p11_kit_external        (int argc,
-                                   char *argv[]);
+int       p11_kit_external (int   argc,
+			    char *argv[]);
 
 static const p11_tool_command commands[] = {
 	{ "list-modules", p11_kit_list_modules, N_("List modules and tokens") },
@@ -81,8 +81,8 @@ static const p11_tool_command commands[] = {
 };
 
 int
-p11_kit_trust (int argc,
-               char *argv[])
+p11_kit_trust (int   argc,
+	       char *argv[])
 {
 	char **args;
 
@@ -95,7 +95,7 @@ p11_kit_trust (int argc,
 
 	execv (args[0], args);
 
-	/* At this point we have no command */
+        /* At this point we have no command */
 	p11_message_err (errno, _("couldn't run trust tool"));
 
 	free (args);
@@ -103,14 +103,14 @@ p11_kit_trust (int argc,
 }
 
 int
-p11_kit_external (int argc,
-                  char *argv[])
+p11_kit_external (int   argc,
+		  char *argv[])
 {
 	const char *private_dir;
 	char *filename;
 	char *path;
 
-	/* These are trust commands, send them to that tool */
+        /* These are trust commands, send them to that tool */
 	if (strcmp (argv[0], "extract") == 0) {
 		return p11_kit_trust (argc, argv);
 	} else if (strcmp (argv[0], "extract-trust") == 0) {
@@ -125,19 +125,19 @@ p11_kit_external (int argc,
 	if (!private_dir || !private_dir[0])
 		private_dir = PRIVATEDIR;
 
-	/* Add our libexec directory to the path */
+        /* Add our libexec directory to the path */
 	path = p11_path_build (private_dir, filename, NULL);
 	return_val_if_fail (path != NULL, 1);
 
-	/* Windows execv() requires the first element of ARGV must be
-	 * the executable name */
+        /* Windows execv() requires the first element of ARGV must be
+         * the executable name */
 #ifdef OS_WIN32
 	argv[0] = path;
 #endif
 	argv[argc] = NULL;
 	execv (path, argv);
 
-	/* At this point we have no command */
+        /* At this point we have no command */
 	p11_message (_("'%s' is not a valid command. See 'p11-kit --help'"), argv[0]);
 
 	free (filename);
@@ -146,7 +146,7 @@ p11_kit_external (int argc,
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	return p11_tool_main (argc, argv, commands);

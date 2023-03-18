@@ -69,8 +69,8 @@ setup_mock_module (CK_SESSION_HANDLE *session)
 
 	if (session) {
 		rv = (module->C_OpenSession) (MOCK_SLOT_ONE_ID,
-		                              CKF_RW_SESSION | CKF_SERIAL_SESSION,
-		                              NULL, NULL, session);
+					      CKF_RW_SESSION | CKF_SERIAL_SESSION,
+					      NULL, NULL, session);
 		assert (rv == CKR_OK);
 	}
 
@@ -97,7 +97,7 @@ teardown_mock_module (CK_FUNCTION_LIST_PTR module)
 #include "test-mock.c"
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

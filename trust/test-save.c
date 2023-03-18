@@ -359,11 +359,11 @@ test_directory_files (void)
 
 #ifdef OS_UNIX
 	test_check_directory (subdir, ("blah.cer", "file.txt",
-	                      "link.ext",
-	                      NULL));
+				       "link.ext",
+				       NULL));
 #else
 	test_check_directory (subdir, ("blah.cer", "file.txt",
-	                      NULL));
+				       NULL));
 #endif
 	test_check_file (subdir, "blah.cer", SRCDIR "/trust/fixtures/cacert3.der");
 	test_check_data (subdir, "file.txt", test_text, strlen (test_text));
@@ -416,23 +416,23 @@ test_directory_dups (void)
 	free (path);
 
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "file", ".txt"),
-	                                 test_text, 15);
+					 test_text, 15);
 	assert_num_eq (true, ret);
 
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "no-ext", NULL),
-	                                 test_text, 8);
+					 test_text, 8);
 	assert_num_eq (true, ret);
 
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "no-ext", NULL),
-	                                 test_text, 16);
+					 test_text, 16);
 	assert_num_eq (true, ret);
 
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "with-num", ".0"),
-	                                 test_text, 14);
+					 test_text, 14);
 	assert_num_eq (true, ret);
 
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "with-num", ".0"),
-	                                 test_text, 15);
+					 test_text, 15);
 	assert_num_eq (true, ret);
 
 #ifdef OS_UNIX
@@ -514,7 +514,7 @@ test_directory_overwrite (void)
 	if (asprintf (&subdir, "%s/%s", test.directory, "extract-dir") < 0)
 		assert_not_reached ();
 
-	/* Some initial files into this directory, which get overwritten */
+        /* Some initial files into this directory, which get overwritten */
 	dir = p11_save_open_directory (subdir, 0);
 	ret = p11_save_write_and_finish (p11_save_open_file_in (dir, "file", ".txt"), "", 0) &&
 	      p11_save_write_and_finish (p11_save_open_file_in (dir, "another-file", NULL), "", 0) &&
@@ -522,7 +522,7 @@ test_directory_overwrite (void)
 	      p11_save_finish_directory (dir, true);
 	assert (ret && dir);
 
-	/* Now the actual test, using the same directory */
+        /* Now the actual test, using the same directory */
 	dir = p11_save_open_directory (subdir, P11_SAVE_OVERWRITE);
 	assert_ptr_not_null (dir);
 
@@ -575,7 +575,7 @@ test_directory_overwrite (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

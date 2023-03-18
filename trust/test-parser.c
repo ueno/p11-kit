@@ -87,7 +87,7 @@ static CK_ATTRIBUTE certificate_match[] = {
 
 static CK_ATTRIBUTE *
 parsed_attrs (CK_ATTRIBUTE *match,
-              int length)
+              int           length)
 {
 	int i;
 
@@ -119,10 +119,10 @@ test_parse_der_certificate (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_x509, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/cacert3.der", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate */
+        /* Should have gotten certificate */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -147,10 +147,10 @@ test_parse_pem_certificate (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_pem, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/cacert3.pem", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate  */
+        /* Should have gotten certificate  */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -174,10 +174,10 @@ test_parse_p11_kit_persist (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_persist, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/input/verisign-v1.p11-kit", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate  */
+        /* Should have gotten certificate  */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -227,21 +227,21 @@ test_parse_openssl_trusted (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_pem, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/cacert3-trusted.pem", NULL,
-	                      P11_PARSE_FLAG_ANCHOR);
+			      P11_PARSE_FLAG_ANCHOR);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/*
-	 * Should have gotten:
-	 * - 1 certificate
-	 * - 2 attached extensions
-	 */
+        /*
+         * Should have gotten:
+         * - 1 certificate
+         * - 2 attached extensions
+         */
 	assert_num_eq (3, test.parsed->num);
 
-	/* The certificate */
+        /* The certificate */
 	cert = parsed_attrs (certificate_match, -1);
 	test_check_attrs (expected[0], cert);
 
-	/* The other objects */
+        /* The other objects */
 	for (i = 1; expected[i]; i++) {
 		object = parsed_attrs (expected[i], 2);
 		assert_ptr_not_null (object);
@@ -304,25 +304,25 @@ test_parse_openssl_distrusted (void)
 	int ret;
 	int i;
 
-	/*
-	 * OpenSSL style is to litter the blocklist in with the anchors,
-	 * so we parse this as an anchor, but expect it to be distrusted
-	 */
+        /*
+         * OpenSSL style is to litter the blocklist in with the anchors,
+         * so we parse this as an anchor, but expect it to be distrusted
+         */
 	p11_parser_formats (test.parser, p11_parser_format_pem, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/distrusted.pem", NULL,
-	                      P11_PARSE_FLAG_ANCHOR);
+			      P11_PARSE_FLAG_ANCHOR);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/*
-	 * Should have gotten:
-	 * - 1 certificate
-	 * - 2 attached extensions
-	 */
+        /*
+         * Should have gotten:
+         * - 1 certificate
+         * - 2 attached extensions
+         */
 	assert_num_eq (3, test.parsed->num);
 	cert = parsed_attrs (certificate_match, -1);
 	test_check_attrs (expected[0], cert);
 
-	/* The other objects */
+        /* The other objects */
 	for (i = 1; expected[i]; i++) {
 		object = parsed_attrs (expected[i], 2);
 		assert_ptr_not_null (object);
@@ -425,10 +425,10 @@ test_openssl_trusted_no_trust (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_pem, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/openssl-trust-no-trust.pem", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate  */
+        /* Should have gotten certificate  */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -453,13 +453,13 @@ test_parse_anchor (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_x509, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/cacert3.der", NULL,
-	                      P11_PARSE_FLAG_ANCHOR);
+			      P11_PARSE_FLAG_ANCHOR);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/*
-	 * Should have gotten:
-	 * - 1 certificate
-	 */
+        /*
+         * Should have gotten:
+         * - 1 certificate
+         */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -483,10 +483,10 @@ test_parse_thawte (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_pem, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/thawte.pem", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate  */
+        /* Should have gotten certificate  */
 	assert_num_eq (1, test.parsed->num);
 
 	cert = parsed_attrs (certificate_match, -1);
@@ -504,7 +504,7 @@ test_parse_invalid_file (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_x509, NULL);
 	ret = p11_parse_file (test.parser, "/nonexistent", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_FAILURE, ret);
 
 	p11_message_loud ();
@@ -519,7 +519,7 @@ test_parse_unrecognized (void)
 
 	p11_parser_formats (test.parser, p11_parser_format_x509, NULL);
 	ret = p11_parse_file (test.parser, SRCDIR "/trust/fixtures/unrecognized-file.txt", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_UNRECOGNIZED, ret);
 
 	p11_message_loud ();
@@ -538,14 +538,14 @@ test_parse_no_asn1_cache (void)
 	ret = p11_parse_file (parser, SRCDIR "/trust/fixtures/cacert3.der", NULL, P11_PARSE_FLAG_NONE);
 	assert_num_eq (P11_PARSE_SUCCESS, ret);
 
-	/* Should have gotten certificate  */
+        /* Should have gotten certificate  */
 	assert_num_eq (1, p11_parser_parsed (parser)->num);
 
 	p11_parser_free (parser);
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

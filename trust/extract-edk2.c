@@ -44,7 +44,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -94,7 +94,7 @@ static const efi_guid agent_guid_host = {
 /* serialization helpers */
 static void
 buffer_add_uint16 (p11_buffer *buffer,
-                   uint16_t uint16)
+                   uint16_t    uint16)
 {
 	uint8_t uint16_buf[2];
 
@@ -105,7 +105,7 @@ buffer_add_uint16 (p11_buffer *buffer,
 
 static void
 buffer_add_uint32 (p11_buffer *buffer,
-                   uint32_t uint32)
+                   uint32_t    uint32)
 {
 	uint8_t uint32_buf[4];
 
@@ -117,7 +117,7 @@ buffer_add_uint32 (p11_buffer *buffer,
 }
 
 static void
-buffer_add_efi_guid (p11_buffer *buffer,
+buffer_add_efi_guid (p11_buffer     *buffer,
                      const efi_guid *guid)
 {
 	buffer_add_uint32 (buffer, guid->data1);
@@ -127,7 +127,7 @@ buffer_add_efi_guid (p11_buffer *buffer,
 }
 
 static void
-buffer_add_efi_signature_list (p11_buffer *buffer,
+buffer_add_efi_signature_list (p11_buffer               *buffer,
                                const efi_signature_list *siglist)
 {
 	buffer_add_efi_guid (buffer, &siglist->signature_type);
@@ -137,7 +137,7 @@ buffer_add_efi_signature_list (p11_buffer *buffer,
 }
 
 static void
-buffer_add_efi_signature_data (p11_buffer *buffer,
+buffer_add_efi_signature_data (p11_buffer               *buffer,
                                const efi_signature_data *sigdata)
 {
 	buffer_add_efi_guid (buffer, &sigdata->signature_owner);
@@ -146,31 +146,31 @@ buffer_add_efi_signature_data (p11_buffer *buffer,
 /* main routine */
 static bool
 prepare_edk2_buffer (p11_enumerate *ex,
-                     p11_buffer *buffer)
+                     p11_buffer    *buffer)
 {
 	efi_signature_list siglist;
 	efi_signature_data sigdata;
 	CK_RV rv;
 	size_t size;
 
-	/*
-	 * set "siglist.signature_type" and "sigdata.signature_owner" for reuse
-	 * across all certificates
-	 */
+        /*
+         * set "siglist.signature_type" and "sigdata.signature_owner" for reuse
+         * across all certificates
+         */
 	siglist.signature_type = efi_cert_x509_guid_host;
 	sigdata.signature_owner = agent_guid_host;
 
-	/* also reuse a zero "siglist.signature_header_size" */
+        /* also reuse a zero "siglist.signature_header_size" */
 	siglist.signature_header_size = 0;
 
-	/* for every certificate */
+        /* for every certificate */
 	while ((rv = p11_kit_iter_next (ex->iter)) == CKR_OK) {
 		size = sizeof sigdata;
 
-		/*
-		 * set the variable size fields in "siglist" while catching any
-		 * (unlikely) integer overflows
-		 */
+                /*
+                 * set the variable size fields in "siglist" while catching any
+                 * (unlikely) integer overflows
+                 */
 		return_val_if_fail (ex->cert_len <= UINT32_MAX - size, false);
 		size += ex->cert_len;
 		siglist.signature_size = size;
@@ -179,18 +179,18 @@ prepare_edk2_buffer (p11_enumerate *ex,
 		size += sizeof siglist;
 		siglist.signature_list_size = size;
 
-		/* serialize the headers */
+                /* serialize the headers */
 		buffer_add_efi_signature_list (buffer, &siglist);
 		buffer_add_efi_signature_data (buffer, &sigdata);
 
-		/* serialize the DER encoding of the certificate */
+                /* serialize the DER encoding of the certificate */
 		return_val_if_fail (ex->cert_len <= SSIZE_MAX, false);
 		p11_buffer_add (buffer, ex->cert_der, ex->cert_len);
 	}
 
 	if (rv != CKR_CANCEL) {
 		p11_message (_("failed to find certificate: %s"),
-		             p11_kit_strerror (rv));
+			     p11_kit_strerror (rv));
 		return false;
 	}
 
@@ -200,7 +200,7 @@ prepare_edk2_buffer (p11_enumerate *ex,
 
 bool
 p11_extract_edk2_cacerts (p11_enumerate *ex,
-                          const char *destination)
+                          const char    *destination)
 {
 	p11_buffer buffer;
 	p11_save_file *file;

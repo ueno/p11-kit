@@ -40,7 +40,7 @@
 static void
 test_success (void)
 {
-	/* Yup, nothing */
+        /* Yup, nothing */
 }
 
 
@@ -49,7 +49,7 @@ test_failure (void)
 {
 	if (getenv ("TEST_FAIL")) {
 		p11_test_fail (__FILE__, __LINE__, __FUNCTION__,
-		               "Unconditional test failure due to TEST_FAIL environment variable");
+			       "Unconditional test failure due to TEST_FAIL environment variable");
 	}
 }
 
@@ -62,7 +62,7 @@ test_memory (void)
 		mem = malloc (1);
 		assert (mem != NULL);
 		free (mem);
-		/* cppcheck-suppress deallocuse */
+                /* cppcheck-suppress deallocuse */
 		*mem = 1;
 	}
 }
@@ -78,11 +78,11 @@ test_leak (void)
 		assert (mem != NULL);
 		*mem = 1;
 	}
-	/* cppcheck-suppress memleak */
+        /* cppcheck-suppress memleak */
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_success, "/test/success");

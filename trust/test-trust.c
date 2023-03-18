@@ -59,12 +59,12 @@
 #endif
 
 void
-test_check_object_msg (const char *file,
-                       int line,
-                       const char *function,
-                       CK_ATTRIBUTE *attrs,
-                       CK_OBJECT_CLASS klass,
-                       const char *label)
+test_check_object_msg (const char      *file,
+                       int              line,
+                       const char      *function,
+                       CK_ATTRIBUTE    *attrs,
+                       CK_OBJECT_CLASS  klass,
+                       const char      *label)
 {
 	CK_BBOOL vfalse = CK_FALSE;
 
@@ -79,11 +79,11 @@ test_check_object_msg (const char *file,
 }
 
 void
-test_check_cacert3_ca_msg (const char *file,
-                           int line,
-                           const char *function,
+test_check_cacert3_ca_msg (const char   *file,
+                           int           line,
+                           const char   *function,
                            CK_ATTRIBUTE *attrs,
-                           const char *label)
+                           const char   *label)
 {
 	CK_CERTIFICATE_TYPE x509 = CKC_X_509;
 	CK_ULONG category = 2; /* authority */
@@ -106,9 +106,9 @@ test_check_cacert3_ca_msg (const char *file,
 }
 
 void
-test_check_id_msg (const char *file,
-                   int line,
-                   const char *function,
+test_check_id_msg (const char   *file,
+                   int           line,
+                   const char   *function,
                    CK_ATTRIBUTE *expected,
                    CK_ATTRIBUTE *attr)
 {
@@ -122,9 +122,9 @@ test_check_id_msg (const char *file,
 }
 
 void
-test_check_attrs_msg (const char *file,
-                      int line,
-                      const char *function,
+test_check_attrs_msg (const char   *file,
+                      int           line,
+                      const char   *function,
                       CK_ATTRIBUTE *expected,
                       CK_ATTRIBUTE *attrs)
 {
@@ -144,35 +144,35 @@ test_check_attrs_msg (const char *file,
 }
 
 void
-test_check_attr_msg (const char *file,
-                     int line,
-                     const char *function,
-                     CK_OBJECT_CLASS klass,
-                     CK_ATTRIBUTE *expected,
-                     CK_ATTRIBUTE *attr)
+test_check_attr_msg (const char      *file,
+                     int              line,
+                     const char      *function,
+                     CK_OBJECT_CLASS  klass,
+                     CK_ATTRIBUTE    *expected,
+                     CK_ATTRIBUTE    *attr)
 {
 	assert (expected != NULL);
 
 	if (attr == NULL) {
 		p11_test_fail (file, line, function,
-		               "attribute does not match: (expected %s but found NULL)",
-		               p11_attr_to_string (expected, klass));
+			       "attribute does not match: (expected %s but found NULL)",
+			       p11_attr_to_string (expected, klass));
 	}
 
 	if (!p11_attr_equal (attr, expected)) {
 		p11_test_fail (file, line, function,
-		               "attribute does not match: (expected %s but found %s)",
-		               p11_attr_to_string (expected, klass),
-		               attr ? p11_attr_to_string (attr, klass) : "(null)");
+			       "attribute does not match: (expected %s but found %s)",
+			       p11_attr_to_string (expected, klass),
+			       attr ? p11_attr_to_string (attr, klass) : "(null)");
 	}
 }
 
 static char *
 read_file (const char *file,
-           int line,
+           int         line,
            const char *function,
            const char *filename,
-           long *len)
+           long       *len)
 {
 	struct stat sb;
 	FILE *f = NULL;
@@ -182,7 +182,7 @@ read_file (const char *file,
 	if (f == NULL)
 		p11_test_fail (file, line, function, "Couldn't open file: %s", filename);
 
-	/* Figure out size */
+        /* Figure out size */
 	if (stat (filename, &sb) < 0)
 		p11_test_fail (file, line, function, "Couldn't stat file: %s", filename);
 
@@ -190,7 +190,7 @@ read_file (const char *file,
 	data = malloc (*len ? *len : 1);
 	assert (data != NULL);
 
-	/* And read in one block */
+        /* And read in one block */
 	if (fread (data, 1, *len, f) != *len)
 		p11_test_fail (file, line, function, "Couldn't read file: %s", filename);
 
@@ -201,7 +201,7 @@ read_file (const char *file,
 
 void
 test_check_file_msg (const char *file,
-                     int line,
+                     int         line,
                      const char *function,
                      const char *directory,
                      const char *name,
@@ -217,12 +217,12 @@ test_check_file_msg (const char *file,
 
 void
 test_check_data_msg (const char *file,
-                     int line,
+                     int         line,
                      const char *function,
                      const char *directory,
                      const char *name,
                      const void *refdata,
-                     long reflen)
+                     long        reflen)
 {
 	char *filedata;
 	char *filename;
@@ -246,7 +246,7 @@ test_check_data_msg (const char *file,
 
 void
 test_check_symlink_msg (const char *file,
-                        int line,
+                        int         line,
                         const char *function,
                         const char *directory,
                         const char *name,
@@ -273,7 +273,7 @@ test_check_symlink_msg (const char *file,
 
 p11_dict *
 test_check_directory_files (const char *file,
-                            ...)
+			    ...)
 {
 	p11_dict *files;
 	va_list va;
@@ -297,10 +297,10 @@ test_check_directory_files (const char *file,
 
 void
 test_check_directory_msg (const char *file,
-                          int line,
+                          int         line,
                           const char *function,
                           const char *directory,
-                          p11_dict *files)
+                          p11_dict   *files)
 {
 	p11_dictiter iter;
 	struct dirent *dp;
@@ -309,7 +309,7 @@ test_check_directory_msg (const char *file,
 
 	dir = opendir (directory);
 	if (dir == NULL)
-		p11_test_fail (file ,line, function, "Couldn't open directory: %s", directory);
+		p11_test_fail (file, line, function, "Couldn't open directory: %s", directory);
 
 	while ((dp = readdir (dir)) != NULL) {
 		if (strcmp (dp->d_name, ".") == 0 ||
@@ -317,7 +317,7 @@ test_check_directory_msg (const char *file,
 			continue;
 
 		if (!p11_dict_remove (files, dp->d_name))
-			p11_test_fail  (file, line, function, "Unexpected file in directory: %s", dp->d_name);
+			p11_test_fail (file, line, function, "Unexpected file in directory: %s", dp->d_name);
 	}
 
 	closedir (dir);

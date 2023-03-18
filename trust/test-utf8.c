@@ -57,21 +57,18 @@ test_ucs2be (void)
 	} fixtures[] = {
 		{ "This is a test", 14,
 		  { 0x00, 'T', 0x00, 'h', 0x00, 'i', 0x00, 's', 0x00, ' ', 0x00, 'i', 0x00, 's', 0x00, ' ',
-		    0x00, 'a', 0x00, ' ', 0x00, 't', 0x00, 'e', 0x00, 's', 0x00, 't' }, 28,
-		},
+		    0x00, 'a', 0x00, ' ', 0x00, 't', 0x00, 'e', 0x00, 's', 0x00, 't' }, 28, },
 		{ "V\303\266gel", 6,
-		  { 0x00, 'V', 0x00, 0xF6, 0x00, 'g', 0x00, 'e', 0x00, 'l' }, 10,
-		},
+		  { 0x00, 'V', 0x00, 0xF6, 0x00, 'g', 0x00, 'e', 0x00, 'l' }, 10, },
 		{ "M\303\244nwich \340\264\205", 12,
 		  { 0x00, 'M', 0x00, 0xE4, 0x00, 'n', 0x00, 'w', 0x00, 'i', 0x00, 'c', 0x00, 'h',
-		    0x00, ' ', 0x0D, 0x05 }, 18,
-		}
+		    0x00, ' ', 0x0D, 0x05 }, 18, }
 	};
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		output = p11_utf8_for_ucs2be (fixtures[i].input,
-		                              fixtures[i].input_len,
-		                              &length);
+					      fixtures[i].input_len,
+					      &length);
 
 		assert_num_eq (fixtures[i].output_len, length);
 		assert_str_eq (fixtures[i].output, output);
@@ -95,8 +92,8 @@ test_ucs2be_fail (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		output = p11_utf8_for_ucs2be (fixtures[i].input,
-		                              fixtures[i].input_len,
-		                              &length);
+					      fixtures[i].input_len,
+					      &length);
 		assert_ptr_eq (NULL, output);
 	}
 }
@@ -128,23 +125,20 @@ test_ucs4be (void)
 		    0x00, 0x00, 0x00, 't',
 		    0x00, 0x00, 0x00, 'e',
 		    0x00, 0x00, 0x00, 's',
-		    0x00, 0x00, 0x00, 't',
-		  }, 56,
-		},
+		    0x00, 0x00, 0x00, 't', }, 56, },
 		{ "Fun \360\220\214\231", 8,
 		  { 0x00, 0x00, 0x00, 'F',
 		    0x00, 0x00, 0x00, 'u',
 		    0x00, 0x00, 0x00, 'n',
 		    0x00, 0x00, 0x00, ' ',
 		    0x00, 0x01, 0x03, 0x19, /* U+10319: looks like an antenna */
-		  }, 20,
-		}
+		  }, 20, }
 	};
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		output = p11_utf8_for_ucs4be (fixtures[i].input,
-		                              fixtures[i].input_len,
-		                              &length);
+					      fixtures[i].input_len,
+					      &length);
 
 		assert_num_eq (fixtures[i].output_len, length);
 		assert_str_eq (fixtures[i].output, output);
@@ -164,21 +158,18 @@ test_ucs4be_fail (void)
 		const unsigned char input[100];
 		size_t input_len;
 	} fixtures[] = {
-		{ { 0x00, 0x00, 'T',
-		  }, 7 /* truncated */ },
+		{ { 0x00, 0x00, 'T', }, 7 /* truncated */ },
 		{ { 0x00, 0x00, 0x00, 'F',
 		    0x00, 0x00, 0x00, 'u',
 		    0x00, 0x00, 0x00, 'n',
 		    0x00, 0x00, 0x00, ' ',
-		    0xD8, 0x00, 0xDF, 0x19,
-		  }, 20,
-		}
+		    0xD8, 0x00, 0xDF, 0x19, }, 20, }
 	};
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		output = p11_utf8_for_ucs4be (fixtures[i].input,
-		                              fixtures[i].input_len,
-		                              &length);
+					      fixtures[i].input_len,
+					      &length);
 		assert_ptr_eq (NULL, output);
 	}
 }
@@ -202,7 +193,7 @@ test_utf8 (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		ret = p11_utf8_validate (fixtures[i].input,
-		                         fixtures[i].input_len);
+					 fixtures[i].input_len);
 		assert_num_eq (true, ret);
 	}
 }
@@ -227,13 +218,13 @@ test_utf8_fail (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		ret = p11_utf8_validate (fixtures[i].input,
-		                         fixtures[i].input_len);
+					 fixtures[i].input_len);
 		assert_num_eq (false, ret);
 	}
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_ucs2be, "/utf8/ucs2be");

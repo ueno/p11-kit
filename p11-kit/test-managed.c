@@ -78,8 +78,8 @@ setup_mock_module (CK_SESSION_HANDLE *session)
 
 	if (session) {
 		rv = (module->C_OpenSession) (MOCK_SLOT_ONE_ID,
-		                              CKF_RW_SESSION | CKF_SERIAL_SESSION,
-		                              NULL, NULL, session);
+					      CKF_RW_SESSION | CKF_SERIAL_SESSION,
+					      NULL, NULL, session);
 		assert (rv == CKR_OK);
 	}
 
@@ -207,7 +207,7 @@ test_separate_close_all_sessions (void)
 	teardown_mock_module (second);
 }
 
-#define MAX_MODS (P11_VIRTUAL_MAX_FIXED+10)
+#define MAX_MODS (P11_VIRTUAL_MAX_FIXED + 10)
 static void
 test_max_session_load (void)
 {
@@ -257,7 +257,7 @@ test_fork_and_reinitialize (void)
 	pid = fork ();
 	assert_num_cmp (pid, >=, 0);
 
-	/* The child */
+        /* The child */
 	if (pid == 0) {
 		rv = (module->C_Initialize) (NULL);
 		assert_num_eq (CKR_OK, rv);
@@ -290,7 +290,7 @@ test_fork_and_reinitialize (void)
 #include "test-mock.c"
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

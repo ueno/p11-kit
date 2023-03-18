@@ -132,10 +132,10 @@
  */
 
 typedef struct _PinCallback {
-	/* Only used/modified within the lock */
+        /* Only used/modified within the lock */
 	int refs;
 
-	/* Readonly after construct */
+        /* Readonly after construct */
 	p11_kit_pin_callback func;
 	void *user_data;
 	p11_kit_pin_destroy_func destroy;
@@ -149,7 +149,7 @@ static struct _Shared {
 	p11_dict *pin_sources;
 } gl = { NULL };
 
-static void*
+static void *
 ref_pin_callback (void *pointer)
 {
 	PinCallback *cb = pointer;
@@ -172,7 +172,7 @@ unref_pin_callback (void *pointer)
 }
 
 static bool
-register_callback_unlocked (const char *pin_source,
+register_callback_unlocked (const char  *pin_source,
                             PinCallback *cb)
 {
 	p11_array *callbacks = NULL;
@@ -183,7 +183,7 @@ register_callback_unlocked (const char *pin_source,
 
 	if (gl.pin_sources == NULL) {
 		gl.pin_sources = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal,
-		                               free, (p11_destroyer)p11_array_free);
+					       free, (p11_destroyer)p11_array_free);
 		return_val_if_fail (gl.pin_sources != NULL, false);
 	}
 
@@ -224,10 +224,10 @@ register_callback_unlocked (const char *pin_source,
  * Returns: Returns negative if registering fails.
  */
 int
-p11_kit_pin_register_callback (const char *pin_source,
-                               p11_kit_pin_callback callback,
-                               void *callback_data,
-                               p11_kit_pin_destroy_func callback_destroy)
+p11_kit_pin_register_callback (const char               *pin_source,
+                               p11_kit_pin_callback      callback,
+                               void                     *callback_data,
+                               p11_kit_pin_destroy_func  callback_destroy)
 {
 	PinCallback *cb;
 	bool ret;
@@ -264,9 +264,9 @@ p11_kit_pin_register_callback (const char *pin_source,
  * removed.
  */
 void
-p11_kit_pin_unregister_callback (const char *pin_source,
-                                 p11_kit_pin_callback callback,
-                                 void *callback_data)
+p11_kit_pin_unregister_callback (const char           *pin_source,
+                                 p11_kit_pin_callback  callback,
+                                 void                 *callback_data)
 {
 	PinCallback *cb;
 	p11_array *callbacks;
@@ -277,27 +277,27 @@ p11_kit_pin_unregister_callback (const char *pin_source,
 
 	p11_lock ();
 
-		if (gl.pin_sources) {
-			callbacks = p11_dict_get (gl.pin_sources, pin_source);
-			if (callbacks) {
-				for (i = 0; i < callbacks->num; i++) {
-					cb = callbacks->elem[i];
-					if (cb->func == callback && cb->user_data == callback_data) {
-						p11_array_remove (callbacks, i);
-						break;
-					}
+	if (gl.pin_sources) {
+		callbacks = p11_dict_get (gl.pin_sources, pin_source);
+		if (callbacks) {
+			for (i = 0; i < callbacks->num; i++) {
+				cb = callbacks->elem[i];
+				if (cb->func == callback && cb->user_data == callback_data) {
+					p11_array_remove (callbacks, i);
+					break;
 				}
-
-				if (callbacks->num == 0)
-					p11_dict_remove (gl.pin_sources, pin_source);
 			}
 
-			/* When there are no more pin sources, get rid of the hash table */
-			if (p11_dict_size (gl.pin_sources) == 0) {
-				p11_dict_free (gl.pin_sources);
-				gl.pin_sources = NULL;
-			}
+			if (callbacks->num == 0)
+				p11_dict_remove (gl.pin_sources, pin_source);
 		}
+
+                /* When there are no more pin sources, get rid of the hash table */
+		if (p11_dict_size (gl.pin_sources) == 0) {
+			p11_dict_free (gl.pin_sources);
+			gl.pin_sources = NULL;
+		}
+	}
 
 	p11_unlock ();
 }
@@ -334,10 +334,10 @@ p11_kit_pin_unregister_callback (const char *pin_source,
  *     if no callback was registered or could proivde a PIN
  */
 P11KitPin *
-p11_kit_pin_request (const char *pin_source,
-                     P11KitUri *pin_uri,
-                     const char *pin_description,
-                     P11KitPinFlags pin_flags)
+p11_kit_pin_request (const char     *pin_source,
+                     P11KitUri      *pin_uri,
+                     const char     *pin_description,
+                     P11KitPinFlags  pin_flags)
 {
 	PinCallback **snapshot = NULL;
 	unsigned int snapshot_count = 0;
@@ -349,21 +349,21 @@ p11_kit_pin_request (const char *pin_source,
 
 	p11_lock ();
 
-		/* Find and ref the pin source data */
-		if (gl.pin_sources) {
-			callbacks = p11_dict_get (gl.pin_sources, pin_source);
+        /* Find and ref the pin source data */
+	if (gl.pin_sources) {
+		callbacks = p11_dict_get (gl.pin_sources, pin_source);
 
-			/* If we didn't find any snapshots try the global ones */
-			if (callbacks == NULL)
-				callbacks = p11_dict_get (gl.pin_sources, P11_KIT_PIN_FALLBACK);
+                /* If we didn't find any snapshots try the global ones */
+		if (callbacks == NULL)
+			callbacks = p11_dict_get (gl.pin_sources, P11_KIT_PIN_FALLBACK);
 
-			if (callbacks != NULL && callbacks->num) {
-				snapshot = memdup (callbacks->elem, sizeof (void *) * callbacks->num);
-				snapshot_count = callbacks->num;
-				for (i = 0; snapshot && i < snapshot_count; i++)
-					ref_pin_callback (snapshot[i]);
-			}
+		if (callbacks != NULL && callbacks->num) {
+			snapshot = memdup (callbacks->elem, sizeof (void *) * callbacks->num);
+			snapshot_count = callbacks->num;
+			for (i = 0; snapshot && i < snapshot_count; i++)
+				ref_pin_callback (snapshot[i]);
 		}
+	}
 
 	p11_unlock ();
 
@@ -372,13 +372,13 @@ p11_kit_pin_request (const char *pin_source,
 
 	for (pin = NULL, i = snapshot_count; pin == NULL && i > 0; i--) {
 		pin = (snapshot[i - 1]->func) (pin_source, pin_uri, pin_description, pin_flags,
-		                               snapshot[i - 1]->user_data);
+					       snapshot[i - 1]->user_data);
 	}
 
 	p11_lock ();
-		for (i = 0; i < snapshot_count; i++)
-			unref_pin_callback (snapshot[i]);
-		free (snapshot);
+	for (i = 0; i < snapshot_count; i++)
+		unref_pin_callback (snapshot[i]);
+	free (snapshot);
 	p11_unlock ();
 
 	return pin;
@@ -446,11 +446,11 @@ p11_kit_pin_request (const char *pin_source,
  *          could not be read
  */
 P11KitPin *
-p11_kit_pin_file_callback (const char *pin_source,
-                           P11KitUri *pin_uri,
-                           const char *pin_description,
-                           P11KitPinFlags pin_flags,
-                           void *callback_data)
+p11_kit_pin_file_callback (const char     *pin_source,
+                           P11KitUri      *pin_uri,
+                           const char     *pin_description,
+                           P11KitPinFlags  pin_flags,
+                           void           *callback_data)
 {
 	const size_t block = 1024;
 	unsigned char *buffer;
@@ -462,7 +462,7 @@ p11_kit_pin_file_callback (const char *pin_source,
 
 	return_val_if_fail (pin_source != NULL, NULL);
 
-	/* We don't support retries */
+        /* We don't support retries */
 	if (pin_flags & P11_KIT_PIN_FLAGS_RETRY)
 		return NULL;
 
@@ -541,7 +541,8 @@ struct p11_kit_pin {
  *          p11_kit_pin_unref() when no longer needed.
  */
 P11KitPin *
-p11_kit_pin_new (const unsigned char *value, size_t length)
+p11_kit_pin_new (const unsigned char *value,
+		 size_t               length)
 {
 	unsigned char *copy;
 	P11KitPin *pin;
@@ -603,8 +604,9 @@ p11_kit_pin_new_for_string (const char *value)
  *          p11_kit_pin_unref() when no longer needed.
  */
 P11KitPin *
-p11_kit_pin_new_for_buffer (unsigned char *buffer, size_t length,
-                            p11_kit_pin_destroy_func destroy)
+p11_kit_pin_new_for_buffer (unsigned char           *buffer,
+			    size_t                   length,
+			    p11_kit_pin_destroy_func destroy)
 {
 	P11KitPin *pin;
 
@@ -634,7 +636,8 @@ p11_kit_pin_new_for_buffer (unsigned char *buffer, size_t length,
  * Returns: the value for the PIN.
  */
 const unsigned char *
-p11_kit_pin_get_value (P11KitPin *pin, size_t *length)
+p11_kit_pin_get_value (P11KitPin *pin,
+                       size_t    *length)
 {
 	if (length)
 		*length = pin->length;
@@ -670,7 +673,7 @@ p11_kit_pin_ref (P11KitPin *pin)
 {
 	p11_lock ();
 
-		pin->ref_count++;
+	pin->ref_count++;
 
 	p11_unlock ();
 
@@ -691,8 +694,8 @@ p11_kit_pin_unref (P11KitPin *pin)
 
 	p11_lock ();
 
-		last = (pin->ref_count == 1);
-		pin->ref_count--;
+	last = (pin->ref_count == 1);
+	pin->ref_count--;
 
 	p11_unlock ();
 

@@ -78,9 +78,9 @@ test_base (void)
 #define assert_str_eq_free(ex, ac) \
 	do { const char *__s1 = (ex); \
 	     char *__s2 = (ac); \
-	     if (__s1 && __s2 && strcmp (__s1, __s2) == 0) ; else \
-	         p11_test_fail (__FILE__, __LINE__, __FUNCTION__, "assertion failed (%s == %s): (%s == %s)", \
-	                        #ex, #ac, __s1 ? __s1 : "(null)", __s2 ? __s2 : "(null)"); \
+	     if (__s1 && __s2 && strcmp (__s1, __s2) == 0); else \
+	     p11_test_fail (__FILE__, __LINE__, __FUNCTION__, "assertion failed (%s == %s): (%s == %s)", \
+			    #ex, #ac, __s1 ? __s1 : "(null)", __s2 ? __s2 : "(null)"); \
 	     free (__s2); \
 	} while (0)
 
@@ -89,52 +89,52 @@ test_build (void)
 {
 #ifdef OS_UNIX
 	assert_str_eq_free ("/",
-	                    p11_path_build ("/", NULL));
+			    p11_path_build ("/", NULL));
 	assert_str_eq_free ("/",
-	                    p11_path_build ("", "//", NULL));
+			    p11_path_build ("", "//", NULL));
 	assert_str_eq_free ("/root",
-	                    p11_path_build ("///root///", NULL));
+			    p11_path_build ("///root///", NULL));
 	assert_str_eq_free ("/root",
-	                    p11_path_build ("/", "root", NULL));
+			    p11_path_build ("/", "root", NULL));
 	assert_str_eq_free ("/root",
-	                    p11_path_build ("", "/root", NULL));
+			    p11_path_build ("", "/root", NULL));
 	assert_str_eq_free ("/root",
-	                    p11_path_build ("/root", "", NULL));
+			    p11_path_build ("/root", "", NULL));
 	assert_str_eq_free ("/root/second",
-	                    p11_path_build ("/root", "second", NULL));
+			    p11_path_build ("/root", "second", NULL));
 	assert_str_eq_free ("/root/second",
-	                    p11_path_build ("/root", "/second", NULL));
+			    p11_path_build ("/root", "/second", NULL));
 	assert_str_eq_free ("/root/second",
-	                    p11_path_build ("/root/", "second", NULL));
+			    p11_path_build ("/root/", "second", NULL));
 	assert_str_eq_free ("/root/second",
-	                    p11_path_build ("/root//", "//second/", NULL));
+			    p11_path_build ("/root//", "//second/", NULL));
 	assert_str_eq_free ("/root/second",
-	                    p11_path_build ("/root//", "", "//second/", NULL));
+			    p11_path_build ("/root//", "", "//second/", NULL));
 	assert_str_eq_free ("/root/second/third",
-	                    p11_path_build ("/root", "second", "third", NULL));
+			    p11_path_build ("/root", "second", "third", NULL));
 	assert_str_eq_free ("/root/second/third",
-	                    p11_path_build ("/root", "/second/third", NULL));
+			    p11_path_build ("/root", "/second/third", NULL));
 #else /* OS_WIN32 */
 	assert_str_eq_free ("C:\\root",
-	                    p11_path_build ("C:\\", "root", NULL));
+			    p11_path_build ("C:\\", "root", NULL));
 	assert_str_eq_free ("C:\\root",
-	                    p11_path_build ("", "C:\\root", NULL));
+			    p11_path_build ("", "C:\\root", NULL));
 	assert_str_eq_free ("C:\\root",
-	                    p11_path_build ("C:\\root", "", NULL));
+			    p11_path_build ("C:\\root", "", NULL));
 	assert_str_eq_free ("C:\\root\\second",
-	                    p11_path_build ("C:\\root", "second", NULL));
+			    p11_path_build ("C:\\root", "second", NULL));
 	assert_str_eq_free ("C:\\root\\second",
-	                    p11_path_build ("C:\\root", "\\second", NULL));
+			    p11_path_build ("C:\\root", "\\second", NULL));
 	assert_str_eq_free ("C:\\root\\second",
-	                    p11_path_build ("C:\\root\\", "second", NULL));
+			    p11_path_build ("C:\\root\\", "second", NULL));
 	assert_str_eq_free ("C:\\root\\second",
-	                    p11_path_build ("C:\\root\\\\", "\\\\second", NULL));
+			    p11_path_build ("C:\\root\\\\", "\\\\second", NULL));
 	assert_str_eq_free ("C:\\root\\second",
-	                    p11_path_build ("C:\\root\\\\", "", "\\\\second", NULL));
+			    p11_path_build ("C:\\root\\\\", "", "\\\\second", NULL));
 	assert_str_eq_free ("C:\\root\\second\\third",
-	                    p11_path_build ("C:\\root", "second", "third", NULL));
+			    p11_path_build ("C:\\root", "second", "third", NULL));
 	assert_str_eq_free ("C:\\root\\second/third",
-	                    p11_path_build ("C:\\root", "second/third", NULL));
+			    p11_path_build ("C:\\root", "second/third", NULL));
 #endif
 }
 
@@ -146,24 +146,24 @@ test_expand (void)
 #ifdef OS_UNIX
 	putenv ("HOME=/home/blah");
 	assert_str_eq_free ("/home/blah/my/path",
-	                    p11_path_expand ("~/my/path"));
+			    p11_path_expand ("~/my/path"));
 	assert_str_eq_free ("/home/blah",
-	                    p11_path_expand ("~"));
+			    p11_path_expand ("~"));
 	putenv ("XDG_CONFIG_HOME=/my");
 	assert_str_eq_free ("/my/path",
-	                    p11_path_expand ("~/.config/path"));
+			    p11_path_expand ("~/.config/path"));
 	putenv ("XDG_CONFIG_HOME=");
 	assert_str_eq_free ("/home/blah/.config/path",
-	                    p11_path_expand ("~/.config/path"));
+			    p11_path_expand ("~/.config/path"));
 #else /* OS_WIN32 */
 	putenv ("HOME=C:\\Users\\blah");
 	assert_str_eq_free ("C:\\Users\\blah\\my/path",
-	                    p11_path_expand ("~/my/path"));
+			    p11_path_expand ("~/my/path"));
 	assert_str_eq_free ("C:\\Users\\blah\\path",
-	                    p11_path_expand ("~\\path"));
+			    p11_path_expand ("~\\path"));
 #endif
 
-	putenv("HOME=");
+	putenv ("HOME=");
 	path = p11_path_expand ("~/this/is/my/path");
 	assert (strstr (path, "this/is/my/path") != NULL);
 	free (path);
@@ -247,7 +247,7 @@ test_decode (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_base, "/path/base");

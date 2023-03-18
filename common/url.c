@@ -51,7 +51,7 @@ unsigned char *
 p11_url_decode (const char *value,
                 const char *end,
                 const char *skip,
-                size_t *length)
+                size_t     *length)
 {
 	char *a, *b;
 	unsigned char *result, *p;
@@ -59,17 +59,17 @@ p11_url_decode (const char *value,
 	assert (value <= end);
 	assert (skip != NULL);
 
-	/* String can only get shorter */
+        /* String can only get shorter */
 	result = malloc ((end - value) + 1);
 	return_val_if_fail (result != NULL, NULL);
 
-	/* Now loop through looking for escapes */
+        /* Now loop through looking for escapes */
 	p = result;
 	while (value != end) {
-		/*
-		 * A percent sign followed by two hex digits means
-		 * that the digits represent an escaped character.
-		 */
+                /*
+                 * A percent sign followed by two hex digits means
+                 * that the digits represent an escaped character.
+                 */
 		if (*value == '%') {
 			value++;
 			if (end - value < 2) {
@@ -86,17 +86,17 @@ p11_url_decode (const char *value,
 			*(p++) |= (b - HEX_CHARS_UPPER);
 			value += 2;
 
-		/* Ignore whitespace characters */
+                        /* Ignore whitespace characters */
 		} else if (strchr (skip, *value)) {
 			value++;
 
-		/* A different character */
+                        /* A different character */
 		} else {
 			*(p++) = *(value++);
 		}
 	}
 
-	/* Null terminate string, in case its a string */
+        /* Null terminate string, in case its a string */
 	*p = 0;
 
 	if (length)
@@ -106,9 +106,9 @@ p11_url_decode (const char *value,
 
 void
 p11_url_encode (const unsigned char *value,
-                const unsigned char *end,
-                const char *verbatim,
-                p11_buffer *buf)
+		const unsigned char *end,
+		const char          *verbatim,
+		p11_buffer          *buf)
 {
 	char hex[3];
 	const char *env;
@@ -116,21 +116,20 @@ p11_url_encode (const unsigned char *value,
 
 	assert (value <= end);
 
-	/* Opt to output lowercase hex-digits for compatibility */
+        /* Opt to output lowercase hex-digits for compatibility */
 	env = secure_getenv ("P11_KIT_URI_LOWERCASE");
 	if (env && *env != '\0')
 		hex_chars = HEX_CHARS_LOWER;
 	else
 		hex_chars = HEX_CHARS_UPPER;
 
-	/* Now loop through looking for escapes */
+        /* Now loop through looking for escapes */
 	while (value != end) {
-
-		/* These characters we let through verbatim */
+                /* These characters we let through verbatim */
 		if (*value && strchr (verbatim, *value) != NULL) {
 			p11_buffer_add (buf, value, 1);
 
-		/* All others get encoded */
+                        /* All others get encoded */
 		} else {
 			hex[0] = '%';
 			hex[1] = hex_chars[((unsigned char)*value) >> 4];

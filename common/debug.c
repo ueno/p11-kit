@@ -96,13 +96,11 @@ parse_environ_flags (void)
 	if (strcmp (env, "all") == 0) {
 		for (i = 0; debug_keys[i].name; i++)
 			result |= debug_keys[i].value;
-
 	} else if (strcmp (env, "help") == 0) {
 		fprintf (stderr, "Supported debug values:");
 		for (i = 0; debug_keys[i].name; i++)
 			fprintf (stderr, " %s", debug_keys[i].name);
 		fprintf (stderr, "\n");
-
 	} else {
 		p = env;
 		while (*p) {
@@ -132,13 +130,14 @@ p11_debug_init (void)
 }
 
 void
-p11_debug_message (int flag,
-                    const char *format, ...)
+p11_debug_message (int         flag,
+		   const char *format,
+		   ...)
 {
 	va_list args;
 
 	if (flag & p11_debug_current_flags) {
-		fprintf (stderr, "(p11-kit:%d) ", getpid());
+		fprintf (stderr, "(p11-kit:%d) ", getpid ());
 		va_start (args, format);
 		vfprintf (stderr, format, args);
 		va_end (args);
@@ -147,22 +146,23 @@ p11_debug_message (int flag,
 }
 
 void
-p11_debug_message_err (int flag,
-		       int errnum,
-		       const char *format, ...)
+p11_debug_message_err (int         flag,
+		       int         errnum,
+		       const char *format,
+		       ...)
 {
 	va_list args;
 	char strerr[P11_DEBUG_MESSAGE_MAX];
 
 	if (flag & p11_debug_current_flags) {
-		fprintf (stderr, "(p11-kit:%d) ", getpid());
+		fprintf (stderr, "(p11-kit:%d) ", getpid ());
 		va_start (args, format);
 		vfprintf (stderr, format, args);
 		va_end (args);
 
 		snprintf (strerr, sizeof (strerr), "Unknown error %d", errnum);
 #ifdef HAVE_STRERROR_L
-		if (p11_message_locale != (locale_t) 0)
+		if (p11_message_locale != (locale_t)0)
 			strncpy (strerr, strerror_l (errnum, p11_message_locale), sizeof (strerr));
 #else
 		strerror_r (errnum, strerr, sizeof (strerr));
@@ -174,7 +174,7 @@ p11_debug_message_err (int flag,
 
 void
 p11_debug_precond (const char *format,
-                    ...)
+		   ...)
 {
 	va_list va;
 
@@ -187,5 +187,5 @@ p11_debug_precond (const char *format,
 #else
 	if (debug_strict)
 #endif
-		abort ();
+	abort ();
 }

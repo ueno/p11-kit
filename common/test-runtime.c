@@ -81,7 +81,7 @@ static void
 test_bases (void)
 {
 	char *directory;
-	const char * bases[] = {
+	const char *bases[] = {
 		NULL,
 		NULL
 	};
@@ -115,13 +115,13 @@ test_xdg_cache_home (void)
 {
 	char *directory;
 #ifdef OS_UNIX
-	const char * bases[] = {
+	const char *bases[] = {
 		NULL
 	};
 	_p11_runtime_bases = bases;
 #endif
 
-	/* MinGW doesn't have unsetenv */
+        /* MinGW doesn't have unsetenv */
 	setenv ("XDG_RUNTIME_DIR", "", 1);
 	setenv ("XDG_CACHE_HOME", "/cache", 1);
 	p11_get_runtime_directory (&directory);
@@ -130,7 +130,7 @@ test_xdg_cache_home (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

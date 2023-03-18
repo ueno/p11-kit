@@ -43,13 +43,13 @@
 static void
 test_space_strlen (void)
 {
-	assert_num_eq (4,  p11_kit_space_strlen ((const unsigned char *)"Test                ", 20));
+	assert_num_eq (4, p11_kit_space_strlen ((const unsigned char *)"Test                ", 20));
 	assert_num_eq (20, p11_kit_space_strlen ((const unsigned char *)"01234567890123456789", 20));
-	assert_num_eq (0,  p11_kit_space_strlen ((const unsigned char *)"                    ", 20));
+	assert_num_eq (0, p11_kit_space_strlen ((const unsigned char *)"                    ", 20));
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	putenv ("P11_KIT_STRICT=1");

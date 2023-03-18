@@ -47,7 +47,7 @@
 #include <string.h>
 
 static void
-dump_object (P11KitIter *iter,
+dump_object (P11KitIter   *iter,
              CK_ATTRIBUTE *attrs)
 {
 	CK_ATTRIBUTE label = { CKA_LABEL, };
@@ -82,13 +82,13 @@ dump_trust_module (const char *path)
 	CK_FUNCTION_LIST *module;
 	CK_OBJECT_CLASS nss_trust = CKO_NSS_TRUST;
 	CK_ATTRIBUTE match =
-		{ CKA_CLASS, &nss_trust, sizeof (nss_trust) };
+	{ CKA_CLASS, &nss_trust, sizeof (nss_trust) };
 	P11KitIter *iter;
 	CK_ATTRIBUTE *attrs;
 	CK_RV rv;
 
 	CK_ATTRIBUTE template[] = {
-		{ CKA_CLASS,},
+		{ CKA_CLASS, },
 		{ CKA_LABEL, },
 		{ CKA_CERT_MD5_HASH, },
 		{ CKA_CERT_SHA1_HASH },
@@ -138,7 +138,7 @@ compare_trust_modules (const char *path1,
 	CK_FUNCTION_LIST *module2;
 	CK_OBJECT_CLASS nss_trust = CKO_NSS_TRUST;
 	CK_ATTRIBUTE match =
-		{ CKA_CLASS, &nss_trust, sizeof (nss_trust) };
+	{ CKA_CLASS, &nss_trust, sizeof (nss_trust) };
 	P11KitIter *iter;
 	P11KitIter *iter2;
 	CK_ATTRIBUTE *check;
@@ -179,10 +179,10 @@ compare_trust_modules (const char *path1,
 		rv = p11_kit_iter_load_attributes (iter, check, p11_attrs_count (check));
 		return_val_if_fail (rv == CKR_OK || rv == CKR_ATTRIBUTE_TYPE_INVALID, 1);
 
-		/* Go through and remove anything not found */
+                /* Go through and remove anything not found */
 		p11_attrs_purge (check);
 
-		/* Check that this object exists */
+                /* Check that this object exists */
 		iter2 = p11_kit_iter_new (NULL, 0);
 		p11_kit_iter_add_filter (iter2, check, p11_attrs_count (check));
 		p11_kit_iter_begin_with (iter2, module2, 0, 0);
@@ -206,7 +206,7 @@ compare_trust_modules (const char *path1,
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	if (argc == 2) {

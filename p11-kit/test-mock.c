@@ -77,7 +77,7 @@ test_get_slot_list (void)
 
 	module = setup_mock_module (NULL);
 
-	/* Normal module has 2 slots, one with token present */
+        /* Normal module has 2 slots, one with token present */
 	rv = (module->C_GetSlotList) (CK_TRUE, NULL, &count);
 	assert (rv == CKR_OK);
 	assert_num_eq (MOCK_SLOTS_PRESENT, count);
@@ -443,7 +443,7 @@ test_set_pin (void)
 	assert_num_eq (rv, CKR_OK);
 
 	rv = (module->C_SetPIN) (session, (CK_UTF8CHAR_PTR)"other", 5, (CK_UTF8CHAR_PTR)"OTHER", 5);
-	assert_num_eq (rv,  CKR_PIN_INCORRECT);
+	assert_num_eq (rv, CKR_PIN_INCORRECT);
 
 	teardown_mock_module (module);
 }
@@ -531,7 +531,7 @@ test_get_attribute_value (void)
 	rv = (module->C_GetAttributeValue) (session, MOCK_PUBLIC_KEY_CAPITALIZE, attrs, 2);
 	assert (rv == CKR_BUFFER_TOO_SMALL);
 
-	/* Get right size */
+        /* Get right size */
 	attrs[1].pValue = NULL;
 	attrs[1].ulValueLen = 0;
 
@@ -836,7 +836,7 @@ test_get_object_size (void)
 	rv = (module->C_GetObjectSize) (session, MOCK_PUBLIC_KEY_CAPITALIZE, &size);
 	assert (rv == CKR_OK);
 
-	/* The number here is the length of all attributes added up */
+        /* The number here is the length of all attributes added up */
 	assert_num_eq (sizeof (CK_ULONG) == 8 ? 44 : 36, size);
 
 	teardown_mock_module (module);
@@ -870,21 +870,21 @@ test_find_objects (void)
 
 	assert (count < 16);
 
-	/* Make sure we get the capitalize public key */
+        /* Make sure we get the capitalize public key */
 	for (i = 0; i < count; i++) {
 		if (objects[i] == MOCK_PUBLIC_KEY_CAPITALIZE)
 			break;
 	}
 	assert (i != count);
 
-	/* Make sure we get the prefix public key */
+        /* Make sure we get the prefix public key */
 	for (i = 0; i < count; i++) {
 		if (objects[i] == MOCK_PUBLIC_KEY_PREFIX)
 			break;
 	}
 	assert (i != count);
 
-	/* Make sure all public keys */
+        /* Make sure all public keys */
 	for (i = 0; i < count; i++) {
 		klass = (CK_ULONG)-1;
 		rv = (module->C_GetAttributeValue) (session, objects[i], &attr, 1);
@@ -922,7 +922,7 @@ test_encrypt (void)
 	rv = (module->C_EncryptInit) (session, &mech, MOCK_PUBLIC_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
-	/* null mechanism cancels the operation */
+        /* null mechanism cancels the operation */
 	rv = (module->C_EncryptInit) (session, NULL, MOCK_PUBLIC_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
@@ -937,7 +937,7 @@ test_encrypt (void)
 	rv = (module->C_EncryptInit) (session, &mech, MOCK_PUBLIC_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the length */
+        /* just get the length */
 	length = 0;
 	rv = (module->C_Encrypt) (session, (CK_BYTE_PTR)"blah", 4, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
@@ -1008,7 +1008,7 @@ test_decrypt (void)
 	rv = (module->C_DecryptInit) (session, &mech, MOCK_PRIVATE_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
-	/* null mechanism cancels the operation */
+        /* null mechanism cancels the operation */
 	rv = (module->C_DecryptInit) (session, NULL, MOCK_PRIVATE_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1023,7 +1023,7 @@ test_decrypt (void)
 	rv = (module->C_DecryptInit) (session, &mech, MOCK_PRIVATE_KEY_CAPITALIZE);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the length */
+        /* just get the length */
 	length = 0;
 	rv = (module->C_Decrypt) (session, (CK_BYTE_PTR)"BLAh", 4, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
@@ -1092,7 +1092,7 @@ test_digest (void)
 	rv = (module->C_DigestInit) (session, &mech);
 	assert_num_eq (rv, CKR_OK);
 
-	/* null mechanism cancels the operation */
+        /* null mechanism cancels the operation */
 	rv = (module->C_DigestInit) (session, NULL);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1107,7 +1107,7 @@ test_digest (void)
 	rv = (module->C_DigestInit) (session, &mech);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the length */
+        /* just get the length */
 	length = sizeof (digest);
 	rv = (module->C_Digest) (session, (CK_BYTE_PTR)"BLAh", 4, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
@@ -1134,7 +1134,7 @@ test_digest (void)
 	rv = (module->C_DigestUpdate) (session, (CK_BYTE_PTR)"sLuRM", 5);
 	assert_num_eq (rv, CKR_OK);
 
-	/* Adds the the value of object handle to hash: 6 */
+        /* Adds the the value of object handle to hash: 6 */
 	assert_num_eq (6, MOCK_PUBLIC_KEY_PREFIX);
 	rv = (module->C_DigestKey) (session, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
@@ -1177,7 +1177,7 @@ test_sign (void)
 	rv = (module->C_SignInit) (session, &mech, MOCK_PRIVATE_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
-	/* NULL mechanisms cancel the operation */
+        /* NULL mechanisms cancel the operation */
 	rv = (module->C_SignInit) (session, NULL, MOCK_PRIVATE_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1195,7 +1195,7 @@ test_sign (void)
 	rv = (module->C_Login) (session, CKU_CONTEXT_SPECIFIC, (CK_BYTE_PTR)"booo", 4);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the length */
+        /* just get the length */
 	length = sizeof (signature);
 	rv = (module->C_Sign) (session, (CK_BYTE_PTR)"BLAh", 4, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
@@ -1263,7 +1263,7 @@ test_sign_recover (void)
 	rv = (module->C_SignRecoverInit) (session, &mech, MOCK_PRIVATE_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
-	/* NULL mech cancels the operation */
+        /* NULL mech cancels the operation */
 	rv = (module->C_SignRecoverInit) (session, NULL, MOCK_PRIVATE_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1281,13 +1281,13 @@ test_sign_recover (void)
 	rv = (module->C_Login) (session, CKU_CONTEXT_SPECIFIC, (CK_BYTE_PTR)"booo", 4);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the length */
+        /* just get the length */
 	length = 0;
 	rv = (module->C_SignRecover) (session, (CK_BYTE_PTR)"BLAh", 4, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
 	assert_num_eq (16, length);
 
-	/* just get the length */
+        /* just get the length */
 	length = 1;
 	rv = (module->C_SignRecover) (session, (CK_BYTE_PTR)"BLAh", 4, signature, &length);
 	assert_num_eq (rv, CKR_BUFFER_TOO_SMALL);
@@ -1321,7 +1321,7 @@ test_verify (void)
 	rv = (module->C_VerifyInit) (session, &mech, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
-	/* NULL mech cancels operation */
+        /* NULL mech cancels operation */
 	rv = (module->C_VerifyInit) (session, NULL, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1381,7 +1381,7 @@ test_verify_recover (void)
 	rv = (module->C_VerifyRecoverInit) (session, &mech, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
-	/* NULL mech cancels operation */
+        /* NULL mech cancels operation */
 	rv = (module->C_VerifyRecoverInit) (session, NULL, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1396,13 +1396,13 @@ test_verify_recover (void)
 	rv = (module->C_VerifyRecoverInit) (session, &mech, MOCK_PUBLIC_KEY_PREFIX);
 	assert_num_eq (rv, CKR_OK);
 
-	/* just get the size */
+        /* just get the size */
 	length = sizeof (data);
 	rv = (module->C_VerifyRecover) (session, (CK_BYTE_PTR)"prefix:valueBLah", 16, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
 	assert_num_eq (4, length);
 
-	/* Still too short */
+        /* Still too short */
 	length = 1;
 	rv = (module->C_VerifyRecover) (session, (CK_BYTE_PTR)"prefix:valueBLah", 16, data, &length);
 	assert_num_eq (rv, CKR_BUFFER_TOO_SMALL);
@@ -1694,14 +1694,14 @@ test_generate_key_pair (void)
 	priv_attrs[1].ulValueLen = sizeof (priv_bits);
 
 	rv = (module->C_GenerateKeyPair) (0, &mech, pub_attrs, 2, priv_attrs, 2,
-	                                  &pub_object, &priv_object);
+					  &pub_object, &priv_object);
 	assert (rv == CKR_SESSION_HANDLE_INVALID);
 
 	mech.pParameter = "generate";
 	mech.ulParameterLen = 9;
 
 	rv = (module->C_GenerateKeyPair) (session, &mech, pub_attrs, 2, priv_attrs, 2,
-	                                  &pub_object, &priv_object);
+					  &pub_object, &priv_object);
 	assert (rv == CKR_OK);
 
 	pub_bits = 0;
@@ -1758,13 +1758,13 @@ test_wrap_key (void)
 	mech.pParameter = "wrap";
 	mech.ulParameterLen = 4;
 
-	/* just get the length */
+        /* just get the length */
 	length = sizeof (data);
 	rv = (module->C_WrapKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX, MOCK_PUBLIC_KEY_PREFIX, NULL, &length);
 	assert_num_eq (rv, CKR_OK);
 	assert_num_eq (5, length);
 
-	/* still not large enough */
+        /* still not large enough */
 	length = 1;
 	rv = (module->C_WrapKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX, MOCK_PUBLIC_KEY_PREFIX, data, &length);
 	assert_num_eq (rv, CKR_BUFFER_TOO_SMALL);
@@ -1806,14 +1806,14 @@ test_unwrap_key (void)
 	attrs[1].ulValueLen = sizeof (bits);
 
 	rv = (module->C_UnwrapKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX,
-	                            (CK_BYTE_PTR)"wheee", 5, attrs, 2, &object);
+				    (CK_BYTE_PTR)"wheee", 5, attrs, 2, &object);
 	assert (rv == CKR_MECHANISM_PARAM_INVALID);
 
 	mech.pParameter = "wrap";
 	mech.ulParameterLen = 4;
 
 	rv = (module->C_UnwrapKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX,
-	                            (CK_BYTE_PTR)"wheee", 5, attrs, 2, &object);
+				    (CK_BYTE_PTR)"wheee", 5, attrs, 2, &object);
 	assert (rv == CKR_OK);
 
 	attrs[0].ulValueLen = sizeof (label);
@@ -1861,14 +1861,14 @@ test_derive_key (void)
 	attrs[1].ulValueLen = sizeof (bits);
 
 	rv = (module->C_DeriveKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX,
-	                                attrs, 2, &object);
+				    attrs, 2, &object);
 	assert (rv == CKR_MECHANISM_PARAM_INVALID);
 
 	mech.pParameter = "derive";
 	mech.ulParameterLen = 6;
 
 	rv = (module->C_DeriveKey) (session, &mech, MOCK_PUBLIC_KEY_PREFIX,
-	                            attrs, 2, &object);
+				    attrs, 2, &object);
 	assert (rv == CKR_OK);
 
 	attrs[0].ulValueLen = sizeof (label);

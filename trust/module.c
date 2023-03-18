@@ -60,7 +60,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -102,8 +102,8 @@ find_objects_free (void *data)
 }
 
 static CK_RV
-lookup_session (CK_SESSION_HANDLE handle,
-                p11_session **session)
+lookup_session (CK_SESSION_HANDLE   handle,
+                p11_session       **session)
 {
 	p11_session *sess;
 
@@ -120,9 +120,9 @@ lookup_session (CK_SESSION_HANDLE handle,
 }
 
 static CK_ATTRIBUTE *
-lookup_object_inlock (p11_session *session,
-                      CK_OBJECT_HANDLE handle,
-                      p11_index **index)
+lookup_object_inlock (p11_session       *session,
+                      CK_OBJECT_HANDLE   handle,
+                      p11_index        **index)
 {
 	CK_ATTRIBUTE *attrs;
 
@@ -147,7 +147,7 @@ lookup_object_inlock (p11_session *session,
 
 static CK_RV
 check_index_writable (p11_session *session,
-                      p11_index *index)
+                      p11_index   *index)
 {
 	if (index == p11_token_index (session->token)) {
 		if (!p11_token_is_writable (session->token))
@@ -160,19 +160,19 @@ check_index_writable (p11_session *session,
 }
 
 static CK_RV
-lookup_slot_inlock (CK_SLOT_ID id,
-                    p11_token **token)
+lookup_slot_inlock (CK_SLOT_ID   id,
+                    p11_token  **token)
 {
-	/*
-	 * These are invalid inputs, that well behaved callers should
-	 * not produce, so have them fail precondations
-	 */
+        /*
+         * These are invalid inputs, that well behaved callers should
+         * not produce, so have them fail precondations
+         */
 
 	return_val_if_fail (gl.tokens != NULL,
-	                    CKR_CRYPTOKI_NOT_INITIALIZED);
+			    CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	return_val_if_fail (id >= BASE_SLOT_ID && id - BASE_SLOT_ID < gl.tokens->num,
-	                    CKR_SLOT_ID_INVALID);
+			    CKR_SLOT_ID_INVALID);
 
 	if (token)
 		*token = gl.tokens->elem[id - BASE_SLOT_ID];
@@ -192,15 +192,15 @@ check_slot (CK_SLOT_ID id)
 }
 
 static bool
-create_tokens_inlock (p11_array *tokens,
+create_tokens_inlock (p11_array  *tokens,
                       const char *paths)
 {
-	/*
-	 * TRANSLATORS: These label strings are used in PKCS#11 URIs and
-	 * unfortunately cannot be marked translatable. If localization is
-	 * desired they should be translated in GUI applications. These
-	 * strings will not change arbitrarily.
-	 */
+        /*
+         * TRANSLATORS: These label strings are used in PKCS#11 URIs and
+         * unfortunately cannot be marked translatable. If localization is
+         * desired they should be translated in GUI applications. These
+         * strings will not change arbitrarily.
+         */
 
 	struct {
 		const char *prefix;
@@ -241,14 +241,14 @@ create_tokens_inlock (p11_array *tokens,
 		}
 
 		if (path[0] != '\0') {
-			/* The slot for the new token */
+                        /* The slot for the new token */
 			slot = BASE_SLOT_ID + tokens->num;
 
 			label = NULL;
 			flags = P11_TOKEN_FLAG_NONE;
 			base = NULL;
 
-			/* Claim the various labels based on prefix */
+                        /* Claim the various labels based on prefix */
 			for (i = 0; label == NULL && labels[i].prefix != NULL; i++) {
 				if (strncmp (path, labels[i].prefix, strlen (labels[i].prefix)) == 0) {
 					label = labels[i].label;
@@ -257,7 +257,7 @@ create_tokens_inlock (p11_array *tokens,
 				}
 			}
 
-			/* Didn't find a label above, then make one based on the path */
+                        /* Didn't find a label above, then make one based on the path */
 			if (!label) {
 				label = base = p11_path_base (path);
 				return_val_if_fail (base != NULL, false);
@@ -293,7 +293,6 @@ parse_argument (char *arg,
 	if (strcmp (arg, "paths") == 0) {
 		free (gl.paths);
 		gl.paths = value ? strdup (value) : NULL;
-
 	} else if (strcmp (arg, "verbose") == 0) {
 		if (strcmp (value, "yes") == 0)
 			p11_message_loud ();
@@ -311,37 +310,34 @@ sys_C_Finalize (CK_VOID_PTR reserved)
 
 	p11_debug ("in");
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 
 	if (reserved) {
 		rv = CKR_ARGUMENTS_BAD;
-
 	} else {
 		p11_lock ();
 
-			if (gl.initialized == 0) {
-				p11_debug ("trust module is not initialized");
-				rv = CKR_CRYPTOKI_NOT_INITIALIZED;
+		if (gl.initialized == 0) {
+			p11_debug ("trust module is not initialized");
+			rv = CKR_CRYPTOKI_NOT_INITIALIZED;
+		} else if (gl.initialized == 1) {
+			p11_debug ("doing finalization");
 
-			} else if (gl.initialized == 1) {
-				p11_debug ("doing finalization");
+			free (gl.paths);
+			gl.paths = NULL;
 
-				free (gl.paths);
-				gl.paths = NULL;
+			p11_dict_free (gl.sessions);
+			gl.sessions = NULL;
 
-				p11_dict_free (gl.sessions);
-				gl.sessions = NULL;
+			p11_array_free (gl.tokens);
+			gl.tokens = NULL;
 
-				p11_array_free (gl.tokens);
-				gl.tokens = NULL;
-
-				rv = CKR_OK;
-				gl.initialized = 0;
-
-			} else {
-				gl.initialized--;
-				p11_debug ("trust module still initialized %d times", gl.initialized);
-			}
+			rv = CKR_OK;
+			gl.initialized = 0;
+		} else {
+			gl.initialized--;
+			p11_debug ("trust module still initialized %d times", gl.initialized);
+		}
 
 		p11_unlock ();
 	}
@@ -354,73 +350,73 @@ static CK_RV
 sys_C_Initialize (CK_VOID_PTR init_args)
 {
 	static const CK_C_INITIALIZE_ARGS def_args =
-		{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
+	{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
 	const CK_C_INITIALIZE_ARGS *args = NULL;
 	int supplied_ok;
 	CK_RV rv;
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 
 	p11_debug ("in");
 
 	p11_lock ();
 
-		rv = CKR_OK;
+	rv = CKR_OK;
 
-		args = init_args;
-		if (args == NULL)
-			args = &def_args;
+	args = init_args;
+	if (args == NULL)
+		args = &def_args;
 
-		/* ALL supplied function pointers need to have the value either NULL or non-NULL. */
-		supplied_ok = (args->CreateMutex == NULL && args->DestroyMutex == NULL &&
-		               args->LockMutex == NULL && args->UnlockMutex == NULL) ||
-		              (args->CreateMutex != NULL && args->DestroyMutex != NULL &&
-		               args->LockMutex != NULL && args->UnlockMutex != NULL);
-		if (!supplied_ok) {
-			p11_message (_("invalid set of mutex calls supplied"));
-			rv = CKR_ARGUMENTS_BAD;
+        /* ALL supplied function pointers need to have the value either NULL or non-NULL. */
+	supplied_ok = (args->CreateMutex == NULL && args->DestroyMutex == NULL &&
+		       args->LockMutex == NULL && args->UnlockMutex == NULL) ||
+		      (args->CreateMutex != NULL && args->DestroyMutex != NULL &&
+		       args->LockMutex != NULL && args->UnlockMutex != NULL);
+	if (!supplied_ok) {
+		p11_message (_("invalid set of mutex calls supplied"));
+		rv = CKR_ARGUMENTS_BAD;
+	}
+
+        /*
+         * When the CKF_OS_LOCKING_OK flag isn't set return an error.
+         * We must be able to use our pthread functionality.
+         */
+	if (!(args->flags & CKF_OS_LOCKING_OK)) {
+		p11_message (_("can't do without os locking"));
+		rv = CKR_CANT_LOCK;
+	}
+
+	if (rv == CKR_OK && gl.initialized != 0) {
+		p11_debug ("trust module already initialized %d times",
+			   gl.initialized);
+
+                /*
+                 * We support setting the socket path and other arguments from from the
+                 * pReserved pointer, similar to how NSS PKCS#11 components are initialized.
+                 */
+	} else if (rv == CKR_OK) {
+		p11_debug ("doing initialization");
+
+		if (args->pReserved)
+			p11_argv_parse ((const char *)args->pReserved, parse_argument, NULL);
+
+		gl.sessions = p11_dict_new (p11_dict_ulongptr_hash,
+					    p11_dict_ulongptr_equal,
+					    NULL, p11_session_free);
+
+		gl.tokens = p11_array_new ((p11_destroyer)p11_token_free);
+		if (gl.tokens && !create_tokens_inlock (gl.tokens, gl.paths ? gl.paths : TRUST_PATHS))
+			gl.tokens = NULL;
+
+		if (gl.sessions == NULL || gl.tokens == NULL) {
+			warn_if_reached ();
+			rv = CKR_GENERAL_ERROR;
 		}
+	}
 
-		/*
-		 * When the CKF_OS_LOCKING_OK flag isn't set return an error.
-		 * We must be able to use our pthread functionality.
-		 */
-		if (!(args->flags & CKF_OS_LOCKING_OK)) {
-			p11_message (_("can't do without os locking"));
-			rv = CKR_CANT_LOCK;
-		}
-
-		if (rv == CKR_OK && gl.initialized != 0) {
-			p11_debug ("trust module already initialized %d times",
-			           gl.initialized);
-
-		/*
-		 * We support setting the socket path and other arguments from from the
-		 * pReserved pointer, similar to how NSS PKCS#11 components are initialized.
-		 */
-		} else if (rv == CKR_OK) {
-			p11_debug ("doing initialization");
-
-			if (args->pReserved)
-				p11_argv_parse ((const char*)args->pReserved, parse_argument, NULL);
-
-			gl.sessions = p11_dict_new (p11_dict_ulongptr_hash,
-			                            p11_dict_ulongptr_equal,
-			                            NULL, p11_session_free);
-
-			gl.tokens = p11_array_new ((p11_destroyer)p11_token_free);
-			if (gl.tokens && !create_tokens_inlock (gl.tokens, gl.paths ? gl.paths : TRUST_PATHS))
-				gl.tokens = NULL;
-
-			if (gl.sessions == NULL || gl.tokens == NULL) {
-				warn_if_reached ();
-				rv = CKR_GENERAL_ERROR;
-			}
-		}
-
-		gl.initialized++;
+	gl.initialized++;
 
 	p11_unlock ();
 
@@ -444,8 +440,8 @@ sys_C_GetInfo (CK_INFO_PTR info)
 
 	p11_lock ();
 
-		if (!gl.sessions)
-			rv = CKR_CRYPTOKI_NOT_INITIALIZED;
+	if (!gl.sessions)
+		rv = CKR_CRYPTOKI_NOT_INITIALIZED;
 
 	p11_unlock ();
 
@@ -456,8 +452,8 @@ sys_C_GetInfo (CK_INFO_PTR info)
 		info->libraryVersion.major = PACKAGE_MAJOR;
 		info->libraryVersion.minor = PACKAGE_MINOR;
 		info->flags = 0;
-		memcpy ((char*)info->manufacturerID, MANUFACTURER_ID, 32);
-		memcpy ((char*)info->libraryDescription, LIBRARY_DESCRIPTION, 32);
+		memcpy ((char *)info->manufacturerID, MANUFACTURER_ID, 32);
+		memcpy ((char *)info->libraryDescription, LIBRARY_DESCRIPTION, 32);
 	}
 
 	p11_debug ("out: 0x%lx", rv);
@@ -468,7 +464,7 @@ sys_C_GetInfo (CK_INFO_PTR info)
 static CK_RV
 sys_C_GetFunctionList (CK_FUNCTION_LIST_PTR_PTR list)
 {
-	/* Can be called before C_Initialize */
+        /* Can be called before C_Initialize */
 	return_val_if_fail (list != NULL, CKR_ARGUMENTS_BAD);
 
 	*list = &sys_function_list;
@@ -476,9 +472,9 @@ sys_C_GetFunctionList (CK_FUNCTION_LIST_PTR_PTR list)
 }
 
 static CK_RV
-sys_C_GetSlotList (CK_BBOOL token_present,
+sys_C_GetSlotList (CK_BBOOL       token_present,
                    CK_SLOT_ID_PTR slot_list,
-                   CK_ULONG_PTR count)
+                   CK_ULONG_PTR   count)
 {
 	CK_RV rv = CKR_OK;
 	int i;
@@ -489,22 +485,19 @@ sys_C_GetSlotList (CK_BBOOL token_present,
 
 	p11_lock ();
 
-		if (!gl.sessions)
-			rv = CKR_CRYPTOKI_NOT_INITIALIZED;
+	if (!gl.sessions)
+		rv = CKR_CRYPTOKI_NOT_INITIALIZED;
 
 	p11_unlock ();
 
 	if (rv != CKR_OK) {
-		/* already failed */
-
+                /* already failed */
 	} else if (!slot_list) {
 		*count = gl.tokens->num;
 		rv = CKR_OK;
-
 	} else if (*count < gl.tokens->num) {
 		*count = gl.tokens->num;
 		rv = CKR_BUFFER_TOO_SMALL;
-
 	} else {
 		for (i = 0; i < gl.tokens->num; i++)
 			slot_list[i] = BASE_SLOT_ID + i;
@@ -518,7 +511,7 @@ sys_C_GetSlotList (CK_BBOOL token_present,
 }
 
 static CK_RV
-sys_C_GetSlotInfo (CK_SLOT_ID id,
+sys_C_GetSlotInfo (CK_SLOT_ID       id,
                    CK_SLOT_INFO_PTR info)
 {
 	CK_RV rv = CKR_OK;
@@ -539,9 +532,9 @@ sys_C_GetSlotInfo (CK_SLOT_ID id,
 		info->hardwareVersion.major = PACKAGE_MAJOR;
 		info->hardwareVersion.minor = PACKAGE_MINOR;
 		info->flags = CKF_TOKEN_PRESENT;
-		memcpy ((char*)info->manufacturerID, MANUFACTURER_ID, 32);
+		memcpy ((char *)info->manufacturerID, MANUFACTURER_ID, 32);
 
-		/* If too long, copy the first 64 characters into buffer */
+                /* If too long, copy the first 64 characters into buffer */
 		path = p11_token_get_path (token);
 		length = strlen (path);
 		if (length > sizeof (info->slotDescription))
@@ -557,7 +550,7 @@ sys_C_GetSlotInfo (CK_SLOT_ID id,
 }
 
 static CK_RV
-sys_C_GetTokenInfo (CK_SLOT_ID id,
+sys_C_GetTokenInfo (CK_SLOT_ID        id,
                     CK_TOKEN_INFO_PTR info)
 {
 	CK_RV rv = CKR_OK;
@@ -579,9 +572,9 @@ sys_C_GetTokenInfo (CK_SLOT_ID id,
 		info->hardwareVersion.major = PACKAGE_MAJOR;
 		info->hardwareVersion.minor = PACKAGE_MINOR;
 		info->flags = CKF_TOKEN_INITIALIZED;
-		memcpy ((char*)info->manufacturerID, MANUFACTURER_ID, 32);
-		memcpy ((char*)info->model, TOKEN_MODEL, 16);
-		memcpy ((char*)info->serialNumber, TOKEN_SERIAL_NUMBER, 16);
+		memcpy ((char *)info->manufacturerID, MANUFACTURER_ID, 32);
+		memcpy ((char *)info->model, TOKEN_MODEL, 16);
+		memcpy ((char *)info->serialNumber, TOKEN_SERIAL_NUMBER, 16);
 		info->ulMaxSessionCount = CK_EFFECTIVELY_INFINITE;
 		info->ulSessionCount = CK_UNAVAILABLE_INFORMATION;
 		info->ulMaxRwSessionCount = 0;
@@ -593,7 +586,7 @@ sys_C_GetTokenInfo (CK_SLOT_ID id,
 		info->ulTotalPrivateMemory = CK_UNAVAILABLE_INFORMATION;
 		info->ulFreePrivateMemory = CK_UNAVAILABLE_INFORMATION;
 
-		/* If too long, copy the first 32 characters into buffer */
+                /* If too long, copy the first 32 characters into buffer */
 		label = p11_token_get_label (token);
 		length = strlen (label);
 		if (length > sizeof (info->label))
@@ -612,9 +605,9 @@ sys_C_GetTokenInfo (CK_SLOT_ID id,
 }
 
 static CK_RV
-sys_C_GetMechanismList (CK_SLOT_ID id,
+sys_C_GetMechanismList (CK_SLOT_ID            id,
                         CK_MECHANISM_TYPE_PTR mechanism_list,
-                        CK_ULONG_PTR count)
+                        CK_ULONG_PTR          count)
 {
 	CK_RV rv = CKR_OK;
 
@@ -629,8 +622,8 @@ sys_C_GetMechanismList (CK_SLOT_ID id,
 }
 
 static CK_RV
-sys_C_GetMechanismInfo (CK_SLOT_ID id,
-                        CK_MECHANISM_TYPE type,
+sys_C_GetMechanismInfo (CK_SLOT_ID            id,
+                        CK_MECHANISM_TYPE     type,
                         CK_MECHANISM_INFO_PTR info)
 {
 	return_val_if_fail (info != NULL, CKR_ARGUMENTS_BAD);
@@ -639,9 +632,9 @@ sys_C_GetMechanismInfo (CK_SLOT_ID id,
 }
 
 static CK_RV
-sys_C_InitToken (CK_SLOT_ID id,
+sys_C_InitToken (CK_SLOT_ID      id,
                  CK_UTF8CHAR_PTR pin,
-                 CK_ULONG pin_len,
+                 CK_ULONG        pin_len,
                  CK_UTF8CHAR_PTR label)
 {
 	p11_debug ("not supported");
@@ -649,19 +642,19 @@ sys_C_InitToken (CK_SLOT_ID id,
 }
 
 static CK_RV
-sys_C_WaitForSlotEvent (CK_FLAGS flags,
+sys_C_WaitForSlotEvent (CK_FLAGS       flags,
                         CK_SLOT_ID_PTR slot,
-                        CK_VOID_PTR reserved)
+                        CK_VOID_PTR    reserved)
 {
 	p11_debug ("not supported");
 	return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
 static CK_RV
-sys_C_OpenSession (CK_SLOT_ID id,
-                   CK_FLAGS flags,
-                   CK_VOID_PTR user_data,
-                   CK_NOTIFY callback,
+sys_C_OpenSession (CK_SLOT_ID            id,
+                   CK_FLAGS              flags,
+                   CK_VOID_PTR           user_data,
+                   CK_NOTIFY             callback,
                    CK_SESSION_HANDLE_PTR handle)
 {
 	p11_session *session;
@@ -675,30 +668,27 @@ sys_C_OpenSession (CK_SLOT_ID id,
 
 	p11_lock ();
 
-		rv = lookup_slot_inlock (id, &token);
-		if (rv != CKR_OK) {
-			/* fail below */;
-
-		} else if (!(flags & CKF_SERIAL_SESSION)) {
-			rv = CKR_SESSION_PARALLEL_NOT_SUPPORTED;
-
-		} else if ((flags & CKF_RW_SESSION) &&
-		           !p11_token_is_writable (token)) {
-			rv = CKR_TOKEN_WRITE_PROTECTED;
-
+	rv = lookup_slot_inlock (id, &token);
+	if (rv != CKR_OK) {
+                /* fail below */
+	} else if (!(flags & CKF_SERIAL_SESSION)) {
+		rv = CKR_SESSION_PARALLEL_NOT_SUPPORTED;
+	} else if ((flags & CKF_RW_SESSION) &&
+		   !p11_token_is_writable (token)) {
+		rv = CKR_TOKEN_WRITE_PROTECTED;
+	} else {
+		session = p11_session_new (token);
+		if (p11_dict_set (gl.sessions, &session->handle, session)) {
+			rv = CKR_OK;
+			if (flags & CKF_RW_SESSION)
+				session->read_write = true;
+			*handle = session->handle;
+			p11_debug ("session: %lu", *handle);
 		} else {
-			session = p11_session_new (token);
-			if (p11_dict_set (gl.sessions, &session->handle, session)) {
-				rv = CKR_OK;
-				if (flags & CKF_RW_SESSION)
-					session->read_write = true;
-				*handle = session->handle;
-				p11_debug ("session: %lu", *handle);
-			} else {
-				warn_if_reached ();
-				rv = CKR_GENERAL_ERROR;
-			}
+			warn_if_reached ();
+			rv = CKR_GENERAL_ERROR;
 		}
+	}
 
 	p11_unlock ();
 
@@ -716,15 +706,13 @@ sys_C_CloseSession (CK_SESSION_HANDLE handle)
 
 	p11_lock ();
 
-		if (!gl.sessions) {
-			rv = CKR_CRYPTOKI_NOT_INITIALIZED;
-
-		} else if (p11_dict_remove (gl.sessions, &handle)) {
-			rv = CKR_OK;
-
-		} else {
-			rv = CKR_SESSION_HANDLE_INVALID;
-		}
+	if (!gl.sessions) {
+		rv = CKR_CRYPTOKI_NOT_INITIALIZED;
+	} else if (p11_dict_remove (gl.sessions, &handle)) {
+		rv = CKR_OK;
+	} else {
+		rv = CKR_SESSION_HANDLE_INVALID;
+	}
 
 	p11_unlock ();
 
@@ -746,14 +734,14 @@ sys_C_CloseAllSessions (CK_SLOT_ID id)
 
 	p11_lock ();
 
-		rv = lookup_slot_inlock (id, &token);
-		if (rv == CKR_OK) {
-			p11_dict_iterate (gl.sessions, &iter);
-			while (p11_dict_next (&iter, (void **)&handle, (void **)&session)) {
-				if (session->token == token)
-					p11_dict_remove (gl.sessions, handle);
-			}
+	rv = lookup_slot_inlock (id, &token);
+	if (rv == CKR_OK) {
+		p11_dict_iterate (gl.sessions, &iter);
+		while (p11_dict_next (&iter, (void **)&handle, (void **)&session)) {
+			if (session->token == token)
+				p11_dict_remove (gl.sessions, handle);
 		}
+	}
 
 	p11_unlock ();
 
@@ -775,7 +763,7 @@ sys_C_CancelFunction (CK_SESSION_HANDLE handle)
 }
 
 static CK_RV
-sys_C_GetSessionInfo (CK_SESSION_HANDLE handle,
+sys_C_GetSessionInfo (CK_SESSION_HANDLE   handle,
                       CK_SESSION_INFO_PTR info)
 {
 	p11_session *session;
@@ -787,13 +775,13 @@ sys_C_GetSessionInfo (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			info->flags = CKF_SERIAL_SESSION;
-			info->state = CKS_RO_PUBLIC_SESSION;
-			info->slotID = p11_token_get_slot (session->token);
-			info->ulDeviceError = 0;
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		info->flags = CKF_SERIAL_SESSION;
+		info->state = CKS_RO_PUBLIC_SESSION;
+		info->slotID = p11_token_get_slot (session->token);
+		info->ulDeviceError = 0;
+	}
 
 
 	p11_unlock ();
@@ -805,8 +793,8 @@ sys_C_GetSessionInfo (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_InitPIN (CK_SESSION_HANDLE handle,
-               CK_UTF8CHAR_PTR pin,
-               CK_ULONG pin_len)
+               CK_UTF8CHAR_PTR   pin,
+               CK_ULONG          pin_len)
 {
 	p11_debug ("not supported");
 	return CKR_FUNCTION_NOT_SUPPORTED;
@@ -814,10 +802,10 @@ sys_C_InitPIN (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_SetPIN (CK_SESSION_HANDLE handle,
-              CK_UTF8CHAR_PTR old_pin,
-              CK_ULONG old_pin_len,
-              CK_UTF8CHAR_PTR new_pin,
-              CK_ULONG new_pin_len)
+              CK_UTF8CHAR_PTR   old_pin,
+              CK_ULONG          old_pin_len,
+              CK_UTF8CHAR_PTR   new_pin,
+              CK_ULONG          new_pin_len)
 {
 	p11_debug ("not supported");
 	return CKR_FUNCTION_NOT_SUPPORTED;
@@ -825,8 +813,8 @@ sys_C_SetPIN (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_GetOperationState (CK_SESSION_HANDLE handle,
-                         CK_BYTE_PTR operation_state,
-                         CK_ULONG_PTR operation_state_len)
+                         CK_BYTE_PTR       operation_state,
+                         CK_ULONG_PTR      operation_state_len)
 {
 	p11_debug ("not supported");
 	return CKR_FUNCTION_NOT_SUPPORTED;
@@ -834,10 +822,10 @@ sys_C_GetOperationState (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_SetOperationState (CK_SESSION_HANDLE handle,
-                         CK_BYTE_PTR operation_state,
-                         CK_ULONG operation_state_len,
-                         CK_OBJECT_HANDLE encryption_key,
-                         CK_OBJECT_HANDLE authentication_key)
+                         CK_BYTE_PTR       operation_state,
+                         CK_ULONG          operation_state_len,
+                         CK_OBJECT_HANDLE  encryption_key,
+                         CK_OBJECT_HANDLE  authentication_key)
 {
 	p11_debug ("not supported");
 	return CKR_FUNCTION_NOT_SUPPORTED;
@@ -845,9 +833,9 @@ sys_C_SetOperationState (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_Login (CK_SESSION_HANDLE handle,
-             CK_USER_TYPE user_type,
-             CK_UTF8CHAR_PTR pin,
-             CK_ULONG pin_len)
+             CK_USER_TYPE      user_type,
+             CK_UTF8CHAR_PTR   pin,
+             CK_ULONG          pin_len)
 {
 	CK_RV rv;
 
@@ -855,20 +843,20 @@ sys_C_Login (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, NULL);
-		/* Since the trust module is designed as a replacement
-		 * of nssckbi, it works as a general access device as
-		 * described in the table 1.1 of:
-		 * <https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/PKCS11_Implement>.
-		 *
-		 * That means that the tokens provided by this module
-		 * shall be accessed without login, and if the caller
-		 * tries to login, the attempt should fail with an
-		 * explicit error (otherwise, the caller cannot
-		 * distinguish the user's login status, see also
-		 * C_Logout below). */
-		if (rv == CKR_OK)
-			rv = CKR_USER_TYPE_INVALID;
+	rv = lookup_session (handle, NULL);
+        /* Since the trust module is designed as a replacement
+         * of nssckbi, it works as a general access device as
+         * described in the table 1.1 of:
+         * <https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/PKCS11_Implement>.
+         *
+         * That means that the tokens provided by this module
+         * shall be accessed without login, and if the caller
+         * tries to login, the attempt should fail with an
+         * explicit error (otherwise, the caller cannot
+         * distinguish the user's login status, see also
+         * C_Logout below). */
+	if (rv == CKR_OK)
+		rv = CKR_USER_TYPE_INVALID;
 
 	p11_unlock ();
 
@@ -886,9 +874,9 @@ sys_C_Logout (CK_SESSION_HANDLE handle)
 
 	p11_lock ();
 
-		rv = lookup_session (handle, NULL);
-		if (rv == CKR_OK)
-			rv = CKR_USER_NOT_LOGGED_IN;
+	rv = lookup_session (handle, NULL);
+	if (rv == CKR_OK)
+		rv = CKR_USER_NOT_LOGGED_IN;
 
 	p11_unlock ();
 
@@ -898,9 +886,9 @@ sys_C_Logout (CK_SESSION_HANDLE handle)
 }
 
 static CK_RV
-sys_C_CreateObject (CK_SESSION_HANDLE handle,
-                    CK_ATTRIBUTE_PTR template,
-                    CK_ULONG count,
+sys_C_CreateObject (CK_SESSION_HANDLE    handle,
+                    CK_ATTRIBUTE_PTR     template,
+                    CK_ULONG             count,
                     CK_OBJECT_HANDLE_PTR new_object)
 {
 	p11_session *session;
@@ -914,17 +902,17 @@ sys_C_CreateObject (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &val) && val)
-				index = p11_token_index (session->token);
-			else
-				index = session->index;
-			rv = check_index_writable (session, index);
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &val) && val)
+			index = p11_token_index (session->token);
+		else
+			index = session->index;
+		rv = check_index_writable (session, index);
+	}
 
-		if (rv == CKR_OK)
-			rv = p11_index_add (index, template, count, new_object);
+	if (rv == CKR_OK)
+		rv = p11_index_add (index, template, count, new_object);
 
 	p11_unlock ();
 
@@ -934,10 +922,10 @@ sys_C_CreateObject (CK_SESSION_HANDLE handle,
 }
 
 static CK_RV
-sys_C_CopyObject (CK_SESSION_HANDLE handle,
-                  CK_OBJECT_HANDLE object,
-                  CK_ATTRIBUTE_PTR template,
-                  CK_ULONG count,
+sys_C_CopyObject (CK_SESSION_HANDLE    handle,
+                  CK_OBJECT_HANDLE     object,
+                  CK_ATTRIBUTE_PTR     template,
+                  CK_ULONG             count,
                   CK_OBJECT_HANDLE_PTR new_object)
 {
 	CK_BBOOL vfalse = CK_FALSE;
@@ -955,25 +943,25 @@ sys_C_CopyObject (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			original = lookup_object_inlock (session, object, &index);
-			if (original == NULL)
-				rv = CKR_OBJECT_HANDLE_INVALID;
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		original = lookup_object_inlock (session, object, &index);
+		if (original == NULL)
+			rv = CKR_OBJECT_HANDLE_INVALID;
+	}
 
-		if (rv == CKR_OK) {
-			if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &val))
-				index = val ? p11_token_index (session->token) : session->index;
-			rv = check_index_writable (session, index);
-		}
+	if (rv == CKR_OK) {
+		if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &val))
+			index = val ? p11_token_index (session->token) : session->index;
+		rv = check_index_writable (session, index);
+	}
 
-		if (rv == CKR_OK) {
-			attrs = p11_attrs_dup (original);
-			attrs = p11_attrs_buildn (attrs, template, count);
-			attrs = p11_attrs_build (attrs, &token, NULL);
-			rv = p11_index_take (index, attrs, new_object);
-		}
+	if (rv == CKR_OK) {
+		attrs = p11_attrs_dup (original);
+		attrs = p11_attrs_buildn (attrs, template, count);
+		attrs = p11_attrs_build (attrs, &token, NULL);
+		rv = p11_index_take (index, attrs, new_object);
+	}
 
 	p11_unlock ();
 
@@ -984,7 +972,7 @@ sys_C_CopyObject (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_DestroyObject (CK_SESSION_HANDLE handle,
-                     CK_OBJECT_HANDLE object)
+                     CK_OBJECT_HANDLE  object)
 {
 	p11_session *session;
 	CK_ATTRIBUTE *attrs;
@@ -996,22 +984,22 @@ sys_C_DestroyObject (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			attrs = lookup_object_inlock (session, object, &index);
-			if (attrs == NULL)
-				rv = CKR_OBJECT_HANDLE_INVALID;
-			else
-				rv = check_index_writable (session, index);
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		attrs = lookup_object_inlock (session, object, &index);
+		if (attrs == NULL)
+			rv = CKR_OBJECT_HANDLE_INVALID;
+		else
+			rv = check_index_writable (session, index);
 
-			if (rv == CKR_OK && p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
-				/* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
-				rv = CKR_ATTRIBUTE_READ_ONLY;
-			}
-
-			if (rv == CKR_OK)
-				rv = p11_index_remove (index, object);
+		if (rv == CKR_OK && p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
+                        /* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
+			rv = CKR_ATTRIBUTE_READ_ONLY;
 		}
+
+		if (rv == CKR_OK)
+			rv = p11_index_remove (index, object);
+	}
 
 	p11_unlock ();
 
@@ -1022,8 +1010,8 @@ sys_C_DestroyObject (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_GetObjectSize (CK_SESSION_HANDLE handle,
-                     CK_OBJECT_HANDLE object,
-                     CK_ULONG_PTR size)
+                     CK_OBJECT_HANDLE  object,
+                     CK_ULONG_PTR      size)
 {
 	p11_session *session;
 	CK_RV rv;
@@ -1034,15 +1022,15 @@ sys_C_GetObjectSize (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			if (lookup_object_inlock (session, object, NULL)) {
-				*size = CK_UNAVAILABLE_INFORMATION;
-				rv = CKR_OK;
-			} else {
-				rv = CKR_OBJECT_HANDLE_INVALID;
-			}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		if (lookup_object_inlock (session, object, NULL)) {
+			*size = CK_UNAVAILABLE_INFORMATION;
+			rv = CKR_OK;
+		} else {
+			rv = CKR_OBJECT_HANDLE_INVALID;
 		}
+	}
 
 	p11_unlock ();
 
@@ -1053,9 +1041,9 @@ sys_C_GetObjectSize (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_GetAttributeValue (CK_SESSION_HANDLE handle,
-                         CK_OBJECT_HANDLE object,
-                         CK_ATTRIBUTE_PTR template,
-                         CK_ULONG count)
+                         CK_OBJECT_HANDLE  object,
+                         CK_ATTRIBUTE_PTR  template,
+                         CK_ULONG          count)
 {
 	CK_ATTRIBUTE *attrs;
 	CK_ATTRIBUTE *result;
@@ -1069,38 +1057,38 @@ sys_C_GetAttributeValue (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			attrs = lookup_object_inlock (session, object, NULL);
-			if (attrs == NULL)
-				rv = CKR_OBJECT_HANDLE_INVALID;
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		attrs = lookup_object_inlock (session, object, NULL);
+		if (attrs == NULL)
+			rv = CKR_OBJECT_HANDLE_INVALID;
+	}
 
-		if (rv == CKR_OK) {
-			for (i = 0; i < count; i++) {
-				result = template + i;
-				attr = p11_attrs_find (attrs, result->type);
-				if (!attr) {
-					result->ulValueLen = (CK_ULONG)-1;
-					rv = CKR_ATTRIBUTE_TYPE_INVALID;
-					continue;
-				}
-
-				if (!result->pValue) {
-					result->ulValueLen = attr->ulValueLen;
-					continue;
-				}
-
-				if (result->ulValueLen >= attr->ulValueLen) {
-					memcpy (result->pValue, attr->pValue, attr->ulValueLen);
-					result->ulValueLen = attr->ulValueLen;
-					continue;
-				}
-
+	if (rv == CKR_OK) {
+		for (i = 0; i < count; i++) {
+			result = template + i;
+			attr = p11_attrs_find (attrs, result->type);
+			if (!attr) {
 				result->ulValueLen = (CK_ULONG)-1;
-				rv = CKR_BUFFER_TOO_SMALL;
+				rv = CKR_ATTRIBUTE_TYPE_INVALID;
+				continue;
 			}
+
+			if (!result->pValue) {
+				result->ulValueLen = attr->ulValueLen;
+				continue;
+			}
+
+			if (result->ulValueLen >= attr->ulValueLen) {
+				memcpy (result->pValue, attr->pValue, attr->ulValueLen);
+				result->ulValueLen = attr->ulValueLen;
+				continue;
+			}
+
+			result->ulValueLen = (CK_ULONG)-1;
+			rv = CKR_BUFFER_TOO_SMALL;
 		}
+	}
 
 	p11_unlock ();
 
@@ -1115,9 +1103,9 @@ sys_C_GetAttributeValue (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_SetAttributeValue (CK_SESSION_HANDLE handle,
-                         CK_OBJECT_HANDLE object,
-                         CK_ATTRIBUTE_PTR template,
-                         CK_ULONG count)
+                         CK_OBJECT_HANDLE  object,
+                         CK_ATTRIBUTE_PTR  template,
+                         CK_ULONG          count)
 {
 	p11_session *session;
 	CK_ATTRIBUTE *attrs;
@@ -1129,33 +1117,33 @@ sys_C_SetAttributeValue (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			attrs = lookup_object_inlock (session, object, &index);
-			if (attrs == NULL) {
-				rv = CKR_OBJECT_HANDLE_INVALID;
-			} else if (p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
-				/* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
-				rv = CKR_ATTRIBUTE_READ_ONLY;
-			}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		attrs = lookup_object_inlock (session, object, &index);
+		if (attrs == NULL) {
+			rv = CKR_OBJECT_HANDLE_INVALID;
+		} else if (p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
+                        /* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
+			rv = CKR_ATTRIBUTE_READ_ONLY;
+		}
 
-			if (rv == CKR_OK)
-				rv = check_index_writable (session, index);
+		if (rv == CKR_OK)
+			rv = check_index_writable (session, index);
 
-			/* Reload the item if applicable */
-			if (rv == CKR_OK && index == p11_token_index (session->token)) {
-				if (p11_token_reload (session->token, attrs)) {
-					attrs = p11_index_lookup (index, object);
-					if (p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
-						/* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
-						rv = CKR_ATTRIBUTE_READ_ONLY;
-					}
+                /* Reload the item if applicable */
+		if (rv == CKR_OK && index == p11_token_index (session->token)) {
+			if (p11_token_reload (session->token, attrs)) {
+				attrs = p11_index_lookup (index, object);
+				if (p11_attrs_find_bool (attrs, CKA_MODIFIABLE, &val) && !val) {
+                                        /* TODO: This should be replaced with CKR_ACTION_PROHIBITED */
+					rv = CKR_ATTRIBUTE_READ_ONLY;
 				}
 			}
-
-			if (rv == CKR_OK)
-				rv = p11_index_set (index, object, template, count);
 		}
+
+		if (rv == CKR_OK)
+			rv = p11_index_set (index, object, template, count);
+	}
 
 	p11_unlock ();
 
@@ -1166,8 +1154,8 @@ sys_C_SetAttributeValue (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_FindObjectsInit (CK_SESSION_HANDLE handle,
-                       CK_ATTRIBUTE_PTR template,
-                       CK_ULONG count)
+                       CK_ATTRIBUTE_PTR  template,
+                       CK_ULONG          count)
 {
 	p11_index *indices[2] = { NULL, NULL };
 	CK_BBOOL want_token_objects;
@@ -1188,59 +1176,59 @@ sys_C_FindObjectsInit (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		/* Are we searching for token objects? */
-		if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &token)) {
-			want_token_objects = token;
-			want_session_objects = !token;
-		} else {
-			want_token_objects = CK_TRUE;
-			want_session_objects = CK_TRUE;
+        /* Are we searching for token objects? */
+	if (p11_attrs_findn_bool (template, count, CKA_TOKEN, &token)) {
+		want_token_objects = token;
+		want_session_objects = !token;
+	} else {
+		want_token_objects = CK_TRUE;
+		want_session_objects = CK_TRUE;
+	}
+
+	rv = lookup_session (handle, &session);
+
+        /* Refresh from disk if this session hasn't yet */
+	if (rv == CKR_OK) {
+		if (want_session_objects)
+			indices[n++] = session->index;
+		if (want_token_objects) {
+			if (!session->loaded)
+				p11_token_load (session->token);
+			if (rv == CKR_OK) {
+				session->loaded = CK_TRUE;
+				indices[n++] = p11_token_index (session->token);
+			}
 		}
+	}
 
-		rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		find = calloc (1, sizeof (FindObjects));
+		warn_if_fail (find != NULL);
 
-		/* Refresh from disk if this session hasn't yet */
-		if (rv == CKR_OK) {
-			if (want_session_objects)
-				indices[n++] = session->index;
-			if (want_token_objects) {
-				if (!session->loaded)
-					p11_token_load (session->token);
-				if (rv == CKR_OK) {
-					session->loaded = CK_TRUE;
-					indices[n++] = p11_token_index (session->token);
-				}
+                /* Make a snapshot of what we're matching */
+		if (find) {
+			find->match = p11_attrs_buildn (NULL, template, count);
+			warn_if_fail (find->match != NULL);
+
+                        /* Build a session snapshot of all objects */
+			find->iterator = 0;
+			find->snapshot = p11_index_snapshot (indices[0], indices[1], template, count);
+			warn_if_fail (find->snapshot != NULL);
+
+			if (p11_attrs_find_ulong (find->match, CKA_CLASS, &klass) &&
+			    klass == CKO_X_CERTIFICATE_EXTENSION) {
+				find->public_key = p11_attrs_find (find->match, CKA_PUBLIC_KEY_INFO);
+				find->extensions = p11_dict_new (p11_oid_hash,
+								 p11_oid_equal,
+								 free, NULL);
 			}
 		}
 
-		if (rv == CKR_OK) {
-			find = calloc (1, sizeof (FindObjects));
-			warn_if_fail (find != NULL);
-
-			/* Make a snapshot of what we're matching */
-			if (find) {
-				find->match = p11_attrs_buildn (NULL, template, count);
-				warn_if_fail (find->match != NULL);
-
-				/* Build a session snapshot of all objects */
-				find->iterator = 0;
-				find->snapshot = p11_index_snapshot (indices[0], indices[1], template, count);
-				warn_if_fail (find->snapshot != NULL);
-
-				if (p11_attrs_find_ulong (find->match, CKA_CLASS, &klass) &&
-				    klass == CKO_X_CERTIFICATE_EXTENSION) {
-					find->public_key = p11_attrs_find (find->match, CKA_PUBLIC_KEY_INFO);
-					find->extensions = p11_dict_new (p11_oid_hash,
-									 p11_oid_equal,
-									 free, NULL);
-				}
-			}
-
-			if (!find || !find->snapshot || !find->match)
-				rv = CKR_HOST_MEMORY;
-			else
-				p11_session_set_operation (session, find_objects_free, find);
-		}
+		if (!find || !find->snapshot || !find->match)
+			rv = CKR_HOST_MEMORY;
+		else
+			p11_session_set_operation (session, find_objects_free, find);
+	}
 
 	p11_unlock ();
 
@@ -1287,7 +1275,7 @@ match_for_broken_nss_serial_number_lookups (CK_ATTRIBUTE *attr,
 
 static bool
 find_objects_match (CK_ATTRIBUTE *attrs,
-                    FindObjects *find)
+                    FindObjects  *find)
 {
 	CK_OBJECT_CLASS klass;
 	CK_ATTRIBUTE *attr, *match = find->match;
@@ -1299,14 +1287,14 @@ find_objects_match (CK_ATTRIBUTE *attrs,
 		if (p11_attr_equal (attr, match))
 			continue;
 
-		/*
-		 * WORKAROUND: NSS calls us asking for CKA_SERIAL_NUMBER items that are
-		 * not DER encoded. It shouldn't be doing this. We never return any certificate
-		 * serial numbers that are not DER encoded.
-		 *
-		 * So work around the issue here while the NSS guys fix this issue.
-		 * This code should be removed in future versions.
-		 */
+                /*
+                 * WORKAROUND: NSS calls us asking for CKA_SERIAL_NUMBER items that are
+                 * not DER encoded. It shouldn't be doing this. We never return any certificate
+                 * serial numbers that are not DER encoded.
+                 *
+                 * So work around the issue here while the NSS guys fix this issue.
+                 * This code should be removed in future versions.
+                 */
 
 		if (attr->type == CKA_SERIAL_NUMBER &&
 		    p11_attrs_find_ulong (attrs, CKA_CLASS, &klass) &&
@@ -1318,12 +1306,12 @@ find_objects_match (CK_ATTRIBUTE *attrs,
 		return false;
 	}
 
-	/*
-	 * WORKAROUND: We keep all objects in the database, while PKIX
-	 * doesn't allow multiple extensions identified by the same
-	 * OID can be attached to a certificate.  Check any duplicate
-	 * and only return the first matching object.
-	 */
+        /*
+         * WORKAROUND: We keep all objects in the database, while PKIX
+         * doesn't allow multiple extensions identified by the same
+         * OID can be attached to a certificate.  Check any duplicate
+         * and only return the first matching object.
+         */
 	if (find->public_key &&
 	    p11_attrs_find_ulong (attrs, CKA_CLASS, &klass) &&
 	    klass == CKO_X_CERTIFICATE_EXTENSION) {
@@ -1346,10 +1334,10 @@ find_objects_match (CK_ATTRIBUTE *attrs,
 }
 
 static CK_RV
-sys_C_FindObjects (CK_SESSION_HANDLE handle,
+sys_C_FindObjects (CK_SESSION_HANDLE    handle,
                    CK_OBJECT_HANDLE_PTR objects,
-                   CK_ULONG max_count,
-                   CK_ULONG_PTR count)
+                   CK_ULONG             max_count,
+                   CK_ULONG_PTR         count)
 {
 	CK_OBJECT_HANDLE object;
 	CK_ATTRIBUTE *attrs;
@@ -1365,34 +1353,34 @@ sys_C_FindObjects (CK_SESSION_HANDLE handle,
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			if (session->cleanup != find_objects_free)
-				rv = CKR_OPERATION_NOT_INITIALIZED;
-			find = session->operation;
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		if (session->cleanup != find_objects_free)
+			rv = CKR_OPERATION_NOT_INITIALIZED;
+		find = session->operation;
+	}
 
-		if (rv == CKR_OK) {
-			matched = 0;
-			while (matched < max_count) {
-				object = find->snapshot[find->iterator];
-				if (!object)
-					break;
+	if (rv == CKR_OK) {
+		matched = 0;
+		while (matched < max_count) {
+			object = find->snapshot[find->iterator];
+			if (!object)
+				break;
 
-				find->iterator++;
+			find->iterator++;
 
-				attrs = lookup_object_inlock (session, object, &index);
-				if (attrs == NULL)
-					continue;
+			attrs = lookup_object_inlock (session, object, &index);
+			if (attrs == NULL)
+				continue;
 
-				if (find_objects_match (attrs, find)) {
-					objects[matched] = object;
-					matched++;
-				}
+			if (find_objects_match (attrs, find)) {
+				objects[matched] = object;
+				matched++;
 			}
-
-			*count = matched;
 		}
+
+		*count = matched;
+	}
 
 	p11_unlock ();
 
@@ -1411,13 +1399,13 @@ sys_C_FindObjectsFinal (CK_SESSION_HANDLE handle)
 
 	p11_lock ();
 
-		rv = lookup_session (handle, &session);
-		if (rv == CKR_OK) {
-			if (session->cleanup != find_objects_free)
-				rv = CKR_OPERATION_NOT_INITIALIZED;
-			else
-				p11_session_set_operation (session, NULL, NULL);
-		}
+	rv = lookup_session (handle, &session);
+	if (rv == CKR_OK) {
+		if (session->cleanup != find_objects_free)
+			rv = CKR_OPERATION_NOT_INITIALIZED;
+		else
+			p11_session_set_operation (session, NULL, NULL);
+	}
 
 	p11_unlock ();
 
@@ -1428,277 +1416,277 @@ sys_C_FindObjectsFinal (CK_SESSION_HANDLE handle)
 
 static CK_RV
 sys_C_EncryptInit (CK_SESSION_HANDLE handle,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_OBJECT_HANDLE key)
+                   CK_MECHANISM_PTR  mechanism,
+                   CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_Encrypt (CK_SESSION_HANDLE handle,
-               CK_BYTE_PTR data,
-               CK_ULONG data_len,
-               CK_BYTE_PTR encrypted_data,
-               CK_ULONG_PTR encrypted_data_len)
+               CK_BYTE_PTR       data,
+               CK_ULONG          data_len,
+               CK_BYTE_PTR       encrypted_data,
+               CK_ULONG_PTR      encrypted_data_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_EncryptUpdate (CK_SESSION_HANDLE handle,
-                     CK_BYTE_PTR part,
-                     CK_ULONG part_len,
-                     CK_BYTE_PTR encrypted_part,
-                     CK_ULONG_PTR encrypted_part_len)
+                     CK_BYTE_PTR       part,
+                     CK_ULONG          part_len,
+                     CK_BYTE_PTR       encrypted_part,
+                     CK_ULONG_PTR      encrypted_part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_EncryptFinal (CK_SESSION_HANDLE handle,
-                    CK_BYTE_PTR last_part,
-                    CK_ULONG_PTR last_part_len)
+                    CK_BYTE_PTR       last_part,
+                    CK_ULONG_PTR      last_part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DecryptInit (CK_SESSION_HANDLE handle,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_OBJECT_HANDLE key)
+                   CK_MECHANISM_PTR  mechanism,
+                   CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_Decrypt (CK_SESSION_HANDLE handle,
-               CK_BYTE_PTR enc_data,
-               CK_ULONG enc_data_len,
-               CK_BYTE_PTR data,
-               CK_ULONG_PTR data_len)
+               CK_BYTE_PTR       enc_data,
+               CK_ULONG          enc_data_len,
+               CK_BYTE_PTR       data,
+               CK_ULONG_PTR      data_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DecryptUpdate (CK_SESSION_HANDLE handle,
-                     CK_BYTE_PTR enc_part,
-                     CK_ULONG enc_part_len,
-                     CK_BYTE_PTR part,
-                     CK_ULONG_PTR part_len)
+                     CK_BYTE_PTR       enc_part,
+                     CK_ULONG          enc_part_len,
+                     CK_BYTE_PTR       part,
+                     CK_ULONG_PTR      part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DecryptFinal (CK_SESSION_HANDLE handle,
-                    CK_BYTE_PTR last_part,
-                    CK_ULONG_PTR last_part_len)
+                    CK_BYTE_PTR       last_part,
+                    CK_ULONG_PTR      last_part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DigestInit (CK_SESSION_HANDLE handle,
-                  CK_MECHANISM_PTR mechanism)
+                  CK_MECHANISM_PTR  mechanism)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_Digest (CK_SESSION_HANDLE handle,
-              CK_BYTE_PTR data,
-              CK_ULONG data_len,
-              CK_BYTE_PTR digest,
-              CK_ULONG_PTR digest_len)
+              CK_BYTE_PTR       data,
+              CK_ULONG          data_len,
+              CK_BYTE_PTR       digest,
+              CK_ULONG_PTR      digest_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DigestUpdate (CK_SESSION_HANDLE handle,
-                    CK_BYTE_PTR part,
-                    CK_ULONG part_len)
+                    CK_BYTE_PTR       part,
+                    CK_ULONG          part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DigestKey (CK_SESSION_HANDLE handle,
-                 CK_OBJECT_HANDLE key)
+                 CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DigestFinal (CK_SESSION_HANDLE handle,
-                   CK_BYTE_PTR digest,
-                   CK_ULONG_PTR digest_len)
+                   CK_BYTE_PTR       digest,
+                   CK_ULONG_PTR      digest_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_SignInit (CK_SESSION_HANDLE handle,
-                CK_MECHANISM_PTR mechanism,
-                CK_OBJECT_HANDLE key)
+                CK_MECHANISM_PTR  mechanism,
+                CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_Sign (CK_SESSION_HANDLE handle,
-            CK_BYTE_PTR data,
-            CK_ULONG data_len,
-            CK_BYTE_PTR signature,
-            CK_ULONG_PTR signature_len)
+            CK_BYTE_PTR       data,
+            CK_ULONG          data_len,
+            CK_BYTE_PTR       signature,
+            CK_ULONG_PTR      signature_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_SignUpdate (CK_SESSION_HANDLE handle,
-                  CK_BYTE_PTR part,
-                  CK_ULONG part_len)
+                  CK_BYTE_PTR       part,
+                  CK_ULONG          part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_SignFinal (CK_SESSION_HANDLE handle,
-                 CK_BYTE_PTR signature,
-                 CK_ULONG_PTR signature_len)
+                 CK_BYTE_PTR       signature,
+                 CK_ULONG_PTR      signature_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_SignRecoverInit (CK_SESSION_HANDLE handle,
-                       CK_MECHANISM_PTR mechanism,
-                       CK_OBJECT_HANDLE key)
+                       CK_MECHANISM_PTR  mechanism,
+                       CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_SignRecover (CK_SESSION_HANDLE handle,
-                   CK_BYTE_PTR data,
-                   CK_ULONG data_len,
-                   CK_BYTE_PTR signature,
-                   CK_ULONG_PTR signature_len)
+                   CK_BYTE_PTR       data,
+                   CK_ULONG          data_len,
+                   CK_BYTE_PTR       signature,
+                   CK_ULONG_PTR      signature_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_VerifyInit (CK_SESSION_HANDLE handle,
-                  CK_MECHANISM_PTR mechanism,
-                  CK_OBJECT_HANDLE key)
+                  CK_MECHANISM_PTR  mechanism,
+                  CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_Verify (CK_SESSION_HANDLE handle,
-              CK_BYTE_PTR data,
-              CK_ULONG data_len,
-              CK_BYTE_PTR signature,
-              CK_ULONG signature_len)
+              CK_BYTE_PTR       data,
+              CK_ULONG          data_len,
+              CK_BYTE_PTR       signature,
+              CK_ULONG          signature_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_VerifyUpdate (CK_SESSION_HANDLE handle,
-                    CK_BYTE_PTR part,
-                    CK_ULONG part_len)
+                    CK_BYTE_PTR       part,
+                    CK_ULONG          part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_VerifyFinal (CK_SESSION_HANDLE handle,
-                   CK_BYTE_PTR signature,
-                   CK_ULONG signature_len)
+                   CK_BYTE_PTR       signature,
+                   CK_ULONG          signature_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_VerifyRecoverInit (CK_SESSION_HANDLE handle,
-                         CK_MECHANISM_PTR mechanism,
-                         CK_OBJECT_HANDLE key)
+                         CK_MECHANISM_PTR  mechanism,
+                         CK_OBJECT_HANDLE  key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
 sys_C_VerifyRecover (CK_SESSION_HANDLE handle,
-                     CK_BYTE_PTR signature,
-                     CK_ULONG signature_len,
-                     CK_BYTE_PTR data,
-                     CK_ULONG_PTR data_len)
+                     CK_BYTE_PTR       signature,
+                     CK_ULONG          signature_len,
+                     CK_BYTE_PTR       data,
+                     CK_ULONG_PTR      data_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DigestEncryptUpdate (CK_SESSION_HANDLE handle,
-                           CK_BYTE_PTR part,
-                           CK_ULONG part_len,
-                           CK_BYTE_PTR enc_part,
-                           CK_ULONG_PTR enc_part_len)
+                           CK_BYTE_PTR       part,
+                           CK_ULONG          part_len,
+                           CK_BYTE_PTR       enc_part,
+                           CK_ULONG_PTR      enc_part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DecryptDigestUpdate (CK_SESSION_HANDLE handle,
-                           CK_BYTE_PTR enc_part,
-                           CK_ULONG enc_part_len,
-                           CK_BYTE_PTR part,
-                           CK_ULONG_PTR part_len)
+                           CK_BYTE_PTR       enc_part,
+                           CK_ULONG          enc_part_len,
+                           CK_BYTE_PTR       part,
+                           CK_ULONG_PTR      part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_SignEncryptUpdate (CK_SESSION_HANDLE handle,
-                         CK_BYTE_PTR part,
-                         CK_ULONG part_len,
-                         CK_BYTE_PTR enc_part,
-                         CK_ULONG_PTR enc_part_len)
+                         CK_BYTE_PTR       part,
+                         CK_ULONG          part_len,
+                         CK_BYTE_PTR       enc_part,
+                         CK_ULONG_PTR      enc_part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
 sys_C_DecryptVerifyUpdate (CK_SESSION_HANDLE handle,
-                           CK_BYTE_PTR enc_part,
-                           CK_ULONG enc_part_len,
-                           CK_BYTE_PTR part,
-                           CK_ULONG_PTR part_len)
+                           CK_BYTE_PTR       enc_part,
+                           CK_ULONG          enc_part_len,
+                           CK_BYTE_PTR       part,
+                           CK_ULONG_PTR      part_len)
 {
 	return_val_if_reached (CKR_OPERATION_NOT_INITIALIZED);
 }
 
 static CK_RV
-sys_C_GenerateKey (CK_SESSION_HANDLE handle,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_ATTRIBUTE_PTR template,
-                   CK_ULONG count,
+sys_C_GenerateKey (CK_SESSION_HANDLE    handle,
+                   CK_MECHANISM_PTR     mechanism,
+                   CK_ATTRIBUTE_PTR     template,
+                   CK_ULONG             count,
                    CK_OBJECT_HANDLE_PTR key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
-sys_C_GenerateKeyPair (CK_SESSION_HANDLE handle,
-                       CK_MECHANISM_PTR mechanism,
-                       CK_ATTRIBUTE_PTR pub_template,
-                       CK_ULONG pub_count,
-                       CK_ATTRIBUTE_PTR priv_template,
-                       CK_ULONG priv_count,
+sys_C_GenerateKeyPair (CK_SESSION_HANDLE    handle,
+                       CK_MECHANISM_PTR     mechanism,
+                       CK_ATTRIBUTE_PTR     pub_template,
+                       CK_ULONG             pub_count,
+                       CK_ATTRIBUTE_PTR     priv_template,
+                       CK_ULONG             priv_count,
                        CK_OBJECT_HANDLE_PTR pub_key,
                        CK_OBJECT_HANDLE_PTR priv_key)
 {
@@ -1707,34 +1695,34 @@ sys_C_GenerateKeyPair (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_WrapKey (CK_SESSION_HANDLE handle,
-               CK_MECHANISM_PTR mechanism,
-               CK_OBJECT_HANDLE wrapping_key,
-               CK_OBJECT_HANDLE key,
-               CK_BYTE_PTR wrapped_key,
-               CK_ULONG_PTR wrapped_key_len)
+               CK_MECHANISM_PTR  mechanism,
+               CK_OBJECT_HANDLE  wrapping_key,
+               CK_OBJECT_HANDLE  key,
+               CK_BYTE_PTR       wrapped_key,
+               CK_ULONG_PTR      wrapped_key_len)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
-sys_C_UnwrapKey (CK_SESSION_HANDLE handle,
-                 CK_MECHANISM_PTR mechanism,
-                 CK_OBJECT_HANDLE unwrapping_key,
-                 CK_BYTE_PTR wrapped_key,
-                 CK_ULONG wrapped_key_len,
-                 CK_ATTRIBUTE_PTR template,
-                 CK_ULONG count,
+sys_C_UnwrapKey (CK_SESSION_HANDLE    handle,
+                 CK_MECHANISM_PTR     mechanism,
+                 CK_OBJECT_HANDLE     unwrapping_key,
+                 CK_BYTE_PTR          wrapped_key,
+                 CK_ULONG             wrapped_key_len,
+                 CK_ATTRIBUTE_PTR     template,
+                 CK_ULONG             count,
                  CK_OBJECT_HANDLE_PTR key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
 }
 
 static CK_RV
-sys_C_DeriveKey (CK_SESSION_HANDLE handle,
-                 CK_MECHANISM_PTR mechanism,
-                 CK_OBJECT_HANDLE base_key,
-                 CK_ATTRIBUTE_PTR template,
-                 CK_ULONG count,
+sys_C_DeriveKey (CK_SESSION_HANDLE    handle,
+                 CK_MECHANISM_PTR     mechanism,
+                 CK_OBJECT_HANDLE     base_key,
+                 CK_ATTRIBUTE_PTR     template,
+                 CK_ULONG             count,
                  CK_OBJECT_HANDLE_PTR key)
 {
 	return_val_if_reached (CKR_MECHANISM_INVALID);
@@ -1742,16 +1730,16 @@ sys_C_DeriveKey (CK_SESSION_HANDLE handle,
 
 static CK_RV
 sys_C_SeedRandom (CK_SESSION_HANDLE handle,
-                  CK_BYTE_PTR seed,
-                  CK_ULONG seed_len)
+                  CK_BYTE_PTR       seed,
+                  CK_ULONG          seed_len)
 {
 	return_val_if_reached (CKR_RANDOM_NO_RNG);
 }
 
 static CK_RV
 sys_C_GenerateRandom (CK_SESSION_HANDLE handle,
-                      CK_BYTE_PTR random_data,
-                      CK_ULONG random_len)
+                      CK_BYTE_PTR       random_data,
+                      CK_ULONG          random_len)
 {
 	return_val_if_reached (CKR_RANDOM_NO_RNG);
 }

@@ -59,13 +59,13 @@ enum {
 };
 
 static const char *
-pem_find_begin (const char *data,
-                size_t n_data,
-                char **type)
+pem_find_begin (const char  *data,
+                size_t       n_data,
+                char       **type)
 {
 	const char *pref, *suff;
 
-	/* Look for a prefix */
+        /* Look for a prefix */
 	pref = strnstr ((char *)data, ARMOR_PREF_BEGIN, n_data);
 	if (!pref)
 		return NULL;
@@ -73,12 +73,12 @@ pem_find_begin (const char *data,
 	n_data -= (pref - data) + ARMOR_PREF_BEGIN_L;
 	data = pref + ARMOR_PREF_BEGIN_L;
 
-	/* Look for the end of that begin */
+        /* Look for the end of that begin */
 	suff = strnstr ((char *)data, ARMOR_SUFF, n_data);
 	if (!suff)
 		return NULL;
 
-	/* Make sure on the same line */
+        /* Make sure on the same line */
 	if (memchr (pref, '\n', suff - pref))
 		return NULL;
 
@@ -89,19 +89,19 @@ pem_find_begin (const char *data,
 		return_val_if_fail (*type != NULL, NULL);
 	}
 
-	/* The byte after this ---BEGIN--- */
+        /* The byte after this ---BEGIN--- */
 	return suff + ARMOR_SUFF_L;
 }
 
 static const char *
 pem_find_end (const char *data,
-              size_t n_data,
+              size_t      n_data,
               const char *type)
 {
 	const char *pref;
 	size_t n_type;
 
-	/* Look for a prefix */
+        /* Look for a prefix */
 	pref = strnstr (data, ARMOR_PREF_END, n_data);
 	if (!pref)
 		return NULL;
@@ -109,7 +109,7 @@ pem_find_end (const char *data,
 	n_data -= (pref - data) + ARMOR_PREF_END_L;
 	data = pref + ARMOR_PREF_END_L;
 
-	/* Next comes the type string */
+        /* Next comes the type string */
 	n_type = strlen (type);
 	if (n_type > n_data || strncmp ((char *)data, type, n_type) != 0)
 		return NULL;
@@ -117,18 +117,18 @@ pem_find_end (const char *data,
 	n_data -= n_type;
 	data += n_type;
 
-	/* Next comes the suffix */
+        /* Next comes the suffix */
 	if (ARMOR_SUFF_L > n_data || strncmp ((char *)data, ARMOR_SUFF, ARMOR_SUFF_L) != 0)
 		return NULL;
 
-	/* The end of the data */
+        /* The end of the data */
 	return pref;
 }
 
 static unsigned char *
 pem_parse_block (const char *data,
-                 size_t n_data,
-                 size_t *n_decoded)
+                 size_t      n_data,
+                 size_t     *n_decoded)
 {
 	const char *x, *hbeg, *hend;
 	const char *p, *end;
@@ -145,29 +145,29 @@ pem_parse_block (const char *data,
 
 	hbeg = hend = NULL;
 
-	/* Try and find a pair of blank lines with only white space between */
+        /* Try and find a pair of blank lines with only white space between */
 	while (hend == NULL) {
 		x = memchr (p, '\n', end - p);
 		if (!x)
 			break;
 		++x;
 		while (isspace (*x)) {
-			/* Found a second line, with only spaces between */
+                        /* Found a second line, with only spaces between */
 			if (*x == '\n') {
 				hbeg = data;
 				hend = x;
 				break;
-			/* Found a space between two lines */
+                                /* Found a space between two lines */
 			} else {
 				++x;
 			}
 		}
 
-		/* Try next line */
+                /* Try next line */
 		p = x;
 	}
 
-	/* Headers found? */
+        /* Headers found? */
 	if (hbeg && hend) {
 		data = hend;
 		n_data = end - data;
@@ -183,17 +183,17 @@ pem_parse_block (const char *data,
 		return NULL;
 	}
 
-	/* No need to parse headers for our use cases */
+        /* No need to parse headers for our use cases */
 
 	*n_decoded = ret;
 	return decoded;
 }
 
 unsigned int
-p11_pem_parse (const char *data,
-               size_t n_data,
-               p11_pem_sink sink,
-               void *user_data)
+p11_pem_parse (const char   *data,
+               size_t        n_data,
+               p11_pem_sink  sink,
+               void         *user_data)
 {
 	const char *beg, *end;
 	unsigned int nfound = 0;
@@ -204,15 +204,14 @@ p11_pem_parse (const char *data,
 	assert (data != NULL);
 
 	while (n_data > 0) {
-
-		/* This returns the first character after the PEM BEGIN header */
+                /* This returns the first character after the PEM BEGIN header */
 		beg = pem_find_begin (data, n_data, &type);
 		if (beg == NULL)
 			break;
 
 		assert (type != NULL);
 
-		/* This returns the character position before the PEM END header */
+                /* This returns the character position before the PEM END header */
 		end = pem_find_end (beg, n_data - (beg - data), type);
 		if (end == NULL) {
 			free (type);
@@ -223,7 +222,7 @@ p11_pem_parse (const char *data,
 			decoded = pem_parse_block (beg, end - beg, &n_decoded);
 			if (decoded) {
 				if (sink != NULL)
-					(sink) (type, decoded, n_decoded, user_data);
+					(sink)(type, decoded, n_decoded, user_data);
 				++nfound;
 				free (decoded);
 			}
@@ -231,7 +230,7 @@ p11_pem_parse (const char *data,
 
 		free (type);
 
-		/* Try for another block */
+                /* Try for another block */
 		end += ARMOR_SUFF_L;
 		n_data -= (const char *)end - (const char *)data;
 		data = end;
@@ -242,9 +241,9 @@ p11_pem_parse (const char *data,
 
 bool
 p11_pem_write (const unsigned char *contents,
-               size_t length,
-               const char *type,
-               p11_buffer *buf)
+	       size_t               length,
+	       const char          *type,
+	       p11_buffer          *buf)
 {
 	size_t estimate;
 	size_t prefix;
@@ -255,7 +254,7 @@ p11_pem_write (const unsigned char *contents,
 	return_val_if_fail (type, false);
 	return_val_if_fail (buf, false);
 
-	/* Estimate from base64 data. Algorithm from Glib reference */
+        /* Estimate from base64 data. Algorithm from Glib reference */
 	estimate = length * 4 / 3 + 7;
 	estimate += estimate / 64 + 1;
 
@@ -267,10 +266,10 @@ p11_pem_write (const unsigned char *contents,
 	target = p11_buffer_append (buf, estimate);
 	return_val_if_fail (target != NULL, false);
 
-	/*
-	 * OpenSSL is absolutely certain that it wants its PEM base64
-	 * lines to be 64 characters in len.
-	 */
+        /*
+         * OpenSSL is absolutely certain that it wants its PEM base64
+         * lines to be 64 characters in len.
+         */
 
 	len = p11_b64_ntop (contents, length, target, estimate, 64);
 

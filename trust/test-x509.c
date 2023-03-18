@@ -233,8 +233,8 @@ test_parse_extended_key_usage (void)
 
 	for (i = 0; extended_key_usage_fixtures[i].eku != NULL; i++) {
 		ekus = p11_x509_parse_extended_key_usage (test.asn1_defs,
-		                                          (const unsigned char *)extended_key_usage_fixtures[i].eku,
-		                                          extended_key_usage_fixtures[i].length);
+							  (const unsigned char *)extended_key_usage_fixtures[i].eku,
+							  extended_key_usage_fixtures[i].length);
 		assert_ptr_not_null (ekus);
 
 		for (count = 0; extended_key_usage_fixtures[i].expected[count] != NULL; count++);
@@ -269,8 +269,8 @@ test_parse_key_usage (void)
 		ku = 0;
 
 		ret = p11_x509_parse_key_usage (test.asn1_defs,
-		                                (const unsigned char *)key_usage_fixtures[i].ku,
-		                                key_usage_fixtures[i].length, &ku);
+						(const unsigned char *)key_usage_fixtures[i].ku,
+						key_usage_fixtures[i].length, &ku);
 		assert_num_eq (true, ret);
 
 		assert_num_eq (key_usage_fixtures[i].expected, ku);
@@ -286,12 +286,12 @@ test_parse_extension (void)
 	bool is_ca;
 
 	cert = p11_asn1_decode (test.asn1_defs, "PKIX1.Certificate",
-	                        test_cacert3_ca_der, sizeof (test_cacert3_ca_der), NULL);
+				test_cacert3_ca_der, sizeof (test_cacert3_ca_der), NULL);
 	assert_ptr_not_null (cert);
 
 	ext = p11_x509_find_extension (cert, P11_OID_BASIC_CONSTRAINTS,
-	                               test_cacert3_ca_der, sizeof (test_cacert3_ca_der),
-	                               &length);
+				       test_cacert3_ca_der, sizeof (test_cacert3_ca_der),
+				       &length);
 	assert_ptr_not_null (ext);
 	assert (length > 0);
 
@@ -310,12 +310,12 @@ test_parse_extension_not_found (void)
 	size_t length;
 
 	cert = p11_asn1_decode (test.asn1_defs, "PKIX1.Certificate",
-	                        test_cacert3_ca_der, sizeof (test_cacert3_ca_der), NULL);
+				test_cacert3_ca_der, sizeof (test_cacert3_ca_der), NULL);
 	assert_ptr_not_null (cert);
 
 	ext = p11_x509_find_extension (cert, P11_OID_OPENSSL_REJECT,
-	                               test_cacert3_ca_der, sizeof (test_cacert3_ca_der),
-	                               &length);
+				       test_cacert3_ca_der, sizeof (test_cacert3_ca_der),
+				       &length);
 	assert_ptr_eq (NULL, ext);
 
 	asn1_delete_structure (&cert);
@@ -330,41 +330,34 @@ test_directory_string (void)
 		char *output;
 		int output_len;
 	} fixtures[] = {
-		/* UTF8String */
+                /* UTF8String */
 		{ { 0x0c, 0x0f, 0xc3, 0x84, ' ', 'U', 'T', 'F', '8', ' ', 's', 't', 'r', 'i', 'n', 'g', ' ', }, 17,
-		  "\xc3\x84 UTF8 string ", 15,
-		},
+		  "\xc3\x84 UTF8 string ", 15, },
 
-		/* NumericString */
+                /* NumericString */
 		{ { 0x12, 0x04, '0', '1', '2', '3', }, 6,
-		  "0123", 4,
-		},
+		  "0123", 4, },
 
-		/* IA5String */
+                /* IA5String */
 		{ { 0x16, 0x04, ' ', 'A', 'B', ' ', }, 6,
-		  " AB ", 4
-		},
+		  " AB ", 4},
 
-		/* TeletexString */
+                /* TeletexString */
 		{ { 0x14, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9,
-		  "A  nice", 7
-		},
+		  "A  nice", 7},
 
-		/* PrintableString */
+                /* PrintableString */
 		{ { 0x13, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9,
-		  "A  nice", 7,
-		},
+		  "A  nice", 7, },
 
-		/* UniversalString */
+                /* UniversalString */
 		{ { 0x1c, 0x14, 0x00, 0x00, 0x00, 'F', 0x00, 0x00, 0x00, 'u',
 		    0x00, 0x00, 0x00, 'n', 0x00, 0x00, 0x00, ' ', 0x00, 0x01, 0x03, 0x19, }, 22,
-		  "Fun \xf0\x90\x8c\x99", 8
-		},
+		  "Fun \xf0\x90\x8c\x99", 8},
 
-		/* BMPString */
+                /* BMPString */
 		{ { 0x1e, 0x0a, 0x00, 'V', 0x00, 0xF6, 0x00, 'g', 0x00, 'e', 0x00, 'l' }, 12,
-		  "V\xc3\xb6gel", 6
-		},
+		  "V\xc3\xb6gel", 6},
 	};
 
 	char *string;
@@ -374,8 +367,8 @@ test_directory_string (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		string = p11_x509_parse_directory_string (fixtures[i].input,
-		                                          fixtures[i].input_len,
-		                                          &unknown, &length);
+							  fixtures[i].input_len,
+							  &unknown, &length);
 		assert_ptr_not_null (string);
 		assert_num_eq (false, unknown);
 
@@ -388,7 +381,7 @@ test_directory_string (void)
 static void
 test_directory_string_unknown (void)
 {
-	/* Not a valid choice in DirectoryString */
+        /* Not a valid choice in DirectoryString */
 	unsigned char input[] = { 0x05, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' };
 	char *string;
 	bool unknown = false;
@@ -400,7 +393,7 @@ test_directory_string_unknown (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

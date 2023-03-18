@@ -44,7 +44,7 @@
 #include <unistd.h>
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	if (argc == 1) {
@@ -83,7 +83,7 @@ main (int argc,
 
 			close (pfds[1]);
 			while (1) {
-				nread = read (pfds[0], buffer + offset, sizeof(buffer) - offset);
+				nread = read (pfds[0], buffer + offset, sizeof (buffer) - offset);
 				if (nread < 0) {
 					perror ("read");
 					exit (EXIT_FAILURE);
@@ -102,7 +102,7 @@ main (int argc,
 			assert (WIFEXITED (status));
 			assert (WEXITSTATUS (status) == 0);
 
-			p = memchr (buffer, '\n', sizeof(buffer));
+			p = memchr (buffer, '\n', sizeof (buffer));
 			if (!p) {
 				fprintf (stderr, "missing newline: %s\n", buffer);
 				exit (EXIT_FAILURE);

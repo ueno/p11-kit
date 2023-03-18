@@ -70,7 +70,7 @@ test_strndup (void)
 static void
 test_getauxval (void)
 {
-	/* 23 is AT_SECURE */
+        /* 23 is AT_SECURE */
 	const char *args[] = { BUILDDIR "/common/frob-getauxval", "23", NULL };
 	char *path;
 	int ret;
@@ -126,7 +126,7 @@ test_mmap (void)
 	int fd = mkstemp (file);
 	assert (fd >= 0);
 	close (fd);
-	/* mmap on empty file should work */
+        /* mmap on empty file should work */
 	map = p11_mmap_open (file, NULL, &data, &size);
 	unlink (file);
 	assert_ptr_not_null (map);
@@ -164,15 +164,15 @@ test_getprogname (void)
 #endif /* OS_UNIX */
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 #ifndef HAVE_STRNDUP
 	p11_test (test_strndup, "/compat/strndup");
 #endif
 #ifdef OS_UNIX
-	/* Don't run this test when under fakeroot, or the binary is
-	 * written under /tmp */
+        /* Don't run this test when under fakeroot, or the binary is
+         * written under /tmp */
 	if (!getenv ("FAKED_MODE") && strncmp (BUILDDIR, "/tmp/", 5) != 0) {
 		p11_test (test_getauxval, "/compat/getauxval");
 		p11_test (test_secure_getenv, "/compat/secure_getenv");

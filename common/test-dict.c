@@ -285,7 +285,7 @@ test_remove_destroys (void)
 	assert_num_eq (true, key.freed);
 	assert_num_eq (2, value);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	key.freed = false;
 	value = 0;
 
@@ -294,7 +294,7 @@ test_remove_destroys (void)
 	assert_num_eq (false, key.freed);
 	assert_num_eq (0, value);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	key.freed = false;
 	value = 0;
 
@@ -321,7 +321,7 @@ test_set_destroys (void)
 	key.freed = key2.freed = false;
 	value = value2 = 0;
 
-	/* Setting same key and value, should not be destroyed */
+        /* Setting same key and value, should not be destroyed */
 	ret = p11_dict_set (map, &key, &value);
 	assert_num_eq (true, ret);
 	assert_num_eq (false, key.freed);
@@ -332,7 +332,7 @@ test_set_destroys (void)
 	key.freed = key2.freed = false;
 	value = value2 = 0;
 
-	/* Setting a new key same value, key should be destroyed */
+        /* Setting a new key same value, key should be destroyed */
 	ret = p11_dict_set (map, &key2, &value);
 	assert_num_eq (true, ret);
 	assert_num_eq (true, key.freed);
@@ -343,7 +343,7 @@ test_set_destroys (void)
 	key.freed = key2.freed = false;
 	value = value2 = 0;
 
-	/* Setting same key, new value, value should be destroyed */
+        /* Setting same key, new value, value should be destroyed */
 	ret = p11_dict_set (map, &key2, &value2);
 	assert_num_eq (true, ret);
 	assert_num_eq (false, key.freed);
@@ -354,7 +354,7 @@ test_set_destroys (void)
 	key.freed = key2.freed = false;
 	value = value2 = 0;
 
-	/* Setting new key new value, both should be destroyed */
+        /* Setting new key new value, both should be destroyed */
 	ret = p11_dict_set (map, &key, &value);
 	assert_num_eq (true, ret);
 	assert_num_eq (false, key.freed);
@@ -389,7 +389,7 @@ test_clear_destroys (void)
 	assert_num_eq (true, key.freed);
 	assert_num_eq (2, value);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	key.freed = false;
 	value = 0;
 
@@ -397,7 +397,7 @@ test_clear_destroys (void)
 	assert_num_eq (false, key.freed);
 	assert_num_eq (0, value);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	key.freed = false;
 	value = 0;
 
@@ -410,8 +410,8 @@ test_clear_destroys (void)
 static unsigned int
 test_hash_intptr_with_collisions (const void *data)
 {
-	/* lots and lots of collisions, only returns 100 values */
-	return (unsigned int)(*((int*)data) % 100);
+        /* lots and lots of collisions, only returns 100 values */
+	return (unsigned int)(*((int *)data) % 100);
 }
 
 static void
@@ -422,7 +422,7 @@ test_hash_add_check_lots_and_collisions (void)
 	int i;
 
 	map = p11_dict_new (test_hash_intptr_with_collisions,
-	                    p11_dict_intptr_equal, NULL, free);
+			    p11_dict_intptr_equal, NULL, free);
 
 	for (i = 0; i < 20000; ++i) {
 		value = malloc (sizeof (int));
@@ -501,7 +501,7 @@ test_hash_ulongptr (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_create, "/dict/create");

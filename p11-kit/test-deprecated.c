@@ -76,7 +76,6 @@ finalize_and_free_modules (CK_FUNCTION_LIST_PTR_PTR modules)
 	free (modules);
 	rv = p11_kit_finalize_registered ();
 	assert_num_eq (CKR_OK, rv);
-
 }
 
 static void
@@ -92,7 +91,7 @@ test_no_duplicates (void)
 	paths = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, NULL, NULL);
 	funcs = p11_dict_new (p11_dict_direct_hash, p11_dict_direct_equal, NULL, NULL);
 
-	/* The loaded modules should not contain duplicates */
+        /* The loaded modules should not contain duplicates */
 	for (i = 0; modules[i] != NULL; i++) {
 		path = p11_kit_registered_option (modules[i], "module");
 
@@ -115,8 +114,8 @@ test_no_duplicates (void)
 }
 
 static CK_FUNCTION_LIST_PTR
-lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR modules,
-                         const char *name)
+lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR  modules,
+                         const char               *name)
 {
 	CK_FUNCTION_LIST_PTR match = NULL;
 	CK_FUNCTION_LIST_PTR module;
@@ -131,10 +130,10 @@ lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR modules,
 		free (module_name);
 	}
 
-	/*
-	 * As a side effect, we should check that the results of this function
-	 * matches the above search.
-	 */
+        /*
+         * As a side effect, we should check that the results of this function
+         * matches the above search.
+         */
 	module = p11_kit_registered_name_to_module (name);
 	if (module != match)
 		assert_fail ("different result from p11_kit_registered_name_to_module()", NULL);
@@ -147,21 +146,21 @@ test_disable (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module four should be present, as we don't match any prognames
-	 * that it has disabled.
-	 */
+        /*
+         * The module four should be present, as we don't match any prognames
+         * that it has disabled.
+         */
 
 	modules = initialize_and_get_modules ();
 	assert (lookup_module_with_name (modules, "four") != NULL);
 	finalize_and_free_modules (modules);
 
-	/*
-	 * The module two shouldn't have been loaded, because in its config
-	 * file we have:
-	 *
-	 * disable-in: test-disable
-	 */
+        /*
+         * The module two shouldn't have been loaded, because in its config
+         * file we have:
+         *
+         * disable-in: test-disable
+         */
 
 	p11_kit_set_progname ("test-disable");
 
@@ -178,12 +177,12 @@ test_disable_later (void)
 	CK_FUNCTION_LIST_PTR_PTR modules;
 	CK_RV rv;
 
-	/*
-	 * The module two shouldn't be matched, because in its config
-	 * file we have:
-	 *
-	 * disable-in: test-disable
-	 */
+        /*
+         * The module two shouldn't be matched, because in its config
+         * file we have:
+         *
+         * disable-in: test-disable
+         */
 
 	rv = p11_kit_initialize_registered ();
 	assert_num_eq (CKR_OK, rv);
@@ -204,21 +203,21 @@ test_enable (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module three should not be present, as we don't match the current
-	 * program.
-	 */
+        /*
+         * The module three should not be present, as we don't match the current
+         * program.
+         */
 
 	modules = initialize_and_get_modules ();
 	assert (lookup_module_with_name (modules, "three") == NULL);
 	finalize_and_free_modules (modules);
 
-	/*
-	 * The module three should be loaded here , because in its config
-	 * file we have:
-	 *
-	 * enable-in: test-enable
-	 */
+        /*
+         * The module three should be loaded here , because in its config
+         * file we have:
+         *
+         * enable-in: test-enable
+         */
 
 	p11_kit_set_progname ("test-enable");
 
@@ -247,7 +246,7 @@ mock_C_Initialize__with_fork (CK_VOID_PTR init_args)
 	rv = mock_C_Initialize (init_args);
 	assert (rv == CKR_OK);
 
-	/* Fork during the initialization */
+        /* Fork during the initialization */
 	child = fork ();
 	if (child == 0) {
 		close (1);
@@ -270,7 +269,7 @@ test_fork_initialization (void)
 
 	assert (!mock_module_initialized ());
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__with_fork;
 
@@ -288,7 +287,7 @@ test_fork_initialization (void)
 static CK_RV
 mock_C_Initialize__with_recursive (CK_VOID_PTR init_args)
 {
-	/* Recursively initialize, this is broken */
+        /* Recursively initialize, this is broken */
 	return p11_kit_initialize_module (&module);
 }
 
@@ -299,7 +298,7 @@ test_recursive_initialization (void)
 
 	assert (!mock_module_initialized ());
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__with_recursive;
 
@@ -316,7 +315,7 @@ static int finalization_count = 0;
 static CK_RV
 mock_C_Initialize__threaded_race (CK_VOID_PTR init_args)
 {
-	/* Atomically increment value */
+        /* Atomically increment value */
 	p11_mutex_lock (&race_mutex);
 	initialization_count += 1;
 	p11_mutex_unlock (&race_mutex);
@@ -328,7 +327,7 @@ mock_C_Initialize__threaded_race (CK_VOID_PTR init_args)
 static CK_RV
 mock_C_Finalize__threaded_race (CK_VOID_PTR reserved)
 {
-	/* Atomically increment value */
+        /* Atomically increment value */
 	p11_mutex_lock (&race_mutex);
 	finalization_count += 1;
 	p11_mutex_unlock (&race_mutex);
@@ -371,7 +370,7 @@ test_threaded_initialization (void)
 
 	assert (!mock_module_initialized ());
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__threaded_race;
 	module.C_Finalize = mock_C_Finalize__threaded_race;
@@ -405,7 +404,7 @@ test_threaded_initialization (void)
 		threads[i] = 0;
 	}
 
-	/* C_Initialize should have been called exactly once */
+        /* C_Initialize should have been called exactly once */
 	p11_mutex_lock (&race_mutex);
 	assert_num_eq (1, initialization_count);
 	assert_num_eq (1, finalization_count);
@@ -450,7 +449,7 @@ test_mutexes (void)
 
 	assert (!mock_module_initialized ());
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__test_mutexes;
 
@@ -475,7 +474,7 @@ test_load_and_initialize (void)
 	assert (rv == CKR_OK);
 	assert (module != NULL);
 
-	memset (&info, 0, sizeof(info));
+	memset (&info, 0, sizeof (info));
 	rv = (module->C_GetInfo) (&info);
 	assert (rv == CKR_OK);
 
@@ -489,7 +488,7 @@ test_load_and_initialize (void)
 extern bool p11_conf_force_user_config;
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_conf_force_user_config = true;

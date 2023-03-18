@@ -81,28 +81,28 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 typedef struct {
-	/* Never changes.  On Unix, these are identical, as it is
-	 * backed by a socket.  On Windows, it is another file
-	 * descriptor, as they are backed by two pipes */
+        /* Never changes.  On Unix, these are identical, as it is
+         * backed by a socket.  On Windows, it is another file
+         * descriptor, as they are backed by two pipes */
 	int read_fd;
 	int write_fd;
 
-	/* Protected by the lock */
+        /* Protected by the lock */
 	p11_mutex_t write_lock;
 	int refs;
 	int last_code;
 
-	/* This data is protected by read mutex */
+        /* This data is protected by read mutex */
 	p11_mutex_t read_lock;
 #ifdef OS_UNIX
         /* Signalled when read_code changes */
-        p11_cond_t read_code_cond;
+	p11_cond_t read_code_cond;
 #endif
 	uint32_t read_code;
 	uint32_t read_olen;
@@ -126,7 +126,7 @@ rpc_socket_new (int fd)
 	p11_mutex_init (&sock->read_lock);
 
 #ifdef OS_UNIX
-        p11_cond_init (&sock->read_code_cond);
+	p11_cond_init (&sock->read_code_cond);
 #endif
 
 	return sock;
@@ -189,15 +189,15 @@ rpc_socket_unref (rpc_socket *sock)
 	p11_mutex_uninit (&sock->write_lock);
 	p11_mutex_uninit (&sock->read_lock);
 #ifdef OS_UNIX
-        p11_cond_uninit (&sock->read_code_cond);
+	p11_cond_uninit (&sock->read_code_cond);
 #endif
 	free (sock);
 }
 
 static bool
-write_all (int fd,
-           unsigned char* data,
-           size_t len)
+write_all (int            fd,
+	   unsigned char *data,
+	   size_t         len)
 {
 	int r;
 
@@ -222,9 +222,9 @@ write_all (int fd,
 }
 
 static bool
-read_all (int fd,
-          unsigned char* data,
-          size_t len)
+read_all (int            fd,
+	  unsigned char *data,
+	  size_t         len)
 {
 	int r;
 
@@ -250,13 +250,13 @@ read_all (int fd,
 
 static CK_RV
 rpc_socket_write_inlock (rpc_socket *sock,
-                         int code,
+                         int         code,
                          p11_buffer *options,
                          p11_buffer *buffer)
 {
 	unsigned char header[12];
 
-	/* The socket is locked and referenced at this point */
+        /* The socket is locked and referenced at this point */
 	assert (buffer != NULL);
 
 	p11_rpc_buffer_encode_uint32 (header, code);
@@ -272,11 +272,11 @@ rpc_socket_write_inlock (rpc_socket *sock,
 }
 
 static p11_rpc_status
-write_at (int fd,
-          unsigned char *data,
-          size_t len,
-          size_t offset,
-          size_t *at)
+write_at (int            fd,
+	  unsigned char *data,
+	  size_t         len,
+	  size_t         offset,
+	  size_t        *at)
 {
 	p11_rpc_status status;
 	ssize_t num;
@@ -294,26 +294,26 @@ write_at (int fd,
 	num = write (fd, data + from, len - from);
 	errn = errno;
 
-	/* Update state */
+        /* Update state */
 	if (num > 0)
 		*at += num;
 
-	/* Completely written out this block */
+        /* Completely written out this block */
 	if (num == len - from) {
 		p11_debug ("ok: wrote block of %d", (int)num);
 		status = P11_RPC_OK;
 
-	/* Partially written out this block */
+                /* Partially written out this block */
 	} else if (num >= 0) {
 		p11_debug ("again: partial read of %d", (int)num);
 		status = P11_RPC_AGAIN;
 
-	/* Didn't write out block due to transient issue */
+                /* Didn't write out block due to transient issue */
 	} else if (errn == EINTR || errn == EAGAIN || errn == EWOULDBLOCK) {
 		p11_debug ("again: due to %d", errn);
 		status = P11_RPC_AGAIN;
 
-	/* Failure */
+                /* Failure */
 	} else {
 		p11_debug ("error: due to %d", errn);
 		status = P11_RPC_ERROR;
@@ -324,9 +324,9 @@ write_at (int fd,
 }
 
 p11_rpc_status
-p11_rpc_transport_write (int fd,
-                         size_t *state,
-                         int call_code,
+p11_rpc_transport_write (int         fd,
+                         size_t     *state,
+                         int         call_code,
                          p11_buffer *options,
                          p11_buffer *buffer)
 {
@@ -347,15 +347,15 @@ p11_rpc_transport_write (int fd,
 
 	if (status == P11_RPC_OK) {
 		status = write_at (fd, options->data, options->len,
-		                   12, state);
+				   12, state);
 	}
 
 	if (status == P11_RPC_OK) {
 		status = write_at (fd, buffer->data, buffer->len,
-		                   12 + options->len, state);
+				   12 + options->len, state);
 	}
 
-	/* All done */
+        /* All done */
 	if (status == P11_RPC_OK)
 		*state = 0;
 
@@ -364,11 +364,11 @@ p11_rpc_transport_write (int fd,
 
 static void
 rpc_socket_set_read_code_inlock (rpc_socket *sock,
-                                 int code)
+                                 int         code)
 {
-        sock->read_code = code;
+	sock->read_code = code;
 #ifdef OS_UNIX
-        p11_cond_broadcast (&sock->read_code_cond);
+	p11_cond_broadcast (&sock->read_code_cond);
 #endif
 }
 
@@ -376,13 +376,13 @@ rpc_socket_set_read_code_inlock (rpc_socket *sock,
 static void
 rpc_socket_wait_for_read_code_change_inlock (rpc_socket *sock)
 {
-        p11_cond_wait (&sock->read_code_cond, &sock->read_lock);
+	p11_cond_wait (&sock->read_code_cond, &sock->read_lock);
 }
 #endif
 
 static int
 rpc_socket_read (rpc_socket *sock,
-                 int *code,
+                 int        *code,
                  p11_buffer *buffer)
 {
 	CK_RV ret = CKR_DEVICE_ERROR;
@@ -395,20 +395,20 @@ rpc_socket_read (rpc_socket *sock,
 	assert (code != NULL);
 	assert (buffer != NULL);
 
-	/*
-	 * We are not in the main socket lock here, but the socket
-	 * is referenced, and won't go away
-	 */
+        /*
+         * We are not in the main socket lock here, but the socket
+         * is referenced, and won't go away
+         */
 
 	p11_mutex_lock (&sock->read_lock);
 
 	for (;;) {
-		/* No message header has been read yet? ... read one in */
+                /* No message header has been read yet? ... read one in */
 		if (sock->read_code == 0) {
 			if (!read_all (sock->read_fd, header, 12))
 				break;
 
-			/* Decode and check the message header */
+                        /* Decode and check the message header */
 			rpc_socket_set_read_code_inlock (sock, p11_rpc_buffer_decode_uint32 (header));
 			sock->read_olen = p11_rpc_buffer_decode_uint32 (header + 4);
 			sock->read_dlen = p11_rpc_buffer_decode_uint32 (header + 8);
@@ -418,17 +418,16 @@ rpc_socket_read (rpc_socket *sock,
 			}
 		}
 
-		/* If it's our header (or caller doesn't care), then yay! */
+                /* If it's our header (or caller doesn't care), then yay! */
 		if (*code == -1 || sock->read_code == *code) {
-
-			/* We ignore the options, so read into the same as buffer */
+                        /* We ignore the options, so read into the same as buffer */
 			if (!p11_buffer_reset (buffer, sock->read_olen) ||
 			    !p11_buffer_reset (buffer, sock->read_dlen)) {
 				warn_if_reached ();
 				break;
 			}
 
-			/* Read in the the options first, and then data */
+                        /* Read in the the options first, and then data */
 			if (!read_all (sock->read_fd, buffer->data, sock->read_olen) ||
 			    !read_all (sock->read_fd, buffer->data, sock->read_dlen))
 				break;
@@ -436,25 +435,25 @@ rpc_socket_read (rpc_socket *sock,
 			buffer->len = sock->read_dlen;
 			*code = sock->read_code;
 
-			/* Yay, we got our data, off we go */
-                        rpc_socket_set_read_code_inlock (sock, 0);
+                        /* Yay, we got our data, off we go */
+			rpc_socket_set_read_code_inlock (sock, 0);
 			sock->read_olen = 0;
 			sock->read_dlen = 0;
 			ret = CKR_OK;
 			break;
 		}
 
-		/* Give another thread the chance to read data for this header */
+                /* Give another thread the chance to read data for this header */
 		if (sock->read_code != 0) {
 			p11_debug ("received header in wrong thread");
 
 #ifdef OS_UNIX
-                        rpc_socket_wait_for_read_code_change_inlock (sock);
+			rpc_socket_wait_for_read_code_change_inlock (sock);
 #endif
 #ifdef OS_WIN32
-			/* Used as a simple wait */
+                        /* Used as a simple wait */
 			p11_mutex_unlock (&sock->read_lock);
-			handle = (HANDLE) _get_osfhandle (sock->read_fd);
+			handle = (HANDLE)_get_osfhandle (sock->read_fd);
 			if (!ReadFile (handle, NULL, 0, &mode, NULL))
 				p11_message (_("couldn't use select to wait on rpc pipe"));
 			p11_mutex_lock (&sock->read_lock);
@@ -467,11 +466,11 @@ rpc_socket_read (rpc_socket *sock,
 }
 
 static p11_rpc_status
-read_at (int fd,
-         unsigned char *data,
-         size_t len,
-         size_t offset,
-         size_t *at)
+read_at (int            fd,
+	 unsigned char *data,
+	 size_t         len,
+	 size_t         offset,
+	 size_t        *at)
 {
 	p11_rpc_status status;
 	int errn;
@@ -489,21 +488,21 @@ read_at (int fd,
 	num = read (fd, data + from, len - from);
 	errn = errno;
 
-	/* Update state */
+        /* Update state */
 	if (num > 0)
 		*at += num;
 
-	/* Completely read out this block */
+        /* Completely read out this block */
 	if (num == len - from) {
 		p11_debug ("ok: read block of %d", (int)num);
 		status = P11_RPC_OK;
 
-	/* Partially read out this block */
+                /* Partially read out this block */
 	} else if (num > 0) {
 		p11_debug ("again: partial read of %d", (int)num);
 		status = P11_RPC_AGAIN;
 
-	/* End of file, valid if at offset zero */
+                /* End of file, valid if at offset zero */
 	} else if (num == 0) {
 		if (offset == 0) {
 			p11_debug ("eof: read zero bytes");
@@ -514,12 +513,12 @@ read_at (int fd,
 			status = P11_RPC_ERROR;
 		}
 
-	/* Didn't read out block due to transient issue */
+                /* Didn't read out block due to transient issue */
 	} else if (errn == EINTR || errn == EAGAIN || errn == EWOULDBLOCK) {
 		p11_debug ("again: due to %d", errn);
 		status = P11_RPC_AGAIN;
 
-	/* Failure */
+                /* Failure */
 	} else {
 		p11_debug ("error: due to %d", errn);
 		status = P11_RPC_ERROR;
@@ -530,9 +529,9 @@ read_at (int fd,
 }
 
 p11_rpc_status
-p11_rpc_transport_read (int fd,
-                        size_t *state,
-                        int *call_code,
+p11_rpc_transport_read (int         fd,
+                        size_t     *state,
+                        int        *call_code,
                         p11_buffer *options,
                         p11_buffer *buffer)
 {
@@ -545,7 +544,7 @@ p11_rpc_transport_read (int fd,
 	assert (options != NULL);
 	assert (buffer != NULL);
 
-	/* Reading the header, we read it into @buffer */
+        /* Reading the header, we read it into @buffer */
 	if (*state < 12) {
 		if (!p11_buffer_reset (buffer, 12))
 			return_val_if_reached (P11_RPC_ERROR);
@@ -553,7 +552,7 @@ p11_rpc_transport_read (int fd,
 		if (status != P11_RPC_OK)
 			return status;
 
-		/* Parse out the header */
+                /* Parse out the header */
 		header = buffer->data;
 		*call_code = p11_rpc_buffer_decode_uint32 (header);
 		len = p11_rpc_buffer_decode_uint32 (header + 4);
@@ -566,11 +565,11 @@ p11_rpc_transport_read (int fd,
 		buffer->len = len;
 	}
 
-	/* At this point options has a valid len field */
+        /* At this point options has a valid len field */
 	status = read_at (fd, options->data, options->len, 12, state);
 	if (status == P11_RPC_OK) {
 		status = read_at (fd, buffer->data, buffer->len,
-		                  12 + options->len, state);
+				  12 + options->len, state);
 	}
 
 	if (status == P11_RPC_OK)
@@ -588,7 +587,7 @@ struct _p11_rpc_transport {
 
 static void
 rpc_transport_disconnect (p11_rpc_client_vtable *vtable,
-                          void *init_reserved)
+                          void                  *init_reserved)
 {
 	p11_rpc_transport *rpc = (p11_rpc_transport *)vtable;
 
@@ -601,8 +600,8 @@ rpc_transport_disconnect (p11_rpc_client_vtable *vtable,
 
 static bool
 rpc_transport_init (p11_rpc_transport *rpc,
-                    const char *module_name,
-                    p11_destroyer destroyer)
+                    const char        *module_name,
+                    p11_destroyer      destroyer)
 {
 	rpc->destroyer = destroyer;
 
@@ -621,7 +620,7 @@ rpc_transport_uninit (p11_rpc_transport *rpc)
 
 static CK_RV
 rpc_transport_authenticate (p11_rpc_client_vtable *vtable,
-			    uint8_t *version)
+                            uint8_t               *version)
 {
 	p11_rpc_transport *rpc = (p11_rpc_transport *)vtable;
 	rpc_socket *sock;
@@ -643,7 +642,7 @@ rpc_transport_authenticate (p11_rpc_client_vtable *vtable,
 
 	p11_debug ("authenticating with version %u", *version);
 
-	/* Place holder byte, will later carry unix credentials (on some systems) */
+        /* Place holder byte, will later carry unix credentials (on some systems) */
 	if (write_all (sock->write_fd, version, 1) != 1) {
 		p11_message_err (errno, _("couldn't send socket credentials"));
 		return CKR_DEVICE_ERROR;
@@ -666,8 +665,8 @@ rpc_transport_authenticate (p11_rpc_client_vtable *vtable,
 
 static CK_RV
 rpc_transport_buffer (p11_rpc_client_vtable *vtable,
-                      p11_buffer *request,
-                      p11_buffer *response)
+                      p11_buffer            *request,
+                      p11_buffer            *response)
 {
 	p11_rpc_transport *rpc = (p11_rpc_transport *)vtable;
 	CK_RV rv = CKR_OK;
@@ -685,7 +684,7 @@ rpc_transport_buffer (p11_rpc_client_vtable *vtable,
 	assert (sock->refs > 0);
 	sock->refs++;
 
-	/* Get the next socket reply code */
+        /* Get the next socket reply code */
 	call_code = sock->last_code++;
 
 	if (sock->read_fd == -1)
@@ -697,7 +696,7 @@ rpc_transport_buffer (p11_rpc_client_vtable *vtable,
 	if (rv == CKR_OK)
 		rv = rpc_socket_write_inlock (sock, call_code, &rpc->options, request);
 
-	/* We unlock the socket mutex while reading a response */
+        /* We unlock the socket mutex while reading a response */
 	if (rv == CKR_OK) {
 		p11_mutex_unlock (&sock->write_lock);
 
@@ -776,7 +775,7 @@ rpc_exec_wait_or_terminate (pid_t pid)
 
 static void
 rpc_exec_disconnect (p11_rpc_client_vtable *vtable,
-                     void *fini_reserved)
+                     void                  *fini_reserved)
 {
 	rpc_exec *rex = (rpc_exec *)vtable;
 
@@ -787,13 +786,13 @@ rpc_exec_disconnect (p11_rpc_client_vtable *vtable,
 		rpc_exec_wait_or_terminate (rex->pid);
 	rex->pid = 0;
 
-	/* Do the common disconnect stuff */
+        /* Do the common disconnect stuff */
 	rpc_transport_disconnect (vtable, fini_reserved);
 }
 
 static int
 set_cloexec_on_fd (void *data,
-                   int fd)
+                   int   fd)
 {
 	int *max_fd = data;
 	if (fd >= *max_fd)
@@ -803,7 +802,7 @@ set_cloexec_on_fd (void *data,
 
 static CK_RV
 rpc_exec_connect (p11_rpc_client_vtable *vtable,
-                  void *init_reserved)
+                  void                  *init_reserved)
 {
 	rpc_exec *rex = (rpc_exec *)vtable;
 	pid_t pid;
@@ -820,36 +819,35 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 
 	pid = fork ();
 	switch (pid) {
+                /* Failure */
+		case -1:
+			close (fds[0]);
+			close (fds[1]);
+			p11_message_err (errno, _("failed to fork for remote"));
+			return CKR_DEVICE_ERROR;
 
-	/* Failure */
-	case -1:
-		close (fds[0]);
-		close (fds[1]);
-		p11_message_err (errno, _("failed to fork for remote"));
-		return CKR_DEVICE_ERROR;
+                /* Child */
+		case 0:
+			if (dup2 (fds[1], STDIN_FILENO) < 0 ||
+			    dup2 (fds[1], STDOUT_FILENO) < 0) {
+				errn = errno;
+				p11_message_err (errn, "couldn't dup file descriptors in remote child");
+				_exit (errn);
+			}
 
-	/* Child */
-	case 0:
-		if (dup2 (fds[1], STDIN_FILENO) < 0 ||
-		    dup2 (fds[1], STDOUT_FILENO) < 0) {
+                        /* Close file descriptors, except for above on exec */
+			max_fd = STDERR_FILENO + 1;
+			fdwalk (set_cloexec_on_fd, &max_fd);
+			execvp (rex->argv->elem[0], (char **)rex->argv->elem);
+
 			errn = errno;
-			p11_message_err (errn, "couldn't dup file descriptors in remote child");
+			p11_message_err (errn, "couldn't execute program for rpc: %s",
+					 (char *)rex->argv->elem[0]);
 			_exit (errn);
-		}
 
-		/* Close file descriptors, except for above on exec */
-		max_fd = STDERR_FILENO + 1;
-		fdwalk (set_cloexec_on_fd, &max_fd);
-		execvp (rex->argv->elem[0], (char **)rex->argv->elem);
-
-		errn = errno;
-		p11_message_err (errn, "couldn't execute program for rpc: %s",
-		                 (char *)rex->argv->elem[0]);
-		_exit (errn);
-
-	/* The parent */
-	default:
-		break;
+                /* The parent */
+		default:
+			break;
 	}
 
 	close (fds[1]);
@@ -907,7 +905,7 @@ rpc_exec_wait_or_terminate (HANDLE pid)
 
 static void
 rpc_exec_disconnect (p11_rpc_client_vtable *vtable,
-                     void *fini_reserved)
+                     void                  *fini_reserved)
 {
 	rpc_exec *rex = (rpc_exec *)vtable;
 
@@ -918,7 +916,7 @@ rpc_exec_disconnect (p11_rpc_client_vtable *vtable,
 		rpc_exec_wait_or_terminate (rex->pid);
 	rex->pid = INVALID_HANDLE_VALUE;
 
-	/* Do the common disconnect stuff */
+        /* Do the common disconnect stuff */
 	rpc_transport_disconnect (vtable, fini_reserved);
 }
 
@@ -927,7 +925,7 @@ set_cloexec_on_fd (int fd)
 {
 	HANDLE handle;
 
-	handle = (HANDLE) _get_osfhandle (fd);
+	handle = (HANDLE)_get_osfhandle (fd);
 	if (!SetHandleInformation (handle, HANDLE_FLAG_INHERIT, 0))
 		return -1;
 
@@ -936,7 +934,7 @@ set_cloexec_on_fd (int fd)
 
 static CK_RV
 rpc_exec_connect (p11_rpc_client_vtable *vtable,
-                  void *init_reserved)
+                  void                  *init_reserved)
 {
 	rpc_exec *rex = (rpc_exec *)vtable;
 	intptr_t pid = -1;
@@ -946,7 +944,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 
 	p11_debug ("executing rpc transport: %s", (char *)rex->argv->elem[0]);
 
-	setvbuf (stdout, NULL, _IONBF, 0 );
+	setvbuf (stdout, NULL, _IONBF, 0);
 
 	if (_pipe (pw, 256, _O_BINARY) == -1 ||
 	    set_cloexec_on_fd (pw[1]) == -1) {
@@ -962,7 +960,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 		goto out;
 	}
 
-	/* Save the original stdin and stdout */
+        /* Save the original stdin and stdout */
 	fds[0] = dup (STDIN_FILENO);
 	if (fds[0] == -1) {
 		p11_message_err (errno, _("failed to duplicate stdin"));
@@ -977,7 +975,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 		goto out;
 	}
 
-	/* Temporarily redirect pipe descriptors to stdin/stdout for child */
+        /* Temporarily redirect pipe descriptors to stdin/stdout for child */
 	if (dup2 (pw[0], STDIN_FILENO) == -1 ||
 	    dup2 (pr[1], STDOUT_FILENO) == -1) {
 		p11_message_err (errno, _("failed to duplicate child end of pipe"));
@@ -1000,7 +998,7 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	close (pr[1]);
 	pr[1] = -1;
 
-	/* Restore the original stdin and stdout */
+        /* Restore the original stdin and stdout */
 	if (dup2 (fds[0], STDIN_FILENO) == -1 ||
 	    dup2 (fds[1], STDOUT_FILENO) == -1) {
 		p11_message_err (errno, _("failed to restore file descriptors"));
@@ -1013,16 +1011,16 @@ rpc_exec_connect (p11_rpc_client_vtable *vtable,
 	close (fds[1]);
 	fds[1] = -1;
 
-	rex->pid = (HANDLE) pid;
+	rex->pid = (HANDLE)pid;
 	rex->base.socket = rpc_socket_new (pr[0]);
 	return_val_if_fail (rex->base.socket != NULL, CKR_GENERAL_ERROR);
 	rex->base.socket->write_fd = pw[1];
 
- out:
+out:
 	if (rv != CKR_OK) {
 		if (pid != -1) {
-			TerminateProcess ((HANDLE) pid, SIGTERM);
-			CloseHandle ((HANDLE) pid);
+			TerminateProcess ((HANDLE)pid, SIGTERM);
+			CloseHandle ((HANDLE)pid);
 		}
 		if (pw[0] != -1)
 			close (pw[0]);
@@ -1105,7 +1103,7 @@ typedef struct {
 
 static CK_RV
 rpc_unix_connect (p11_rpc_client_vtable *vtable,
-		    void *init_reserved)
+                  void                  *init_reserved)
 {
 	rpc_unix *run = (rpc_unix *)vtable;
 	int fd;
@@ -1130,14 +1128,14 @@ rpc_unix_connect (p11_rpc_client_vtable *vtable,
 
 static void
 rpc_unix_disconnect (p11_rpc_client_vtable *vtable,
-                     void *fini_reserved)
+                     void                  *fini_reserved)
 {
 	rpc_unix *run = (rpc_unix *)vtable;
 
 	if (run->base.socket)
 		rpc_socket_close (run->base.socket);
 
-	/* Do the common disconnect stuff */
+        /* Do the common disconnect stuff */
 	rpc_transport_disconnect (vtable, fini_reserved);
 }
 
@@ -1152,7 +1150,7 @@ rpc_unix_free (void *data)
 
 static p11_rpc_transport *
 rpc_unix_init (const char *remote,
-	       const char *name)
+               const char *name)
 {
 	rpc_unix *run;
 
@@ -1186,7 +1184,7 @@ typedef struct {
 
 static CK_RV
 rpc_vsock_connect (p11_rpc_client_vtable *vtable,
-		   void *init_reserved)
+                   void                  *init_reserved)
 {
 	rpc_vsock *run = (rpc_vsock *)vtable;
 	int fd;
@@ -1211,14 +1209,14 @@ rpc_vsock_connect (p11_rpc_client_vtable *vtable,
 
 static void
 rpc_vsock_disconnect (p11_rpc_client_vtable *vtable,
-                      void *fini_reserved)
+                      void                  *fini_reserved)
 {
 	rpc_vsock *run = (rpc_vsock *)vtable;
 
 	if (run->base.socket)
 		rpc_socket_close (run->base.socket);
 
-	/* Do the common disconnect stuff */
+        /* Do the common disconnect stuff */
 	rpc_transport_disconnect (vtable, fini_reserved);
 }
 
@@ -1234,7 +1232,7 @@ rpc_vsock_free (void *data)
 static p11_rpc_transport *
 rpc_vsock_init (unsigned int cid,
 		unsigned int port,
-		const char *name)
+		const char  *name)
 {
 	rpc_vsock *run;
 
@@ -1261,8 +1259,8 @@ rpc_vsock_init (unsigned int cid,
 
 p11_rpc_transport *
 p11_rpc_transport_new (p11_virtual *virt,
-                       const char *remote,
-                       const char *name)
+                       const char  *remote,
+                       const char  *name)
 {
 	p11_rpc_transport *rpc = NULL;
 
@@ -1270,13 +1268,13 @@ p11_rpc_transport_new (p11_virtual *virt,
 	return_val_if_fail (remote != NULL, NULL);
 	return_val_if_fail (name != NULL, NULL);
 
-	/* This is a command we can execute */
+        /* This is a command we can execute */
 	if (remote[0] == '|') {
 		rpc = rpc_exec_init (remote + 1, name);
 
 #ifdef OS_UNIX
 	} else if (strncmp (remote, "unix:path=/", 11) == 0) {
-		/* Only absolute path is supported */
+                /* Only absolute path is supported */
 		char *path;
 
 		path = p11_path_decode (remote + 10);

@@ -78,26 +78,26 @@ test_murmur3_incr (void)
 	uint32_t first, second;
 
 	p11_hash_murmur3 ((unsigned char *)&first,
-	                  "this is the long input!", (size_t)23,
-	                  NULL);
+			  "this is the long input!", (size_t)23,
+			  NULL);
 
 	p11_hash_murmur3 ((unsigned char *)&second,
-	                  "this", (size_t)4,
-	                  " ", (size_t)1,
-	                  "is ", (size_t)3,
-	                  "the long ", (size_t)9,
-	                  "in", (size_t)2,
-	                  "p", (size_t)1,
-	                  "u", (size_t)1,
-	                  "t", (size_t)1,
-	                  "!", (size_t)1,
-	                  NULL);
+			  "this", (size_t)4,
+			  " ", (size_t)1,
+			  "is ", (size_t)3,
+			  "the long ", (size_t)9,
+			  "in", (size_t)2,
+			  "p", (size_t)1,
+			  "u", (size_t)1,
+			  "t", (size_t)1,
+			  "!", (size_t)1,
+			  NULL);
 
 	assert_num_eq (first, second);
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_murmur3, "/hash/murmur3");

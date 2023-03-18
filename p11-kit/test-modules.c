@@ -77,7 +77,7 @@ test_no_duplicates (void)
 	paths = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, NULL, NULL);
 	funcs = p11_dict_new (p11_dict_direct_hash, p11_dict_direct_equal, NULL, NULL);
 
-	/* The loaded modules should not contain duplicates */
+        /* The loaded modules should not contain duplicates */
 	for (i = 0; modules[i] != NULL; i++) {
 		path = p11_kit_config_option (modules[i], "module");
 
@@ -100,8 +100,8 @@ test_no_duplicates (void)
 }
 
 static CK_FUNCTION_LIST_PTR
-lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR modules,
-                         const char *name)
+lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR  modules,
+                         const char               *name)
 {
 	CK_FUNCTION_LIST_PTR match = NULL;
 	CK_FUNCTION_LIST_PTR module;
@@ -116,10 +116,10 @@ lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR modules,
 		free (module_name);
 	}
 
-	/*
-	 * As a side effect, we should check that the results of this function
-	 * matches the above search.
-	 */
+        /*
+         * As a side effect, we should check that the results of this function
+         * matches the above search.
+         */
 	module = p11_kit_module_for_name (modules, name);
 	if (module != match)
 		assert_fail ("different result from p11_kit_module_for_name ()", NULL);
@@ -128,8 +128,8 @@ lookup_module_with_name (CK_FUNCTION_LIST_PTR_PTR modules,
 }
 
 static CK_FUNCTION_LIST_PTR
-lookup_module_with_filename (CK_FUNCTION_LIST_PTR_PTR modules,
-                             const char *name)
+lookup_module_with_filename (CK_FUNCTION_LIST_PTR_PTR  modules,
+                             const char               *name)
 {
 	CK_FUNCTION_LIST_PTR match = NULL;
 	char *module_name;
@@ -138,7 +138,7 @@ lookup_module_with_filename (CK_FUNCTION_LIST_PTR_PTR modules,
 	for (i = 0; match == NULL && modules[i] != NULL; i++) {
 		module_name = p11_kit_module_get_filename (modules[i]);
 		assert_ptr_not_null (module_name);
-		if (strcmp (basename(module_name), name) == 0)
+		if (strcmp (basename (module_name), name) == 0)
 			match = modules[i];
 		free (module_name);
 	}
@@ -151,21 +151,21 @@ test_disable (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module four should be present, as we don't match any prognames
-	 * that it has disabled.
-	 */
+        /*
+         * The module four should be present, as we don't match any prognames
+         * that it has disabled.
+         */
 
 	modules = initialize_and_get_modules ();
 	assert (lookup_module_with_name (modules, "four") != NULL);
 	finalize_and_free_modules (modules);
 
-	/*
-	 * The module two shouldn't have been loaded, because in its config
-	 * file we have:
-	 *
-	 * disable-in: test-disable
-	 */
+        /*
+         * The module two shouldn't have been loaded, because in its config
+         * file we have:
+         *
+         * disable-in: test-disable
+         */
 
 	p11_kit_set_progname ("test-disable");
 
@@ -181,10 +181,10 @@ test_filename (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module four should be present, as we don't match any prognames
-	 * that it has disabled.
-	 */
+        /*
+         * The module four should be present, as we don't match any prognames
+         * that it has disabled.
+         */
 
 	modules = initialize_and_get_modules ();
 	assert (lookup_module_with_filename (modules, "mock-four" SHLEXT) != NULL);
@@ -196,12 +196,12 @@ test_disable_later (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module two shouldn't be matched, because in its config
-	 * file we have:
-	 *
-	 * disable-in: test-disable
-	 */
+        /*
+         * The module two shouldn't be matched, because in its config
+         * file we have:
+         *
+         * disable-in: test-disable
+         */
 
 	p11_kit_set_progname ("test-disable");
 
@@ -219,21 +219,21 @@ test_enable (void)
 {
 	CK_FUNCTION_LIST_PTR_PTR modules;
 
-	/*
-	 * The module three should not be present, as we don't match the current
-	 * program.
-	 */
+        /*
+         * The module three should not be present, as we don't match the current
+         * program.
+         */
 
 	modules = initialize_and_get_modules ();
 	assert (lookup_module_with_name (modules, "three") == NULL);
 	finalize_and_free_modules (modules);
 
-	/*
-	 * The module three should be loaded here , because in its config
-	 * file we have:
-	 *
-	 * enable-in: test-enable
-	 */
+        /*
+         * The module three should be loaded here , because in its config
+         * file we have:
+         *
+         * enable-in: test-enable
+         */
 
 	p11_kit_set_progname ("test-enable");
 
@@ -251,27 +251,27 @@ test_priority (void)
 	char *name;
 	int i;
 
-	/*
-	 * The expected order.
-	 * - four is marked with a priority of 4, the highest therefore first
-	 * - three is marked with a priority of 3, next highest
-	 * - one and two do not have priority marked, so they default to zero
-	 *   and fallback to sorting alphabetically. 'o' comes before 't'
-	 */
+        /*
+         * The expected order.
+         * - four is marked with a priority of 4, the highest therefore first
+         * - three is marked with a priority of 3, next highest
+         * - one and two do not have priority marked, so they default to zero
+         *   and fallback to sorting alphabetically. 'o' comes before 't'
+         */
 
 	const char *expected[] = { "four", "three", "one", "two.badname" };
 
-	/* This enables module three */
+        /* This enables module three */
 	p11_kit_set_progname ("test-enable");
 
 	modules = initialize_and_get_modules ();
 
-	/* The loaded modules should not contain duplicates */
+        /* The loaded modules should not contain duplicates */
 	for (i = 0; modules[i] != NULL; i++) {
 		name = p11_kit_module_get_name (modules[i]);
 		assert_ptr_not_null (name);
 
-		/* Either one of these can be loaded, as this is a duplicate module */
+                /* Either one of these can be loaded, as this is a duplicate module */
 		if (strcmp (name, "two-duplicate") == 0) {
 			free (name);
 			name = strdup ("two.badname");
@@ -292,10 +292,10 @@ test_module_name (void)
 	CK_FUNCTION_LIST_PTR module;
 	char *name;
 
-	/*
-	 * The module three should not be present, as we don't match the current
-	 * program.
-	 */
+        /*
+         * The module three should not be present, as we don't match the current
+         * program.
+         */
 
 	modules = initialize_and_get_modules ();
 
@@ -321,10 +321,10 @@ test_module_flags (void)
 	CK_FUNCTION_LIST **unmanaged;
 	int flags;
 
-	/*
-	 * The module three should not be present, as we don't match the current
-	 * program.
-	 */
+        /*
+         * The module three should not be present, as we don't match the current
+         * program.
+         */
 
 	modules = initialize_and_get_modules ();
 
@@ -396,10 +396,10 @@ test_config_option (void)
 	CK_FUNCTION_LIST_PTR module;
 	char *value;
 
-	/*
-	 * The module three should not be present, as we don't match the current
-	 * program.
-	 */
+        /*
+         * The module three should not be present, as we don't match the current
+         * program.
+         */
 
 	modules = initialize_and_get_modules ();
 
@@ -420,7 +420,7 @@ test_config_option (void)
 	value = p11_kit_config_option (module, "invalid");
 	assert_ptr_eq (NULL, value);
 
-	/* Invalid but non-NULL module pointer */
+        /* Invalid but non-NULL module pointer */
 	value = p11_kit_config_option (module + 1, "setting");
 	assert_ptr_eq (NULL, value);
 
@@ -433,7 +433,7 @@ test_already_initialized (void)
 	CK_FUNCTION_LIST_PTR_PTR modules;
 	CK_RV rv;
 
-	/* This enables module seven */
+        /* This enables module seven */
 	p11_kit_set_progname ("test-modules");
 
 	modules = initialize_and_get_modules ();
@@ -454,7 +454,7 @@ test_already_initialized (void)
 extern bool p11_conf_force_user_config;
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_conf_force_user_config = true;

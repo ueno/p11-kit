@@ -65,8 +65,8 @@ p11_session_new (p11_token *token)
 	}
 
 	session->index = p11_index_new (p11_builder_build, NULL, NULL,
-	                                p11_builder_changed,
-	                                session->builder);
+					p11_builder_changed,
+					session->builder);
 	if (session->index == NULL) {
 		p11_session_free (session);
 		return_val_if_reached (NULL);
@@ -90,9 +90,9 @@ p11_session_free (void *data)
 }
 
 void
-p11_session_set_operation (p11_session *session,
-                           p11_session_cleanup cleanup,
-                           void *operation)
+p11_session_set_operation (p11_session         *session,
+                           p11_session_cleanup  cleanup,
+                           void                *operation)
 {
 	assert (session != NULL);
 

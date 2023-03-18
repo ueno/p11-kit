@@ -62,7 +62,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -71,7 +71,8 @@
 bool p11_conf_force_user_config = false;
 
 static int
-strequal (const char *one, const char *two)
+strequal (const char *one,
+          const char *two)
 {
 	return strcmp (one, two) == 0;
 }
@@ -90,7 +91,7 @@ _p11_conf_merge_defaults (p11_dict *map,
 
 	p11_dict_iterate (defaults, &iter);
 	while (p11_dict_next (&iter, &key, &value)) {
-		/* Only override if not set */
+                /* Only override if not set */
 		if (p11_dict_get (map, key))
 			continue;
 		key = strdup (key);
@@ -105,9 +106,9 @@ _p11_conf_merge_defaults (p11_dict *map,
 }
 
 p11_dict *
-_p11_conf_parse_file (const char* filename,
-                      struct stat *sb,
-                      int flags)
+_p11_conf_parse_file (const char  *filename,
+		      struct stat *sb,
+		      int          flags)
 {
 	p11_dict *map = NULL;
 	void *data;
@@ -127,11 +128,9 @@ _p11_conf_parse_file (const char* filename,
 		if ((flags & CONF_IGNORE_MISSING) &&
 		    (error == ENOENT || error == ENOTDIR)) {
 			p11_debug ("config file does not exist");
-
 		} else if ((flags & CONF_IGNORE_ACCESS_DENIED) &&
-		           (error == EPERM || error == EACCES)) {
+			   (error == EPERM || error == EACCES)) {
 			p11_debug ("config file is inaccessible");
-
 		} else {
 			p11_message_err (error, "couldn't open config file: %s", filename);
 			errno = error;
@@ -142,32 +141,32 @@ _p11_conf_parse_file (const char* filename,
 	map = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, free, free);
 	return_val_if_fail (map != NULL, NULL);
 
-	/* Empty config fall through above */
+        /* Empty config fall through above */
 	if (mmap == NULL)
 		return map;
 
 	p11_lexer_init (&lexer, filename, data, length);
 	while (p11_lexer_next (&lexer, &failed)) {
 		switch (lexer.tok_type) {
-		case TOK_FIELD:
-			p11_debug ("config value: %s: %s", lexer.tok.field.name,
-			           lexer.tok.field.value);
-			if (!p11_dict_set (map, lexer.tok.field.name, lexer.tok.field.value))
-				return_val_if_reached (NULL);
-			lexer.tok.field.name = NULL;
-			lexer.tok.field.value = NULL;
-			break;
-		case TOK_PEM:
-			p11_message (_("%s: unexpected pem block"), filename);
-			failed = true;
-			break;
-		case TOK_SECTION:
-			p11_message (_("%s: unexpected section header"), filename);
-			failed = true;
-			break;
-		case TOK_EOF:
-			assert_not_reached ();
-			break;
+			case TOK_FIELD:
+				p11_debug ("config value: %s: %s", lexer.tok.field.name,
+					   lexer.tok.field.value);
+				if (!p11_dict_set (map, lexer.tok.field.name, lexer.tok.field.value))
+					return_val_if_reached (NULL);
+				lexer.tok.field.name = NULL;
+				lexer.tok.field.value = NULL;
+				break;
+			case TOK_PEM:
+				p11_message (_("%s: unexpected pem block"), filename);
+				failed = true;
+				break;
+			case TOK_SECTION:
+				p11_message (_("%s: unexpected section header"), filename);
+				failed = true;
+				break;
+			case TOK_EOF:
+				assert_not_reached ();
+				break;
 		}
 
 		if (failed)
@@ -188,11 +187,11 @@ _p11_conf_parse_file (const char* filename,
 
 static int
 user_config_mode (p11_dict *config,
-                  int defmode)
+                  int       defmode)
 {
 	const char *mode;
 
-	/* Whether we should use or override from user directory */
+        /* Whether we should use or override from user directory */
 	mode = p11_dict_get (config, "user-config");
 	if (mode == NULL) {
 		return defmode;
@@ -211,8 +210,9 @@ user_config_mode (p11_dict *config,
 }
 
 p11_dict *
-_p11_conf_load_globals (const char *system_conf, const char *user_conf,
-                        int *user_mode)
+_p11_conf_load_globals (const char *system_conf,
+                        const char *user_conf,
+                        int        *user_mode)
 {
 	p11_dict *config = NULL;
 	p11_dict *uconfig = NULL;
@@ -222,19 +222,19 @@ _p11_conf_load_globals (const char *system_conf, const char *user_conf,
 	int flags;
 	int mode;
 
-	/*
-	 * This loads the system and user configs. This depends on the user-config
-	 * value in both the system and user configs. A bit more complex than
-	 * you might imagine, since user-config can be set to 'none' in the
-	 * user configuration, essentially turning itself off.
-	 */
+        /*
+         * This loads the system and user configs. This depends on the user-config
+         * value in both the system and user configs. A bit more complex than
+         * you might imagine, since user-config can be set to 'none' in the
+         * user configuration, essentially turning itself off.
+         */
 
-	/* Load the main configuration */
+        /* Load the main configuration */
 	config = _p11_conf_parse_file (system_conf, NULL, CONF_IGNORE_MISSING);
 	if (!config)
 		goto finished;
 
-	/* Whether we should use or override from user directory */
+        /* Whether we should use or override from user directory */
 	mode = user_config_mode (config, CONF_USER_MERGE);
 	if (mode == CONF_USER_INVALID) {
 		error = EINVAL;
@@ -263,7 +263,7 @@ _p11_conf_load_globals (const char *system_conf, const char *user_conf,
 			goto finished;
 		}
 
-		/* Load up the user configuration, ignore selinux denying us access */
+                /* Load up the user configuration, ignore selinux denying us access */
 		flags = CONF_IGNORE_MISSING | CONF_IGNORE_ACCESS_DENIED;
 		uconfig = _p11_conf_parse_file (path, NULL, flags);
 		if (!uconfig) {
@@ -271,14 +271,14 @@ _p11_conf_load_globals (const char *system_conf, const char *user_conf,
 			goto finished;
 		}
 
-		/* Figure out what the user mode is, defaulting to system mode if not set */
+                /* Figure out what the user mode is, defaulting to system mode if not set */
 		mode = user_config_mode (uconfig, mode);
 		if (mode == CONF_USER_INVALID) {
 			error = EINVAL;
 			goto finished;
 		}
 
-		/* If merging, then supplement user config with system values */
+                /* If merging, then supplement user config with system values */
 		if (mode == CONF_USER_MERGE) {
 			if (!_p11_conf_merge_defaults (uconfig, config)) {
 				error = errno;
@@ -286,7 +286,7 @@ _p11_conf_load_globals (const char *system_conf, const char *user_conf,
 			}
 		}
 
-		/* If user config valid at all, then replace system with what we have */
+                /* If user config valid at all, then replace system with what we have */
 		if (mode != CONF_USER_NONE) {
 			p11_dict_free (config);
 			config = uconfig;
@@ -311,8 +311,8 @@ finished:
 static char *
 calc_name_from_filename (const char *fname)
 {
-	/* We eventually want to settle on .module */
-	static const char *const suffix = ".module";
+        /* We eventually want to settle on .module */
+	static const char * const suffix = ".module";
 	static const size_t suffix_len = 7;
 	const char *c = fname;
 	size_t fname_len;
@@ -321,19 +321,19 @@ calc_name_from_filename (const char *fname)
 
 	assert (fname);
 
-	/* Make sure the filename starts with an alphanumeric */
-	if (!isalnum(*c))
+        /* Make sure the filename starts with an alphanumeric */
+	if (!isalnum (*c))
 		return NULL;
 	++c;
 
-	/* Only allow alnum, _, -, and . */
+        /* Only allow alnum, _, -, and . */
 	while (*c) {
-		if (!isalnum(*c) && *c != '_' && *c != '-' && *c != '.')
+		if (!isalnum (*c) && *c != '_' && *c != '-' && *c != '.')
 			return NULL;
 		++c;
 	}
 
-	/* Make sure we have one of the suffixes */
+        /* Make sure we have one of the suffixes */
 	fname_len = strlen (fname);
 	if (suffix_len >= fname_len)
 		return NULL;
@@ -349,11 +349,11 @@ calc_name_from_filename (const char *fname)
 }
 
 static bool
-load_config_from_file (const char *configfile,
-                       struct stat *sb,
-                       const char *name,
-                       p11_dict *configs,
-                       int flags)
+load_config_from_file (const char  *configfile,
+		       struct stat *sb,
+		       const char  *name,
+		       p11_dict    *configs,
+		       int          flags)
 {
 	p11_dict *config;
 	p11_dict *prev;
@@ -386,7 +386,7 @@ load_config_from_file (const char *configfile,
 		free (key);
 	}
 
-	/* If still set */
+        /* If still set */
 	p11_dict_free (config);
 
 	if (error) {
@@ -399,8 +399,8 @@ load_config_from_file (const char *configfile,
 
 static bool
 load_configs_from_directory (const char *directory,
-                             p11_dict *configs,
-                             int flags)
+                             p11_dict   *configs,
+                             int         flags)
 {
 	struct dirent *dp;
 	struct stat st;
@@ -412,7 +412,7 @@ load_configs_from_directory (const char *directory,
 
 	p11_debug ("loading module configs in: %s", directory);
 
-	/* First we load all the modules */
+        /* First we load all the modules */
 	dir = opendir (directory);
 	if (!dir) {
 		error = errno;
@@ -421,7 +421,7 @@ load_configs_from_directory (const char *directory,
 			p11_debug ("module configs do not exist");
 			return true;
 		} else if ((flags & CONF_IGNORE_ACCESS_DENIED) &&
-		           (errno == EPERM || errno == EACCES)) {
+			   (errno == EPERM || errno == EACCES)) {
 			p11_debug ("couldn't list inacessible module configs");
 			return true;
 		}
@@ -430,7 +430,7 @@ load_configs_from_directory (const char *directory,
 		return false;
 	}
 
-	while ((dp = readdir(dir)) != NULL) {
+	while ((dp = readdir (dir)) != NULL) {
 		path = p11_path_build (directory, dp->d_name, NULL);
 		return_val_if_fail (path != NULL, false);
 
@@ -450,7 +450,7 @@ load_configs_from_directory (const char *directory,
 		}
 
 		free (path);
-		count ++;
+		count++;
 	}
 
 	closedir (dir);
@@ -464,7 +464,7 @@ load_configs_from_directory (const char *directory,
 }
 
 p11_dict *
-_p11_conf_load_modules (int mode,
+_p11_conf_load_modules (int         mode,
                         const char *package_dir,
                         const char *system_dir,
                         const char *user_dir)
@@ -474,11 +474,11 @@ _p11_conf_load_modules (int mode,
 	int error = 0;
 	int flags;
 
-	/* A hash table of name -> config */
+        /* A hash table of name -> config */
 	configs = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal,
-	                        free, (p11_destroyer)p11_dict_free);
+				free, (p11_destroyer)p11_dict_free);
 
-	/* Load each user config first, if user config is allowed */
+        /* Load each user config first, if user config is allowed */
 	if (mode != CONF_USER_NONE) {
 		flags = CONF_IGNORE_MISSING | CONF_IGNORE_ACCESS_DENIED;
 		path = p11_path_expand (user_dir);
@@ -494,11 +494,11 @@ _p11_conf_load_modules (int mode,
 		}
 	}
 
-	/*
-	 * Now unless user config is overriding, load system modules.
-	 * Basically if a value for the same config name is not already
-	 * loaded above (in the user configs) then they're loaded here.
-	 */
+        /*
+         * Now unless user config is overriding, load system modules.
+         * Basically if a value for the same config name is not already
+         * loaded above (in the user configs) then they're loaded here.
+         */
 	if (mode != CONF_USER_ONLY) {
 		flags = CONF_IGNORE_MISSING;
 		if (!load_configs_from_directory (system_dir, configs, flags) ||
@@ -515,7 +515,7 @@ _p11_conf_load_modules (int mode,
 
 bool
 _p11_conf_parse_boolean (const char *string,
-                         bool default_value)
+                         bool        default_value)
 {
 	if (!string)
 		return default_value;
@@ -526,7 +526,7 @@ _p11_conf_parse_boolean (const char *string,
 		return false;
 	} else {
 		p11_message (_("invalid setting '%s' defaulting to '%s'"),
-		             string, default_value ? "yes" : "no");
+			     string, default_value ? "yes" : "no");
 		return default_value;
 	}
 }

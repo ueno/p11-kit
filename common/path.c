@@ -74,7 +74,7 @@ p11_path_base (const char *path)
 
 	return_val_if_fail (path != NULL, NULL);
 
-	/* Any trailing slashes */
+        /* Any trailing slashes */
 	end = path + strlen (path);
 	while (end != path) {
 		if (!strchr (delims, *(end - 1)))
@@ -82,7 +82,7 @@ p11_path_base (const char *path)
 		end--;
 	}
 
-	/* Find the last slash after those */
+        /* Find the last slash after those */
 	beg = end;
 	while (beg != path) {
 		if (strchr (delims, *(beg - 1)))
@@ -98,7 +98,7 @@ is_path_separator (char ch)
 {
 	return (ch == '/'
 #ifdef OS_WIN32
-			|| ch == '\\'
+		|| ch == '\\'
 #endif
 		);
 }
@@ -124,7 +124,7 @@ expand_homedir (const char *remainder)
 	if (remainder[0] == '\0')
 		remainder = NULL;
 
-	/* Expand $XDG_CONFIG_HOME */
+        /* Expand $XDG_CONFIG_HOME */
 	if (remainder != NULL &&
 	    strncmp (remainder, ".config", 7) == 0 &&
 	    is_path_separator_or_null (remainder[7])) {
@@ -136,7 +136,6 @@ expand_homedir (const char *remainder)
 	env = getenv ("HOME");
 	if (env && env[0]) {
 		return p11_path_build (env, remainder, NULL);
-
 	} else {
 #ifdef OS_UNIX
 		char buf[1024];
@@ -158,7 +157,6 @@ expand_homedir (const char *remainder)
 		}
 
 		return p11_path_build (pwd->pw_dir, remainder, NULL);
-
 #else /* OS_WIN32 */
 		char directory[MAX_PATH + 1];
 
@@ -169,7 +167,6 @@ expand_homedir (const char *remainder)
 		}
 
 		return p11_path_build (directory, remainder, NULL);
-
 #endif /* OS_WIN32 */
 	}
 }
@@ -182,7 +179,6 @@ p11_path_expand (const char *path)
 	if (strncmp (path, "~", 1) == 0 &&
 	    is_path_separator_or_null (path[1])) {
 		return expand_homedir (path + 1);
-
 	} else {
 		return strdup (path);
 	}
@@ -195,14 +191,14 @@ p11_path_absolute (const char *path)
 
 	return (path[0] == '/')
 #ifdef OS_WIN32
-	|| (path[0] != '\0' && path[1] == ':' && path[2] == '\\')
+	       || (path[0] != '\0' && path[1] == ':' && path[2] == '\\')
 #endif
 	;
 }
 
 char *
 p11_path_build (const char *path,
-                ...)
+		...)
 {
 #ifdef OS_WIN32
 	const char delim = '\\';
@@ -241,16 +237,16 @@ p11_path_build (const char *path,
 	while (path != NULL) {
 		num = strlen (path);
 
-		/* Trim beginning of path */
+                /* Trim beginning of path */
 		while (is_path_separator (path[0])) {
-			/* But preserve the leading path component */
+                        /* But preserve the leading path component */
 			if (!at && !is_path_separator (path[1]))
 				break;
 			path++;
 			num--;
 		}
 
-		/* Trim end of the path */
+                /* Trim end of the path */
 		until = (at > 0) ? 0 : 1;
 		while (num > until && is_path_separator_or_null (path[num - 1]))
 			num--;
@@ -286,18 +282,18 @@ p11_path_parent (const char *path)
 
 	return_val_if_fail (path != NULL, NULL);
 
-	/* Find the end of the last component */
+        /* Find the end of the last component */
 	e = path + strlen (path);
 	while (e != path && is_path_separator_or_null (*e))
 		e--;
 
-	/* Find the beginning of the last component */
+        /* Find the beginning of the last component */
 	while (e != path && !is_path_separator_or_null (*e)) {
 		had = true;
 		e--;
 	}
 
-	/* Find the end of the last component */
+        /* Find the end of the last component */
 	while (e != path && is_path_separator_or_null (*e))
 		e--;
 
@@ -373,5 +369,5 @@ p11_path_encode (const char *path)
 char *
 p11_path_decode (const char *path)
 {
-	return (char *) p11_url_decode (path, path + strlen (path), "", NULL);
+	return (char *)p11_url_decode (path, path + strlen (path), "", NULL);
 }

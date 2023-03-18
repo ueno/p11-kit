@@ -63,10 +63,10 @@ static const char Pad64 = '=';
  */
 
 int
-p11_b64_pton (const char *src,
-              size_t length,
-              unsigned char *target,
-              size_t targsize)
+p11_b64_pton (const char    *src,
+	      size_t         length,
+	      unsigned char *target,
+	      size_t         targsize)
 {
 	int tarindex, state, ch;
 	char *pos;
@@ -76,12 +76,12 @@ p11_b64_pton (const char *src,
 	tarindex = 0;
 	end = src + length;
 
-	/* We can't rely on the null terminator */
+        /* We can't rely on the null terminator */
 	#define next_char(src, end) \
-		(((src) == (end)) ? '\0': *(src)++)
+	(((src) == (end)) ? '\0': *(src)++)
 
 	while ((ch = next_char (src, end)) != '\0') {
-		if (isspace ((unsigned char) ch)) /* Skip whitespace anywhere. */
+		if (isspace ((unsigned char)ch))  /* Skip whitespace anywhere. */
 			continue;
 
 		if (ch == Pad64)
@@ -92,100 +92,100 @@ p11_b64_pton (const char *src,
 			return (-1);
 
 		switch (state) {
-		case 0:
-			if (target) {
-				if ((size_t)tarindex >= targsize)
-					return (-1);
-				target[tarindex] = (pos - Base64) << 2;
-			}
-			state = 1;
-			break;
-		case 1:
-			return_val_if_fail (tarindex < INT_MAX, -1);
-			if (target) {
-				if ((size_t) tarindex + 1 >= targsize)
-					return (-1);
-				target[tarindex] |= (pos - Base64) >> 4;
-				target[tarindex + 1] = ((pos - Base64) & 0x0f)
-				                << 4;
-			}
-			tarindex++;
-			state = 2;
-			break;
-		case 2:
-			return_val_if_fail (tarindex < INT_MAX, -1);
-			if (target) {
-				if ((size_t) tarindex + 1 >= targsize)
-					return (-1);
-				target[tarindex] |= (pos - Base64) >> 2;
-				target[tarindex + 1] = ((pos - Base64) & 0x03)
-				                << 6;
-			}
-			tarindex++;
-			state = 3;
-			break;
-		case 3:
-			return_val_if_fail (tarindex < INT_MAX, -1);
-			if (target) {
-				if ((size_t) tarindex >= targsize)
-					return (-1);
-				target[tarindex] |= (pos - Base64);
-			}
-			tarindex++;
-			state = 0;
-			break;
-		default:
-			abort();
+			case 0:
+				if (target) {
+					if ((size_t)tarindex >= targsize)
+						return (-1);
+					target[tarindex] = (pos - Base64) << 2;
+				}
+				state = 1;
+				break;
+			case 1:
+				return_val_if_fail (tarindex < INT_MAX, -1);
+				if (target) {
+					if ((size_t)tarindex + 1 >= targsize)
+						return (-1);
+					target[tarindex] |= (pos - Base64) >> 4;
+					target[tarindex + 1] = ((pos - Base64) & 0x0f)
+							       << 4;
+				}
+				tarindex++;
+				state = 2;
+				break;
+			case 2:
+				return_val_if_fail (tarindex < INT_MAX, -1);
+				if (target) {
+					if ((size_t)tarindex + 1 >= targsize)
+						return (-1);
+					target[tarindex] |= (pos - Base64) >> 2;
+					target[tarindex + 1] = ((pos - Base64) & 0x03)
+							       << 6;
+				}
+				tarindex++;
+				state = 3;
+				break;
+			case 3:
+				return_val_if_fail (tarindex < INT_MAX, -1);
+				if (target) {
+					if ((size_t)tarindex >= targsize)
+						return (-1);
+					target[tarindex] |= (pos - Base64);
+				}
+				tarindex++;
+				state = 0;
+				break;
+			default:
+				abort ();
 		}
 	}
 
-	/*
-	 * We are done decoding Base-64 chars.  Let's see if we ended
-	 * on a byte boundary, and/or with erroneous trailing characters.
-	 */
+        /*
+         * We are done decoding Base-64 chars.  Let's see if we ended
+         * on a byte boundary, and/or with erroneous trailing characters.
+         */
 
 	if (ch == Pad64) { /* We got a pad char. */
 		ch = next_char (src, end); /* Skip it, get next. */
 		switch (state) {
-		case 0: /* Invalid = in first position */
-		case 1: /* Invalid = in second position */
-			return (-1);
-
-		case 2: /* Valid, means one byte of info */
-			/* Skip any number of spaces. */
-			for ((void) NULL; ch != '\0'; ch = next_char (src, end))
-				if (!isspace((unsigned char) ch))
-					break;
-			/* Make sure there is another trailing = sign. */
-			if (ch != Pad64)
+			case 0: /* Invalid = in first position */
+			case 1: /* Invalid = in second position */
 				return (-1);
-			ch = next_char (src, end); /* Skip the = */
-			/* Fall through to "single trailing =" case. */
-			/* FALLTHROUGH */
 
-		case 3: /* Valid, means two bytes of info */
-			/*
-			 * We know this char is an =.  Is there anything but
-			 * whitespace after it?
-			 */
-			for ((void)NULL; src != end; ch = next_char (src, end))
-				if (!isspace((unsigned char) ch))
+			case 2: /* Valid, means one byte of info */
+                                /* Skip any number of spaces. */
+				for ((void)NULL; ch != '\0'; ch = next_char (src, end))
+					if (!isspace ((unsigned char)ch))
+						break;
+                                /* Make sure there is another trailing = sign. */
+				if (ch != Pad64)
 					return (-1);
+				ch = next_char (src, end); /* Skip the = */
+                        /* Fall through to "single trailing =" case. */
+                        /* FALLTHROUGH */
 
-			/*
-			 * Now make sure for cases 2 and 3 that the "extra"
-			 * bits that slopped past the last full byte were
-			 * zeros.  If we don't check them, they become a
-			 * subliminal channel.
-			 */
-			if (target && target[tarindex] != 0)
-				return (-1);
+			case 3: /* Valid, means two bytes of info */
+                                /*
+                                 * We know this char is an =.  Is there anything but
+                                 * whitespace after it?
+                                 */
+				for ((void)NULL; src != end; ch = next_char (src, end))
+					if (!isspace ((unsigned char)ch))
+						return (-1);
+
+                                /*
+                                 * Now make sure for cases 2 and 3 that the "extra"
+                                 * bits that slopped past the last full byte were
+                                 * zeros.  If we don't check them, they become a
+                                 * subliminal channel.
+                                 */
+				if (target && target[tarindex] != 0)
+					return (-1);
 		}
 	} else {
-		/*
-		 * We ended by seeing the end of the string.  Make sure we
-		 * have no partial bytes lying around.
-		 */
+                /*
+                 * We ended by seeing the end of the string.  Make sure we
+                 * have no partial bytes lying around.
+                 */
 		if (state != 0)
 			return (-1);
 	}
@@ -195,10 +195,10 @@ p11_b64_pton (const char *src,
 
 int
 p11_b64_ntop (const unsigned char *src,
-              size_t srclength,
-              char *target,
-              size_t targsize,
-              int breakl)
+	      size_t               srclength,
+	      char                *target,
+	      size_t               targsize,
+	      int                  breakl)
 {
 	size_t len = 0;
 	unsigned char input[3];
@@ -216,10 +216,9 @@ p11_b64_ntop (const unsigned char *src,
 			output[1] = ((input[0] & 0x03) << 4) + (input[1] >> 4);
 			output[2] = ((input[1] & 0x0f) << 2) + (input[2] >> 6);
 			output[3] = input[2] & 0x3f;
-
 		} else {
 			assert (0 != srclength);
-			/* Get what's left. */
+                        /* Get what's left. */
 			input[0] = input[1] = input[2] = '\0';
 			for (i = 0; i < srclength; i++)
 				input[i] = *src++;
@@ -241,7 +240,7 @@ p11_b64_ntop (const unsigned char *src,
 				target[len++] = '\n';
 			}
 
-			assert(output[i] == 255 || output[i] < 64);
+			assert (output[i] == 255 || output[i] < 64);
 			assert (len + 1 < targsize);
 
 			if (output[i] == 255)

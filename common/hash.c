@@ -54,7 +54,7 @@
 
 GNUC_INLINE static inline uint32_t
 rotl (uint32_t x,
-      int8_t r)
+      int8_t   r)
 {
 	return (x << r) | (x >> (32 - r));
 }
@@ -77,10 +77,10 @@ fmix (uint32_t h)
 
 
 void
-p11_hash_murmur3 (void *hash,
-                  const void *input,
-                  size_t len,
-                  ...)
+p11_hash_murmur3 (void       *hash,
+		  const void *input,
+		  size_t      len,
+		  ...)
 {
 	uint8_t overflow[4];
 	const uint8_t *data;
@@ -95,16 +95,15 @@ p11_hash_murmur3 (void *hash,
 	c2 = 0x1b873593;
 	data = input;
 
-	/* body */
+        /* body */
 
-	/* Mix 4 bytes at a time into the hash */
+        /* Mix 4 bytes at a time into the hash */
 	va_start (va, len);
 	for (;;) {
 		if (len >= 4) {
 			memcpy (&k1, data, 4);
 			data += 4;
 			len -= 4;
-
 		} else {
 			size_t num = len;
 			memcpy (overflow, data, len);
@@ -116,7 +115,7 @@ p11_hash_murmur3 (void *hash,
 				if (!data)
 					break;
 
-				/* Combine uint32 from old and new */
+                                /* Combine uint32 from old and new */
 				len = va_arg (va, size_t);
 				part = 4 - num;
 				if (part > len)
@@ -145,29 +144,29 @@ p11_hash_murmur3 (void *hash,
 	}
 	va_end (va);
 
-	/* tail */
+        /* tail */
 
 	k1 = 0;
 
 	switch (len) {
-	case 3:
-		k1 ^= overflow[2] << 16;
-	case 2:
-		k1 ^= overflow[1] << 8;
-	case 1:
-		k1 ^= overflow[0];
-		k1 *= c1;
-		k1 = rotl (k1, 15);
-		k1 *= c2;
-		h1 ^= k1;
-	default:
-		break;
+		case 3:
+			k1 ^= overflow[2] << 16;
+		case 2:
+			k1 ^= overflow[1] << 8;
+		case 1:
+			k1 ^= overflow[0];
+			k1 *= c1;
+			k1 = rotl (k1, 15);
+			k1 *= c2;
+			h1 ^= k1;
+		default:
+			break;
 	}
 
-	/* finalization */
+        /* finalization */
 
 	h1 ^= len;
-	h1 = fmix(h1);
+	h1 = fmix (h1);
 
 	assert (sizeof (h1) == P11_HASH_MURMUR3_LEN);
 	memcpy (hash, &h1, sizeof (h1));

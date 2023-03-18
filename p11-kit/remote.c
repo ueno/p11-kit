@@ -51,13 +51,13 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	int opt;
@@ -78,26 +78,26 @@ main (int argc,
 
 	p11_tool_desc usages[] = {
 		{ 0, "usage: p11-kit remote <module>\n"
-		     "       p11-kit remote [-p <provider>] <token> ..." },
+		  "       p11-kit remote [-p <provider>] <token> ..." },
 		{ opt_provider, "specify the module to use" },
 		{ 0 },
 	};
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_verbose:
-			p11_kit_be_loud ();
-			break;
-		case opt_help:
-		case '?':
-			p11_tool_usage (usages, options);
-			return 0;
-		case opt_provider:
-			provider = optarg;
-			break;
-		default:
-			assert_not_reached ();
-			break;
+			case opt_verbose:
+				p11_kit_be_loud ();
+				break;
+			case opt_help:
+			case '?':
+				p11_tool_usage (usages, options);
+				return 0;
+			case opt_provider:
+				provider = optarg;
+				break;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 

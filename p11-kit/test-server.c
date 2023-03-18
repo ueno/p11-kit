@@ -107,7 +107,7 @@ setup_server (void *arg)
 
 	setenv ("P11_KIT_PRIVATEDIR", BUILDDIR "/p11-kit", 1);
 
-	/* Allow the child process to preload libasan.so */
+        /* Allow the child process to preload libasan.so */
 	envvar = secure_getenv ("P11_KIT_TEST_LD_PRELOAD");
 	if (envvar)
 		setenv ("LD_PRELOAD", envvar, 1);
@@ -124,7 +124,7 @@ setup_server (void *arg)
 	test.pid = fork ();
 	assert (test.pid >= 0);
 
-	/* The child */
+        /* The child */
 	if (test.pid == 0) {
 		close (STDOUT_FILENO);
 		if (dup2 (fds[0], STDOUT_FILENO) == -1)
@@ -266,7 +266,7 @@ test_open_session_write_protected (void *unused)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	struct fixture with_provider = {

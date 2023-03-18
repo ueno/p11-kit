@@ -41,7 +41,7 @@
 #include <string.h>
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	unsigned long type = 0;

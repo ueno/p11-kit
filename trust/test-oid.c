@@ -82,7 +82,6 @@ test_known_oids (void)
 	assert (ret == ASN1_SUCCESS);
 
 	for (i = 0; known_oids[i].oid != NULL; i++) {
-
 		assert (p11_oid_simple (known_oids[i].oid, known_oids[i].length));
 		assert_num_eq (known_oids[i].length, p11_oid_length (known_oids[i].oid));
 		assert (p11_oid_equal (known_oids[i].oid, known_oids[i].oid));
@@ -90,7 +89,7 @@ test_known_oids (void)
 		if (i > 0)
 			assert (!p11_oid_equal (known_oids[i].oid, known_oids[i - 1].oid));
 
-		/* AttributeType is a OBJECT IDENTIFIER */
+                /* AttributeType is a OBJECT IDENTIFIER */
 		ret = asn1_create_element (definitions, "PKIX1.AttributeType", &node);
 		assert (ret == ASN1_SUCCESS);
 
@@ -118,7 +117,7 @@ test_hash (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_known_oids, "/oids/known");

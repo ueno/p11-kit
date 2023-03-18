@@ -73,8 +73,8 @@
 
 static ssize_t
 utf8_to_uchar (const char *str,
-               size_t len,
-               uint32_t *uc)
+               size_t      len,
+               uint32_t   *uc)
 {
 	int ch, i, mask, want;
 	uint32_t lbound, uch;
@@ -84,23 +84,23 @@ utf8_to_uchar (const char *str,
 	assert (uc != NULL);
 
 	if (((ch = (unsigned char)*str) & ~0x7f) == 0) {
-		/* Fast path for plain ASCII characters. */
+                /* Fast path for plain ASCII characters. */
 		*uc = ch;
 		return 1;
 	}
 
-	/*
-	 * Determine the number of octets that make up this character
-	 * from the first octet, and a mask that extracts the
-	 * interesting bits of the first octet. We already know
-	 * the character is at least two bytes long.
-	 *
-	 * We also specify a lower bound for the character code to
-	 * detect redundant, non-"shortest form" encodings. For
-	 * example, the sequence C0 80 is _not_ a legal representation
-	 * of the null character. This enforces a 1-to-1 mapping
-	 * between character codes and their multibyte representations.
-	 */
+        /*
+         * Determine the number of octets that make up this character
+         * from the first octet, and a mask that extracts the
+         * interesting bits of the first octet. We already know
+         * the character is at least two bytes long.
+         *
+         * We also specify a lower bound for the character code to
+         * detect redundant, non-"shortest form" encodings. For
+         * example, the sequence C0 80 is _not_ a legal representation
+         * of the null character. This enforces a 1-to-1 mapping
+         * between character codes and their multibyte representations.
+         */
 	ch = (unsigned char)*str;
 	if ((ch & 0xe0) == 0xc0) {
 		mask = 0x1f;
@@ -123,43 +123,43 @@ utf8_to_uchar (const char *str,
 		want = 6;
 		lbound = 0x4000000;
 	} else {
-		/*
-		 * Malformed input; input is not UTF-8.
-		 */
+                /*
+                 * Malformed input; input is not UTF-8.
+                 */
 		return -1;
 	}
 
 	if (want > len) {
-		/* Incomplete multibyte sequence. */
+                /* Incomplete multibyte sequence. */
 		return -1;
 	}
 
-	/*
-	 * Decode the octet sequence representing the character in chunks
-	 * of 6 bits, most significant first.
-	 */
+        /*
+         * Decode the octet sequence representing the character in chunks
+         * of 6 bits, most significant first.
+         */
 	uch = (unsigned char)*str++ & mask;
 	for (i = 1; i < want; i++) {
 		if ((*str & 0xc0) != 0x80) {
-			/*
-			 * Malformed input; bad characters in the middle
-			 * of a character.
-			 */
+                        /*
+                         * Malformed input; bad characters in the middle
+                         * of a character.
+                         */
 			return -1;
 		}
 		uch <<= 6;
 		uch |= *str++ & 0x3f;
 	}
 	if (uch < lbound) {
-		/*
-		 * Malformed input; redundant encoding.
-		 */
+                /*
+                 * Malformed input; redundant encoding.
+                 */
 		return -1;
 	}
 	if ((uch >= 0xd800 && uch <= 0xdfff) || uch > 0x10ffff) {
-		/*
-		 * Malformed input; invalid code points.
-		 */
+                /*
+                 * Malformed input; invalid code points.
+                 */
 		return -1;
 	}
 
@@ -168,9 +168,9 @@ utf8_to_uchar (const char *str,
 }
 
 static size_t
-utf8_for_uchar (uint32_t uc,
-                char *str,
-                size_t len)
+utf8_for_uchar (uint32_t  uc,
+                char     *str,
+                size_t    len)
 {
 	unsigned char lead;
 	int i, want;
@@ -179,17 +179,17 @@ utf8_for_uchar (uint32_t uc,
 	assert (len >= 6);
 
 	if ((uc & ~0x7f) == 0) {
-		/* Fast path for plain ASCII characters. */
+                /* Fast path for plain ASCII characters. */
 		*str = (char)uc;
 		return 1;
 	}
 
-	/*
-	 * Determine the number of octets needed to represent this character.
-	 * We always output the shortest sequence possible. Also specify the
-	 * first few bits of the first octet, which contains the information
-	 * about the sequence length.
-	 */
+        /*
+         * Determine the number of octets needed to represent this character.
+         * We always output the shortest sequence possible. Also specify the
+         * first few bits of the first octet, which contains the information
+         * about the sequence length.
+         */
 	if ((uc & ~0x7ff) == 0) {
 		lead = 0xc0;
 		want = 2;
@@ -211,12 +211,12 @@ utf8_for_uchar (uint32_t uc,
 
 	assert (want <= len);
 
-	/*
-	 * Output the octets representing the character in chunks
-	 * of 6 bits, least significant last. The first octet is
-	 * a special case because it contains the sequence length
-	 * information.
-	 */
+        /*
+         * Output the octets representing the character in chunks
+         * of 6 bits, least significant last. The first octet is
+         * a special case because it contains the sequence length
+         * information.
+         */
 	for (i = want - 1; i > 0; i--) {
 		str[i] = (uc & 0x3f) | 0x80;
 		uc >>= 6;
@@ -227,8 +227,8 @@ utf8_for_uchar (uint32_t uc,
 
 static ssize_t
 ucs2be_to_uchar (const unsigned char *str,
-                 size_t len,
-                 uint32_t *wc)
+		 size_t               len,
+		 uint32_t            *wc)
 {
 	assert (str != NULL);
 	assert (len != 0);
@@ -243,8 +243,8 @@ ucs2be_to_uchar (const unsigned char *str,
 
 static ssize_t
 ucs4be_to_uchar (const unsigned char *str,
-                 size_t len,
-                 uint32_t *uc)
+		 size_t               len,
+		 uint32_t            *uc)
 {
 	assert (str != NULL);
 	assert (len != 0);
@@ -253,13 +253,13 @@ ucs4be_to_uchar (const unsigned char *str,
 	if (len < 4)
 		return -1;
 
-	*uc = ((uint32_t) str[0] << 24 | str[1] << 16 | str[2] << 8 | str[3]);
+	*uc = ((uint32_t)str[0] << 24 | str[1] << 16 | str[2] << 8 | str[3]);
 	return 4;
 }
 
 bool
 p11_utf8_validate (const char *str,
-                   ssize_t len)
+                   ssize_t     len)
 {
 	uint32_t dummy;
 	ssize_t ret;
@@ -279,10 +279,10 @@ p11_utf8_validate (const char *str,
 }
 
 static char *
-utf8_for_convert (ssize_t (* convert) (const unsigned char *, size_t, uint32_t *),
-                  const unsigned char *str,
-                  size_t num_bytes,
-                  size_t *ret_len)
+utf8_for_convert (ssize_t ( * convert ) (const unsigned char *, size_t, uint32_t *),
+		  const unsigned char *str,
+		  size_t num_bytes,
+		  size_t *ret_len)
 {
 	p11_buffer buf;
 	char block[6];
@@ -295,7 +295,7 @@ utf8_for_convert (ssize_t (* convert) (const unsigned char *, size_t, uint32_t *
 		return_val_if_reached (NULL);
 
 	while (num_bytes != 0) {
-		ret = (convert) (str, num_bytes, &uc);
+		ret = (convert)(str, num_bytes, &uc);
 		if (ret < 0) {
 			p11_buffer_uninit (&buf);
 			return NULL;
@@ -318,8 +318,8 @@ utf8_for_convert (ssize_t (* convert) (const unsigned char *, size_t, uint32_t *
 
 char *
 p11_utf8_for_ucs2be (const unsigned char *str,
-                     size_t num_bytes,
-                     size_t *ret_len)
+		     size_t               num_bytes,
+		     size_t              *ret_len)
 {
 	assert (str != NULL);
 	return utf8_for_convert (ucs2be_to_uchar, str, num_bytes, ret_len);
@@ -327,8 +327,8 @@ p11_utf8_for_ucs2be (const unsigned char *str,
 
 char *
 p11_utf8_for_ucs4be (const unsigned char *str,
-                     size_t num_bytes,
-                     size_t *ret_len)
+		     size_t               num_bytes,
+		     size_t              *ret_len)
 {
 	assert (str != NULL);
 	return utf8_for_convert (ucs4be_to_uchar, str, num_bytes, ret_len);

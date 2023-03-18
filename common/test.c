@@ -92,9 +92,9 @@ struct {
 
 static void
 print_diagnostics (const char *filename,
-		   int line,
-		   const char *function,
-		   char *output)
+                   int         line,
+                   const char *function,
+                   char       *output)
 {
 	const char *pos;
 	char *from;
@@ -120,10 +120,10 @@ print_diagnostics (const char *filename,
 
 void
 p11_test_fail (const char *filename,
-               int line,
-               const char *function,
-               const char *message,
-               ...)
+	       int         line,
+	       const char *function,
+	       const char *message,
+	       ...)
 {
 	char *output;
 	va_list va;
@@ -142,9 +142,9 @@ p11_test_fail (const char *filename,
 	print_diagnostics (filename, line, function, output);
 	free (output);
 
-	/* Let coverity know we're not supposed to return from here */
+        /* Let coverity know we're not supposed to return from here */
 #ifdef __COVERITY__
-	abort();
+	abort ();
 #endif
 
 	longjmp (gl.jump, 1);
@@ -152,10 +152,10 @@ p11_test_fail (const char *filename,
 
 void
 p11_test_skip (const char *filename,
-               int line,
-               const char *function,
-               const char *message,
-               ...)
+	       int         line,
+	       const char *function,
+	       const char *message,
+	       ...)
 {
 	char *output;
 	char *pos;
@@ -182,9 +182,9 @@ p11_test_skip (const char *filename,
 		print_diagnostics (filename, line, function, pos);
 	free (output);
 
-	/* Let coverity know we're not supposed to return from here */
+        /* Let coverity know we're not supposed to return from here */
 #ifdef __COVERITY__
-	abort();
+	abort ();
 #endif
 
 	longjmp (gl.jump, 1);
@@ -192,10 +192,10 @@ p11_test_skip (const char *filename,
 
 void
 p11_test_todo (const char *filename,
-               int line,
-               const char *function,
-               const char *message,
-               ...)
+	       int         line,
+	       const char *function,
+	       const char *message,
+	       ...)
 {
 	char *output;
 	char *pos;
@@ -222,9 +222,9 @@ p11_test_todo (const char *filename,
 		print_diagnostics (filename, line, function, pos);
 	free (output);
 
-	/* Let coverity know we're not supposed to return from here */
+        /* Let coverity know we're not supposed to return from here */
 #ifdef __COVERITY__
-	abort();
+	abort ();
 #endif
 
 	longjmp (gl.jump, 1);
@@ -247,9 +247,9 @@ test_push (test_item *it)
 }
 
 void
-p11_test (void (* function) (void),
-          const char *name,
-          ...)
+p11_test (void (    * function ) (void),
+	  const char *name,
+	  ...)
 {
 	test_item item = { TEST, };
 	va_list va;
@@ -264,10 +264,10 @@ p11_test (void (* function) (void),
 }
 
 void
-p11_testx (void (* function) (void *),
-           void *argument,
-           const char *name,
-           ...)
+p11_testx (void (    * function ) (void *),
+	   void       *argument,
+	   const char *name,
+	   ...)
 {
 	test_item item = { TEST, };
 	va_list va;
@@ -284,8 +284,8 @@ p11_testx (void (* function) (void *),
 }
 
 void
-p11_fixture (void (* setup) (void *),
-             void (* teardown) (void *))
+p11_fixture (void ( * setup ) (void *),
+	     void ( * teardown ) (void *))
 {
 	test_item item;
 
@@ -297,9 +297,9 @@ p11_fixture (void (* setup) (void *),
 }
 
 static int
-should_run_test (int argc,
-                 char **argv,
-                 test_item *item)
+should_run_test (int         argc,
+                 char      **argv,
+                 test_item  *item)
 {
 	int i;
 	if (argc == 0)
@@ -313,7 +313,7 @@ should_run_test (int argc,
 }
 
 int
-p11_test_run (int argc,
+p11_test_run (int    argc,
               char **argv)
 {
 	test_item *fixture = NULL;
@@ -324,15 +324,15 @@ p11_test_run (int argc,
 	int setup;
 	int opt;
 
-	/* p11-kit specific stuff */
+        /* p11-kit specific stuff */
 	putenv ("P11_KIT_STRICT=1");
 	p11_debug_init ();
 
 	while ((opt = getopt (argc, argv, "")) != -1) {
 		switch (opt) {
-		default:
-			fprintf (stderr, "specify only test names on the command line\n");
-			return 2;
+			default:
+				fprintf (stderr, "specify only test names on the command line\n");
+				return 2;
 		}
 	}
 
@@ -415,7 +415,6 @@ expand_tempdir (const char *name)
 	env = secure_getenv ("TMPDIR");
 	if (env && env[0]) {
 		return p11_path_build (env, name, NULL);
-
 	} else {
 #ifdef OS_UNIX
 #ifdef _PATH_TMP
@@ -423,7 +422,6 @@ expand_tempdir (const char *name)
 #else
 		return p11_path_build ("/tmp", name, NULL);
 #endif
-
 #else /* OS_WIN32 */
 		char directory[MAX_PATH + 1];
 
@@ -434,7 +432,6 @@ expand_tempdir (const char *name)
 		}
 
 		return p11_path_build (directory, name, NULL);
-
 #endif /* OS_WIN32 */
 	}
 }
@@ -453,7 +450,7 @@ p11_test_directory (const char *prefix)
 
 	if (!mkdtemp (directory)) {
 		printf ("# couldn't create temp directory: %s: %s\n",
-		        directory, strerror (errno));
+			directory, strerror (errno));
 		free (directory);
 		assert_not_reached ();
 		return NULL;
@@ -467,7 +464,7 @@ void
 p11_test_file_write (const char *base,
                      const char *name,
                      const void *contents,
-                     size_t length)
+                     size_t      length)
 {
 	char *path = NULL;
 	FILE *f;
@@ -556,7 +553,7 @@ p11_test_directory_delete (const char *directory)
 
 static void
 copy_file (const char *input,
-           int fd)
+           int         fd)
 {
 	p11_mmap *mmap;
 	const char *data;
@@ -579,14 +576,14 @@ copy_file (const char *input,
 
 char *
 p11_test_copy_setgid (const char *input,
-		      const char *tmpdir)
+                      const char *tmpdir)
 {
 	gid_t groups[128];
-		char *path;
-		gid_t group = 0;
-		int ret;
-		int fd;
-		int i;
+	char *path;
+	gid_t group = 0;
+	int ret;
+	int fd;
+	int i;
 	struct statvfs f;
 
 	statvfs (tmpdir, &f);
@@ -607,8 +604,8 @@ p11_test_copy_setgid (const char *input,
 		return NULL;
 	}
 
-	if (asprintf(&path, "%s/test-setgid.XXXXXX", tmpdir) < 0)
-		assert_not_reached();
+	if (asprintf (&path, "%s/test-setgid.XXXXXX", tmpdir) < 0)
+		assert_not_reached ();
 
 	assert (path != NULL);
 
@@ -628,7 +625,7 @@ p11_test_copy_setgid (const char *input,
 
 int
 p11_test_run_child (const char **argv,
-                    bool quiet_out)
+                    bool         quiet_out)
 {
 	pid_t child;
 	int status;
@@ -636,7 +633,7 @@ p11_test_run_child (const char **argv,
 	child = fork ();
 	assert (child >= 0);
 
-	/* In the child process? */
+        /* In the child process? */
 	if (child == 0) {
 		if (quiet_out)
 			close (1); /* stdout */

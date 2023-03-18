@@ -51,7 +51,10 @@
  * Returns zero on success.
  */
 int
-p11_get_upeer_id (int cfd, uid_t *uid, uid_t *gid, pid_t *pid)
+p11_get_upeer_id (int    cfd,
+                  uid_t *uid,
+                  uid_t *gid,
+                  pid_t *pid)
 {
 	int ret;
 #if defined(SO_PEERCRED)
@@ -71,9 +74,8 @@ p11_get_upeer_id (int cfd, uid_t *uid, uid_t *gid, pid_t *pid)
 
 	if (pid)
 		*pid = cr.pid;
-
 #elif defined(HAVE_GETPEEREID)
-	/* *BSD/MacOSX */
+        /* *BSD/MacOSX */
 	uid_t euid;
 	gid_t egid;
 
@@ -90,19 +92,18 @@ p11_get_upeer_id (int cfd, uid_t *uid, uid_t *gid, pid_t *pid)
 
 	if (pid)
 		*pid = -1;
-
 #elif defined(HAVE_GETPEERUCRED)
-	/* *Solaris/OpenIndiana */
+        /* *Solaris/OpenIndiana */
 	ucred_t *ucred = NULL;
 
-	if (getpeerucred(cfd, &ucred) == -1)
+	if (getpeerucred (cfd, &ucred) == -1)
 		return -1;
 
-	ret = ( (uid && (*uid = ucred_geteuid(ucred)) == -1) ||
-			(gid && (*gid = ucred_getrgid(ucred)) == -1) ||
-			(pid && (*pid = ucred_getpid(ucred)) == -1)  );
+	ret = ((uid && (*uid = ucred_geteuid (ucred)) == -1) ||
+	       (gid && (*gid = ucred_getrgid (ucred)) == -1) ||
+	       (pid && (*pid = ucred_getpid (ucred)) == -1));
 
-	ucred_free(ucred);
+	ucred_free (ucred);
 
 	if (ret)
 		return -1;

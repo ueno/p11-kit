@@ -94,8 +94,8 @@ static int mock_realloced = 0;
 static int mock_freed = 0;
 
 static void *
-mock_realloc (void *data,
-              size_t size)
+mock_realloc (void   *data,
+              size_t  size)
 {
 	mock_realloced++;
 	return realloc (data, size);
@@ -119,7 +119,7 @@ test_init_for_data (void)
 	mock_freed = 0;
 
 	p11_buffer_init_full (&buffer, (unsigned char *)strdup ("blah"), 4, 0,
-	                       mock_realloc, mock_free);
+			      mock_realloc, mock_free);
 
 	assert_ptr_not_null (buffer.data);
 	assert_str_eq ("blah", (char *)buffer.data);
@@ -152,7 +152,7 @@ test_steal (void)
 	mock_freed = 0;
 
 	p11_buffer_init_full (&buffer, (unsigned char *)strdup ("blah"), 4,
-	                      P11_BUFFER_NULL, mock_realloc, mock_free);
+			      P11_BUFFER_NULL, mock_realloc, mock_free);
 
 	assert_ptr_not_null (buffer.data);
 	assert_str_eq ("blah", buffer.data);
@@ -186,7 +186,7 @@ test_add (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_init_uninit, "/buffer/init-uninit");

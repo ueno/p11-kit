@@ -45,13 +45,13 @@
 #include <stdlib.h>
 
 static void
-check_decode_msg (const char *file,
-                  int line,
-                  const char *function,
-                  const char *input,
-                  ssize_t input_len,
-                  const unsigned char *expected,
-                  ssize_t expected_len)
+check_decode_msg (const char          *file,
+		  int                  line,
+		  const char          *function,
+		  const char          *input,
+		  ssize_t              input_len,
+		  const unsigned char *expected,
+		  ssize_t              expected_len)
 {
 	unsigned char decoded[8192];
 	int length;
@@ -65,7 +65,6 @@ check_decode_msg (const char *file,
 	if (expected == NULL) {
 		if (length >= 0)
 			p11_test_fail (file, line, function, "decoding should have failed");
-
 	} else {
 		if (length < 0)
 			p11_test_fail (file, line, function, "decoding failed");
@@ -195,7 +194,7 @@ test_decode_thawte (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_decode_simple, "/base64/decode-simple");

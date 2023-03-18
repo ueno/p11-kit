@@ -130,7 +130,7 @@ test_remove_destroys (void)
 
 	assert_num_eq (2, value);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	value = 0;
 
 	p11_array_free (array);
@@ -185,7 +185,7 @@ test_clear_destroys (void)
 	assert_num_eq (2, value);
 	assert_num_eq (0, array->num);
 
-	/* should not be destroyed again */
+        /* should not be destroyed again */
 	value = 0;
 
 	p11_array_free (array);
@@ -194,7 +194,7 @@ test_clear_destroys (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_create, "/array/create");

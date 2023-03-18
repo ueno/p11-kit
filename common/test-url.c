@@ -47,12 +47,12 @@
 
 static void
 check_decode_msg (const char *file,
-                  int line,
+                  int         line,
                   const char *function,
                   const char *input,
-                  ssize_t input_len,
+                  ssize_t     input_len,
                   const char *expected,
-                  size_t expected_len)
+                  size_t      expected_len)
 {
 	unsigned char *decoded;
 	size_t length;
@@ -64,13 +64,12 @@ check_decode_msg (const char *file,
 	if (expected == NULL) {
 		if (decoded != NULL)
 			p11_test_fail (file, line, function, "decoding should have failed");
-
 	} else {
 		if (decoded == NULL)
 			p11_test_fail (file, line, function, "decoding failed");
 		if (expected_len != length)
 			p11_test_fail (file, line, function, "wrong length: (%lu != %lu)",
-			               (unsigned long)expected_len, (unsigned long)length);
+				       (unsigned long)expected_len, (unsigned long)length);
 		if (memcmp (decoded, expected, length) != 0)
 			p11_test_fail (file, line, function, "decoding wrong");
 		free (decoded);
@@ -108,11 +107,11 @@ test_decode_skip (void)
 static void
 test_decode_failure (void)
 {
-	/* Early termination */
+        /* Early termination */
 	check_decode_failure ("%54%45%53%5", -1);
 	check_decode_failure ("%54%45%53%", -1);
 
-	/* Not hex characters */
+        /* Not hex characters */
 	check_decode_failure ("%54%XX%53%54%00", -1);
 }
 
@@ -178,7 +177,7 @@ test_encode_lower (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_decode_success, "/url/decode-success");

@@ -90,11 +90,11 @@ p11_attrs_free (void *attrs)
 
 static CK_ATTRIBUTE *
 attrs_build (CK_ATTRIBUTE *attrs,
-             CK_ULONG count_to_add,
-             bool take_values,
-             bool override,
-             CK_ATTRIBUTE * (*generator) (void *),
-             void *state)
+	     CK_ULONG      count_to_add,
+	     bool          take_values,
+	     bool          override,
+	     CK_ATTRIBUTE *(*generator) (void *),
+	     void         *state)
 {
 	CK_ATTRIBUTE *attr;
 	CK_ATTRIBUTE *add;
@@ -105,10 +105,10 @@ attrs_build (CK_ATTRIBUTE *attrs,
 	size_t length;
 	void *new_memory;
 
-	/* How many attributes we already have */
+        /* How many attributes we already have */
 	current = p11_attrs_count (attrs);
 
-	/* Reallocate for how many we need */
+        /* Reallocate for how many we need */
 	length = current + count_to_add;
 	return_val_if_fail (current <= length && length < SIZE_MAX, NULL);
 	new_memory = reallocarray (attrs, length + 1, sizeof (CK_ATTRIBUTE));
@@ -117,15 +117,15 @@ attrs_build (CK_ATTRIBUTE *attrs,
 
 	at = current;
 	for (i = 0; i < count_to_add; i++) {
-		add = (generator) (state);
+		add = (generator)(state);
 
-		/* Skip with invalid type */
+                /* Skip with invalid type */
 		if (!add || add->type == CKA_INVALID)
 			continue;
 
 		attr = NULL;
 
-		/* Do we have this attribute? */
+                /* Do we have this attribute? */
 		for (j = 0; attr == NULL && j < current; j++) {
 			if (attrs[j].type == add->type) {
 				attr = attrs + j;
@@ -133,18 +133,18 @@ attrs_build (CK_ATTRIBUTE *attrs,
 			}
 		}
 
-		/* The attribute doesn't exist */
+                /* The attribute doesn't exist */
 		if (attr == NULL) {
 			attr = attrs + at;
 			at++;
 
-		/* The attribute exists and we're not overriding */
+                        /* The attribute exists and we're not overriding */
 		} else if (!override) {
 			if (take_values)
 				free (add->pValue);
 			continue;
 
-		/* The attribute exists but we're overriding */
+                        /* The attribute exists but we're overriding */
 		} else {
 			free (attr->pValue);
 		}
@@ -158,7 +158,7 @@ attrs_build (CK_ATTRIBUTE *attrs,
 		}
 	}
 
-	/* Mark this as the end */
+        /* Mark this as the end */
 	(attrs + at)->type = CKA_INVALID;
 	assert (p11_attrs_terminator (attrs + at));
 	return attrs;
@@ -173,7 +173,7 @@ vararg_generator (void *state)
 
 CK_ATTRIBUTE *
 p11_attrs_build (CK_ATTRIBUTE *attrs,
-                 ...)
+		 ...)
 {
 	CK_ULONG count;
 	va_list va;
@@ -186,7 +186,7 @@ p11_attrs_build (CK_ATTRIBUTE *attrs,
 
 	va_start (va, attrs);
 	attrs = attrs_build (attrs, count, false, true,
-	                     vararg_generator, &va);
+			     vararg_generator, &va);
 	va_end (va);
 
 	return attrs;
@@ -200,30 +200,30 @@ template_generator (void *state)
 }
 
 CK_ATTRIBUTE *
-p11_attrs_buildn (CK_ATTRIBUTE *attrs,
+p11_attrs_buildn (CK_ATTRIBUTE       *attrs,
                   const CK_ATTRIBUTE *add,
-                  CK_ULONG count)
+                  CK_ULONG            count)
 {
 	return attrs_build (attrs, count, false, true,
-	                    template_generator, &add);
+			    template_generator, &add);
 }
 
 CK_ATTRIBUTE *
-p11_attrs_take (CK_ATTRIBUTE *attrs,
-                CK_ATTRIBUTE_TYPE type,
-                CK_VOID_PTR value,
-                CK_ULONG length)
+p11_attrs_take (CK_ATTRIBUTE      *attrs,
+                CK_ATTRIBUTE_TYPE  type,
+                CK_VOID_PTR        value,
+                CK_ULONG           length)
 {
 	CK_ATTRIBUTE attr = { type, value, length };
 	CK_ATTRIBUTE *add = &attr;
 	return attrs_build (attrs, 1, true, true,
-	                    template_generator, &add);
+			    template_generator, &add);
 }
 
 CK_ATTRIBUTE *
 p11_attrs_merge (CK_ATTRIBUTE *attrs,
                  CK_ATTRIBUTE *merge,
-                 bool replace)
+                 bool          replace)
 {
 	CK_ATTRIBUTE *ptr;
 	CK_ULONG count;
@@ -235,12 +235,12 @@ p11_attrs_merge (CK_ATTRIBUTE *attrs,
 	count = p11_attrs_count (merge);
 
 	attrs = attrs_build (attrs, count, true, replace,
-	                     template_generator, &ptr);
+			     template_generator, &ptr);
 
-	/*
-	 * Since we're supposed to own the merge attributes,
-	 * free the container array.
-	 */
+        /*
+         * Since we're supposed to own the merge attributes,
+         * free the container array.
+         */
 	free (merge);
 
 	return attrs;
@@ -256,8 +256,8 @@ p11_attrs_dup (const CK_ATTRIBUTE *attrs)
 }
 
 CK_ATTRIBUTE *
-p11_attrs_find (CK_ATTRIBUTE *attrs,
-                CK_ATTRIBUTE_TYPE type)
+p11_attrs_find (CK_ATTRIBUTE      *attrs,
+                CK_ATTRIBUTE_TYPE  type)
 {
 	CK_ULONG i;
 
@@ -270,9 +270,9 @@ p11_attrs_find (CK_ATTRIBUTE *attrs,
 }
 
 CK_ATTRIBUTE *
-p11_attrs_findn (CK_ATTRIBUTE *attrs,
-                 CK_ULONG count,
-                 CK_ATTRIBUTE_TYPE type)
+p11_attrs_findn (CK_ATTRIBUTE      *attrs,
+                 CK_ULONG           count,
+                 CK_ATTRIBUTE_TYPE  type)
 {
 	CK_ULONG i;
 
@@ -286,8 +286,8 @@ p11_attrs_findn (CK_ATTRIBUTE *attrs,
 
 bool
 p11_attrs_find_bool (const CK_ATTRIBUTE *attrs,
-                     CK_ATTRIBUTE_TYPE type,
-                     CK_BBOOL *value)
+                     CK_ATTRIBUTE_TYPE   type,
+                     CK_BBOOL           *value)
 {
 	CK_ULONG i;
 
@@ -305,9 +305,9 @@ p11_attrs_find_bool (const CK_ATTRIBUTE *attrs,
 
 bool
 p11_attrs_findn_bool (const CK_ATTRIBUTE *attrs,
-                      CK_ULONG count,
-                      CK_ATTRIBUTE_TYPE type,
-                      CK_BBOOL *value)
+                      CK_ULONG            count,
+                      CK_ATTRIBUTE_TYPE   type,
+                      CK_BBOOL           *value)
 {
 	CK_ULONG i;
 
@@ -325,8 +325,8 @@ p11_attrs_findn_bool (const CK_ATTRIBUTE *attrs,
 
 bool
 p11_attrs_find_ulong (const CK_ATTRIBUTE *attrs,
-                      CK_ATTRIBUTE_TYPE type,
-                      CK_ULONG *value)
+                      CK_ATTRIBUTE_TYPE   type,
+                      CK_ULONG           *value)
 {
 	CK_ULONG i;
 
@@ -344,9 +344,9 @@ p11_attrs_find_ulong (const CK_ATTRIBUTE *attrs,
 
 bool
 p11_attrs_findn_ulong (const CK_ATTRIBUTE *attrs,
-                       CK_ULONG count,
-                       CK_ATTRIBUTE_TYPE type,
-                       CK_ULONG *value)
+                       CK_ULONG            count,
+                       CK_ATTRIBUTE_TYPE   type,
+                       CK_ULONG           *value)
 {
 	CK_ULONG i;
 
@@ -363,9 +363,9 @@ p11_attrs_findn_ulong (const CK_ATTRIBUTE *attrs,
 }
 
 void *
-p11_attrs_find_value (CK_ATTRIBUTE *attrs,
-                      CK_ATTRIBUTE_TYPE type,
-                      size_t *length)
+p11_attrs_find_value (CK_ATTRIBUTE      *attrs,
+                      CK_ATTRIBUTE_TYPE  type,
+                      size_t            *length)
 {
 	CK_ULONG i;
 
@@ -384,8 +384,8 @@ p11_attrs_find_value (CK_ATTRIBUTE *attrs,
 }
 
 CK_ATTRIBUTE *
-p11_attrs_find_valid (CK_ATTRIBUTE *attrs,
-                      CK_ATTRIBUTE_TYPE type)
+p11_attrs_find_valid (CK_ATTRIBUTE      *attrs,
+                      CK_ATTRIBUTE_TYPE  type)
 {
 	CK_ULONG i;
 
@@ -401,8 +401,8 @@ p11_attrs_find_valid (CK_ATTRIBUTE *attrs,
 }
 
 bool
-p11_attrs_remove (CK_ATTRIBUTE *attrs,
-                  CK_ATTRIBUTE_TYPE type)
+p11_attrs_remove (CK_ATTRIBUTE      *attrs,
+                  CK_ATTRIBUTE_TYPE  type)
 {
 	CK_ULONG count;
 	CK_ULONG i;
@@ -444,7 +444,6 @@ p11_attrs_purge (CK_ATTRIBUTE *attrs)
 
 	attrs[out].type = CKA_INVALID;
 	assert (p11_attrs_terminator (attrs + out));
-
 }
 
 bool
@@ -467,7 +466,7 @@ p11_attrs_match (const CK_ATTRIBUTE *attrs,
 bool
 p11_attrs_matchn (const CK_ATTRIBUTE *attrs,
                   const CK_ATTRIBUTE *match,
-                  CK_ULONG count)
+                  CK_ULONG            count)
 {
 	CK_ATTRIBUTE *attr;
 	CK_ULONG i;
@@ -481,22 +480,21 @@ p11_attrs_matchn (const CK_ATTRIBUTE *attrs,
 	}
 
 	return true;
-
 }
 
 
 bool
 p11_attr_match_value (const CK_ATTRIBUTE *attr,
-                      const void *value,
-                      ssize_t length)
+                      const void         *value,
+                      ssize_t             length)
 {
 	if (length < 0)
 		length = strlen (value);
 	return (attr != NULL &&
-	        attr->ulValueLen == length &&
-	        (attr->pValue == value ||
-	         (attr->pValue && value &&
-	          memcmp (attr->pValue, value, attr->ulValueLen) == 0)));
+		attr->ulValueLen == length &&
+		(attr->pValue == value ||
+		 (attr->pValue && value &&
+		  memcmp (attr->pValue, value, attr->ulValueLen) == 0)));
 }
 
 bool
@@ -519,16 +517,17 @@ p11_attr_hash (const void *data)
 
 	if (attr != NULL) {
 		p11_hash_murmur3 (&hash,
-		                  &attr->type, sizeof (attr->type),
-		                  attr->pValue, (size_t)attr->ulValueLen,
-		                  NULL);
+				  &attr->type, sizeof (attr->type),
+				  attr->pValue, (size_t)attr->ulValueLen,
+				  NULL);
 	}
 
 	return hash;
 }
 
 bool
-p11_attr_copy (CK_ATTRIBUTE *dst, const CK_ATTRIBUTE *src)
+p11_attr_copy (CK_ATTRIBUTE       *dst,
+               const CK_ATTRIBUTE *src)
 {
 	memcpy (dst, src, sizeof (CK_ATTRIBUTE));
 
@@ -584,13 +583,13 @@ p11_attr_clear (CK_ATTRIBUTE *attr)
 
 static void
 buffer_append_printf (p11_buffer *buffer,
-                      const char *format,
-                      ...) GNUC_PRINTF(2, 3);
+		      const char *format,
+		      ...) GNUC_PRINTF (2, 3);
 
 static void
 buffer_append_printf (p11_buffer *buffer,
-                      const char *format,
-                      ...)
+		      const char *format,
+		      ...)
 {
 	char *string;
 	va_list va;
@@ -608,7 +607,7 @@ buffer_append_printf (p11_buffer *buffer,
 
 static bool
 attribute_is_ulong_of_type (const CK_ATTRIBUTE *attr,
-                            CK_ULONG type)
+                            CK_ULONG            type)
 {
 	if (attr->type != type)
 		return false;
@@ -623,24 +622,24 @@ static bool
 attribute_is_trust_value (const CK_ATTRIBUTE *attr)
 {
 	switch (attr->type) {
-	case CKA_TRUST_DIGITAL_SIGNATURE:
-	case CKA_TRUST_NON_REPUDIATION:
-	case CKA_TRUST_KEY_ENCIPHERMENT:
-	case CKA_TRUST_DATA_ENCIPHERMENT:
-	case CKA_TRUST_KEY_AGREEMENT:
-	case CKA_TRUST_KEY_CERT_SIGN:
-	case CKA_TRUST_CRL_SIGN:
-	case CKA_TRUST_SERVER_AUTH:
-	case CKA_TRUST_CLIENT_AUTH:
-	case CKA_TRUST_CODE_SIGNING:
-	case CKA_TRUST_EMAIL_PROTECTION:
-	case CKA_TRUST_IPSEC_END_SYSTEM:
-	case CKA_TRUST_IPSEC_TUNNEL:
-	case CKA_TRUST_IPSEC_USER:
-	case CKA_TRUST_TIME_STAMPING:
-		break;
-	default:
-		return false;
+		case CKA_TRUST_DIGITAL_SIGNATURE:
+		case CKA_TRUST_NON_REPUDIATION:
+		case CKA_TRUST_KEY_ENCIPHERMENT:
+		case CKA_TRUST_DATA_ENCIPHERMENT:
+		case CKA_TRUST_KEY_AGREEMENT:
+		case CKA_TRUST_KEY_CERT_SIGN:
+		case CKA_TRUST_CRL_SIGN:
+		case CKA_TRUST_SERVER_AUTH:
+		case CKA_TRUST_CLIENT_AUTH:
+		case CKA_TRUST_CODE_SIGNING:
+		case CKA_TRUST_EMAIL_PROTECTION:
+		case CKA_TRUST_IPSEC_END_SYSTEM:
+		case CKA_TRUST_IPSEC_TUNNEL:
+		case CKA_TRUST_IPSEC_USER:
+		case CKA_TRUST_TIME_STAMPING:
+			break;
+		default:
+			return false;
 	}
 
 	return attribute_is_ulong_of_type (attr, attr->type);
@@ -648,12 +647,12 @@ attribute_is_trust_value (const CK_ATTRIBUTE *attr)
 
 static bool
 attribute_is_sensitive (const CK_ATTRIBUTE *attr,
-                        CK_OBJECT_CLASS klass)
+                        CK_OBJECT_CLASS     klass)
 {
-	/*
-	 * Don't print any just attribute, since they may contain
-	 * sensitive data
-	 */
+        /*
+         * Don't print any just attribute, since they may contain
+         * sensitive data
+         */
 
 	switch (attr->type) {
 	#define X(x) case x: return false;
@@ -693,8 +692,8 @@ attribute_is_sensitive (const CK_ATTRIBUTE *attr,
 	X (CKA_END_DATE)
 	X (CKA_MODULUS_BITS)
 	X (CKA_PRIME_BITS)
-	/* X (CKA_SUBPRIME_BITS) */
-	/* X (CKA_SUB_PRIME_BITS) */
+        /* X (CKA_SUBPRIME_BITS) */
+        /* X (CKA_SUB_PRIME_BITS) */
 	X (CKA_VALUE_BITS)
 	X (CKA_VALUE_LEN)
 	X (CKA_EXTRACTABLE)
@@ -782,9 +781,9 @@ attribute_is_sensitive (const CK_ATTRIBUTE *attr,
 	X (CKA_IBM_DILITHIUM_KEYFORM)
 	X (CKA_IBM_DILITHIUM_RHO)
 	X (CKA_IBM_DILITHIUM_T1)
-	case CKA_VALUE:
-		return (klass != CKO_CERTIFICATE &&
-			klass != CKO_X_CERTIFICATE_EXTENSION);
+		case CKA_VALUE:
+			return (klass != CKO_CERTIFICATE &&
+				klass != CKO_X_CERTIFICATE_EXTENSION);
 	#undef X
 	}
 
@@ -792,8 +791,8 @@ attribute_is_sensitive (const CK_ATTRIBUTE *attr,
 }
 
 static void
-format_class (p11_buffer *buffer,
-              CK_OBJECT_CLASS klass)
+format_class (p11_buffer      *buffer,
+              CK_OBJECT_CLASS  klass)
 {
 	const char *string = p11_constant_name (p11_constant_classes, klass);
 	if (string != NULL)
@@ -803,8 +802,8 @@ format_class (p11_buffer *buffer,
 }
 
 static void
-format_assertion_type (p11_buffer *buffer,
-                       CK_X_ASSERTION_TYPE type)
+format_assertion_type (p11_buffer          *buffer,
+                       CK_X_ASSERTION_TYPE  type)
 {
 	const char *string = p11_constant_name (p11_constant_asserts, type);
 	if (string != NULL)
@@ -814,8 +813,8 @@ format_assertion_type (p11_buffer *buffer,
 }
 
 static void
-format_key_type (p11_buffer *buffer,
-                 CK_KEY_TYPE type)
+format_key_type (p11_buffer  *buffer,
+                 CK_KEY_TYPE  type)
 {
 	const char *string = p11_constant_name (p11_constant_keys, type);
 	if (string != NULL)
@@ -825,8 +824,8 @@ format_key_type (p11_buffer *buffer,
 }
 
 static void
-format_certificate_type (p11_buffer *buffer,
-                         CK_CERTIFICATE_TYPE type)
+format_certificate_type (p11_buffer          *buffer,
+                         CK_CERTIFICATE_TYPE  type)
 {
 	const char *string = p11_constant_name (p11_constant_certs, type);
 	if (string != NULL)
@@ -837,7 +836,7 @@ format_certificate_type (p11_buffer *buffer,
 
 static void
 format_trust_value (p11_buffer *buffer,
-                    CK_TRUST trust)
+                    CK_TRUST    trust)
 {
 	const char *string = p11_constant_name (p11_constant_trusts, trust);
 	if (string != NULL)
@@ -848,7 +847,7 @@ format_trust_value (p11_buffer *buffer,
 
 static void
 format_certificate_category (p11_buffer *buffer,
-                             CK_ULONG category)
+                             CK_ULONG    category)
 {
 	const char *string = p11_constant_name (p11_constant_categories, category);
 	if (string != NULL)
@@ -859,7 +858,7 @@ format_certificate_category (p11_buffer *buffer,
 
 static void
 format_attribute_type (p11_buffer *buffer,
-                       CK_ULONG type)
+                       CK_ULONG    type)
 {
 	const char *string = p11_constant_name (p11_constant_types, type);
 	if (string != NULL)
@@ -870,8 +869,8 @@ format_attribute_type (p11_buffer *buffer,
 
 static void
 format_some_bytes (p11_buffer *buffer,
-                   void *bytes,
-                   CK_ULONG length)
+                   void       *bytes,
+                   CK_ULONG    length)
 {
 	unsigned char ch;
 	const unsigned char *data = bytes;
@@ -903,9 +902,9 @@ format_some_bytes (p11_buffer *buffer,
 }
 
 void
-p11_attr_format (p11_buffer *buffer,
+p11_attr_format (p11_buffer         *buffer,
                  const CK_ATTRIBUTE *attr,
-                 CK_OBJECT_CLASS klass)
+                 CK_OBJECT_CLASS     klass)
 {
 	p11_buffer_add (buffer, "{ ", -1);
 	format_attribute_type (buffer, attr->type);
@@ -934,9 +933,9 @@ p11_attr_format (p11_buffer *buffer,
 }
 
 void
-p11_attrs_format (p11_buffer *buffer,
+p11_attrs_format (p11_buffer         *buffer,
                   const CK_ATTRIBUTE *attrs,
-                  int count)
+                  int                 count)
 {
 	CK_BBOOL first = CK_TRUE;
 	CK_OBJECT_CLASS klass;
@@ -962,7 +961,7 @@ p11_attrs_format (p11_buffer *buffer,
 
 char *
 p11_attrs_to_string (const CK_ATTRIBUTE *attrs,
-                     int count)
+                     int                 count)
 {
 	p11_buffer buffer;
 	if (!p11_buffer_init_null (&buffer, 128))
@@ -973,7 +972,7 @@ p11_attrs_to_string (const CK_ATTRIBUTE *attrs,
 
 char *
 p11_attr_to_string (const CK_ATTRIBUTE *attr,
-                    CK_OBJECT_CLASS klass)
+                    CK_OBJECT_CLASS     klass)
 {
 	p11_buffer buffer;
 	if (!p11_buffer_init_null (&buffer, 32))

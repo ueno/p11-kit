@@ -198,7 +198,7 @@ test_directory (void)
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
 
-	/* Yes, this is a race, and why you shouldn't build software as root */
+        /* Yes, this is a race, and why you shouldn't build software as root */
 	if (rmdir (test.directory) < 0)
 		assert_not_reached ();
 
@@ -218,7 +218,7 @@ test_directory_empty (void)
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
 
-	/* Yes, this is a race, and why you shouldn't build software as root */
+        /* Yes, this is a race, and why you shouldn't build software as root */
 	if (rmdir (test.directory) < 0)
 		assert_not_reached ();
 
@@ -229,7 +229,7 @@ test_directory_empty (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

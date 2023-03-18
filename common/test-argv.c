@@ -47,7 +47,8 @@ struct {
 } test;
 
 static void
-on_argv_parsed (char *argument, void *data)
+on_argv_parsed (char *argument,
+                void *data)
 {
 	char *value;
 
@@ -103,7 +104,7 @@ test_parse_backslash (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

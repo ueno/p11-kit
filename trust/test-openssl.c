@@ -148,11 +148,11 @@ static CK_ATTRIBUTE certificate_filter[] = {
 
 static void
 setup_objects (const CK_ATTRIBUTE *attrs,
-               ...) GNUC_NULL_TERMINATED;
+	       ...) GNUC_NULL_TERMINATED;
 
 static void
 setup_objects (const CK_ATTRIBUTE *attrs,
-               ...)
+	       ...)
 {
 	static CK_ULONG id_value = 8888;
 
@@ -179,9 +179,9 @@ test_file (void)
 	bool ret;
 
 	setup_objects (cacert3_authority_attrs,
-	               extension_eku_server,
-	               extension_reject_email,
-	               NULL);
+		       extension_eku_server,
+		       extension_reject_email,
+		       NULL);
 
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
@@ -193,7 +193,7 @@ test_file (void)
 	assert_num_eq (true, ret);
 
 	test_check_file (test.directory, "extract.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
+			 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
 
 	free (destination);
 }
@@ -216,7 +216,7 @@ test_plain (void)
 	assert_num_eq (true, ret);
 
 	test_check_file (test.directory, "extract.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-trusted-alias.pem");
+			 SRCDIR "/trust/fixtures/cacert3-trusted-alias.pem");
 
 	free (destination);
 }
@@ -257,7 +257,7 @@ test_keyid (void)
 	assert_num_eq (true, ret);
 
 	test_check_file (test.directory, "extract.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-trusted-keyid.pem");
+			 SRCDIR "/trust/fixtures/cacert3-trusted-keyid.pem");
 
 	free (destination);
 }
@@ -288,7 +288,7 @@ test_not_authority (void)
 	assert_num_eq (true, ret);
 
 	test_check_file (test.directory, "extract.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-not-trusted.pem");
+			 SRCDIR "/trust/fixtures/cacert3-not-trusted.pem");
 
 	free (destination);
 }
@@ -320,7 +320,7 @@ test_distrust_all (void)
 	assert_num_eq (true, ret);
 
 	test_check_file (test.directory, "extract.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-distrust-all.pem");
+			 SRCDIR "/trust/fixtures/cacert3-distrust-all.pem");
 
 	free (destination);
 }
@@ -332,12 +332,12 @@ test_file_multiple (void)
 	bool ret;
 
 	setup_objects (cacert3_authority_attrs,
-	               extension_eku_server,
-	               extension_reject_email,
-	               NULL);
+		       extension_eku_server,
+		       extension_reject_email,
+		       NULL);
 
 	setup_objects (verisign_v1_attrs,
-	               NULL);
+		       NULL);
 
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
@@ -373,7 +373,8 @@ test_file_without (void)
 }
 
 /* From extract-openssl.c */
-void p11_openssl_canon_string (char *str, size_t *len);
+void p11_openssl_canon_string (char   *str,
+			       size_t *len);
 
 static void
 test_canon_string (void)
@@ -416,7 +417,7 @@ test_canon_string (void)
 	}
 }
 
-bool   p11_openssl_canon_string_der  (p11_buffer *der);
+bool   p11_openssl_canon_string_der (p11_buffer *der);
 
 static void
 test_canon_string_der (void)
@@ -427,46 +428,38 @@ test_canon_string_der (void)
 		unsigned char output[100];
 		int output_len;
 	} fixtures[] = {
-		/* UTF8String */
+                /* UTF8String */
 		{ { 0x0c, 0x0f, 0xc3, 0x84, ' ', 'U', 'T', 'F', '8', ' ', 's', 't', 'r', 'i', 'n', 'g', ' ', }, 17,
-		  { 0x0c, 0x0e, 0xc3, 0x84, ' ', 'u', 't', 'f', '8', ' ', 's', 't', 'r', 'i', 'n', 'g', }, 16,
-		},
+		  { 0x0c, 0x0e, 0xc3, 0x84, ' ', 'u', 't', 'f', '8', ' ', 's', 't', 'r', 'i', 'n', 'g', }, 16, },
 
-		/* NumericString */
+                /* NumericString */
 		{ { 0x12, 0x04, '0', '1', '2', '3', }, 6,
-		  { 0x0c, 0x04, '0', '1', '2', '3' }, 6,
-		},
+		  { 0x0c, 0x04, '0', '1', '2', '3' }, 6, },
 
-		/* IA5String */
+                /* IA5String */
 		{ { 0x16, 0x04, ' ', 'A', 'B', ' ', }, 6,
-		  { 0x0c, 0x02, 'a', 'b',  }, 4,
-		},
+		  { 0x0c, 0x02, 'a', 'b', }, 4, },
 
-		/* TeletexString */
+                /* TeletexString */
 		{ { 0x14, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9,
-		  { 0x0c, 0x06, 'a', ' ', 'n', 'i', 'c', 'e' }, 8,
-		},
+		  { 0x0c, 0x06, 'a', ' ', 'n', 'i', 'c', 'e' }, 8, },
 
-		/* PrintableString */
+                /* PrintableString */
 		{ { 0x13, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9,
-		  { 0x0c, 0x06, 'a', ' ', 'n', 'i', 'c', 'e' }, 8,
-		},
+		  { 0x0c, 0x06, 'a', ' ', 'n', 'i', 'c', 'e' }, 8, },
 
-		/* No change, not a known string type */
+                /* No change, not a known string type */
 		{ { 0x05, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9,
-		  { 0x05, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9
-		},
+		  { 0x05, 0x07, 'A', ' ', ' ', 'n', 'i', 'c', 'e' }, 9},
 
-		/* UniversalString */
+                /* UniversalString */
 		{ { 0x1c, 0x14, 0x00, 0x00, 0x00, 'F', 0x00, 0x00, 0x00, 'u',
 		    0x00, 0x00, 0x00, 'n', 0x00, 0x00, 0x00, ' ', 0x00, 0x01, 0x03, 0x19, }, 22,
-		  { 0x0c, 0x08, 'f', 'u', 'n', ' ', 0xf0, 0x90, 0x8c, 0x99 }, 10,
-		},
+		  { 0x0c, 0x08, 'f', 'u', 'n', ' ', 0xf0, 0x90, 0x8c, 0x99 }, 10, },
 
-		/* BMPString */
+                /* BMPString */
 		{ { 0x1e, 0x0a, 0x00, 'V', 0x00, 0xF6, 0x00, 'g', 0x00, 'e', 0x00, 'l' }, 12,
-		  { 0x0c, 0x06, 'v', 0xc3, 0xb6, 'g', 'e', 'l' }, 8,
-		},
+		  { 0x0c, 0x06, 'v', 0xc3, 0xb6, 'g', 'e', 'l' }, 8, },
 	};
 
 	p11_buffer buf;
@@ -475,7 +468,7 @@ test_canon_string_der (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		p11_buffer_init_full (&buf, memdup (fixtures[i].input, fixtures[i].input_len),
-		                      fixtures[i].input_len, 0, realloc, free);
+				      fixtures[i].input_len, 0, realloc, free);
 
 		ret = p11_openssl_canon_string_der (&buf);
 		assert_num_eq (true, ret);
@@ -487,8 +480,8 @@ test_canon_string_der (void)
 	}
 }
 
-bool   p11_openssl_canon_name_der     (p11_dict *asn1_defs,
-                                       p11_buffer *der);
+bool   p11_openssl_canon_name_der (p11_dict   *asn1_defs,
+				   p11_buffer *der);
 
 static void
 test_canon_name_der (void)
@@ -514,11 +507,9 @@ test_canon_name_der (void)
 		    'w', 'w', '.', 'c', 'a', 'c', 'e', 'r', 't', '.', 'o', 'r',
 		    'g', '1', 0x1c, '0', 0x1a, 0x06, 0x03, 'U', 0x04, 0x03, 0x0c,
 		    0x13, 'c', 'a', 'c', 'e', 'r', 't', 0x20, 'c', 'l', 'a', 's',
-		    's', 0x20, '3', 0x20, 'r', 'o', 'o', 't', }, 84,
-		},
+		    's', 0x20, '3', 0x20, 'r', 'o', 'o', 't', }, 84, },
 		{ { '0', 0x00, }, 2,
-		  { }, 0,
-		},
+		  { }, 0, },
 	};
 
 	p11_buffer buf;
@@ -530,7 +521,7 @@ test_canon_name_der (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		p11_buffer_init_full (&buf, memdup (fixtures[i].input, fixtures[i].input_len),
-		                      fixtures[i].input_len, 0, realloc, free);
+				      fixtures[i].input_len, 0, realloc, free);
 
 		ret = p11_openssl_canon_name_der (asn1_defs, &buf);
 		assert_num_eq (true, ret);
@@ -562,7 +553,7 @@ test_canon_string_der_fail (void)
 
 	for (i = 0; i < ELEMS (fixtures); i++) {
 		p11_buffer_init_full (&buf, memdup (fixtures[i].input, fixtures[i].input_len),
-		                      fixtures[i].input_len, 0, realloc, free);
+				      fixtures[i].input_len, 0, realloc, free);
 
 		ret = p11_openssl_canon_string_der (&buf);
 		assert_num_eq (false, ret);
@@ -577,18 +568,18 @@ test_directory (void)
 	bool ret;
 
 	setup_objects (cacert3_authority_attrs,
-	               extension_eku_server,
-	               extension_reject_email,
-	               NULL);
+		       extension_eku_server,
+		       extension_reject_email,
+		       NULL);
 
-	/* Accesses the above objects */
+        /* Accesses the above objects */
 	setup_objects (cacert3_authority_attrs,
-	               NULL);
+		       NULL);
 
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
 
-	/* Yes, this is a race, and why you shouldn't build software as root */
+        /* Yes, this is a race, and why you shouldn't build software as root */
 	if (rmdir (test.directory) < 0)
 		assert_not_reached ();
 
@@ -604,9 +595,9 @@ test_directory (void)
 					       NULL));
 #endif
 	test_check_file (test.directory, "Custom_Label.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
+			 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
 	test_check_file (test.directory, "Custom_Label.1.pem",
-	                 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
+			 SRCDIR "/trust/fixtures/cacert3-trusted-server-alias.pem");
 #ifdef OS_UNIX
 	test_check_symlink (test.directory, "e5662767.0", "Custom_Label.pem");
 	test_check_symlink (test.directory, "e5662767.1", "Custom_Label.1.pem");
@@ -623,7 +614,7 @@ test_directory_empty (void)
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
 
-	/* Yes, this is a race, and why you shouldn't build software as root */
+        /* Yes, this is a race, and why you shouldn't build software as root */
 	if (rmdir (test.directory) < 0)
 		assert_not_reached ();
 
@@ -634,7 +625,7 @@ test_directory_empty (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

@@ -51,12 +51,12 @@ typedef struct {
 } expected_tok;
 
 static void
-check_lex_msg (const char *file,
-               int line,
-               const char *function,
+check_lex_msg (const char         *file,
+               int                 line,
+               const char         *function,
                const expected_tok *expected,
-               const char *input,
-               bool failure)
+               const char         *input,
+               bool                failure)
 {
 	p11_lexer lexer;
 	size_t len;
@@ -67,37 +67,37 @@ check_lex_msg (const char *file,
 	for (i = 0; p11_lexer_next (&lexer, &failed); i++) {
 		if (expected[i].tok_type != lexer.tok_type)
 			p11_test_fail (file, line, function,
-			               "lexer token type does not match: (%d != %d)",
-			               expected[i].tok_type, lexer.tok_type);
+				       "lexer token type does not match: (%d != %d)",
+				       expected[i].tok_type, lexer.tok_type);
 		switch (lexer.tok_type) {
-		case TOK_FIELD:
-			if (strcmp (expected[i].name, lexer.tok.field.name) != 0)
-				p11_test_fail (file, line, function,
-				               "field name doesn't match: (%s != %s)",
-				               expected[i].name, lexer.tok.field.name);
-			if (strcmp (expected[i].value, lexer.tok.field.value) != 0)
-				p11_test_fail (file, line, function,
-				               "field value doesn't match: (%s != %s)",
-				               expected[i].value, lexer.tok.field.value);
-			break;
-		case TOK_SECTION:
-			if (strcmp (expected[i].name, lexer.tok.field.name) != 0)
-				p11_test_fail (file, line, function,
-				               "section name doesn't match: (%s != %s)",
-				               expected[i].name, lexer.tok.field.name);
-			break;
-		case TOK_PEM:
-			len = strlen (expected[i].name);
-			if (lexer.tok.pem.length < len ||
-			    strncmp (lexer.tok.pem.begin, expected[i].name, len) != 0) {
-				p11_test_fail (file, line, function,
-				               "wrong type of PEM block: %s",
-				               expected[i].name);
-			}
-			break;
-		case TOK_EOF:
-			p11_test_fail (file, line, function, "eof should not be received");
-			break;
+			case TOK_FIELD:
+				if (strcmp (expected[i].name, lexer.tok.field.name) != 0)
+					p11_test_fail (file, line, function,
+						       "field name doesn't match: (%s != %s)",
+						       expected[i].name, lexer.tok.field.name);
+				if (strcmp (expected[i].value, lexer.tok.field.value) != 0)
+					p11_test_fail (file, line, function,
+						       "field value doesn't match: (%s != %s)",
+						       expected[i].value, lexer.tok.field.value);
+				break;
+			case TOK_SECTION:
+				if (strcmp (expected[i].name, lexer.tok.field.name) != 0)
+					p11_test_fail (file, line, function,
+						       "section name doesn't match: (%s != %s)",
+						       expected[i].name, lexer.tok.field.name);
+				break;
+			case TOK_PEM:
+				len = strlen (expected[i].name);
+				if (lexer.tok.pem.length < len ||
+				    strncmp (lexer.tok.pem.begin, expected[i].name, len) != 0) {
+					p11_test_fail (file, line, function,
+						       "wrong type of PEM block: %s",
+						       expected[i].name);
+				}
+				break;
+			case TOK_EOF:
+				p11_test_fail (file, line, function, "eof should not be received");
+				break;
 		}
 	}
 
@@ -121,10 +121,10 @@ static void
 test_basic (void)
 {
 	const char *input = "[the header]\n"
-	                    "field: value\n"
-	                    "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
-	                    "-----END BLOCK1-----\n";
+			    "field: value\n"
+			    "-----BEGIN BLOCK1-----\n"
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
+			    "-----END BLOCK1-----\n";
 
 	const expected_tok expected[] = {
 		{ TOK_SECTION, "the header" },
@@ -140,17 +140,17 @@ static void
 test_corners (void)
 {
 	const char *input = "\r\n"                 /* blankline */
-	                    " [the header]\r\n"    /* bad line endings */
-	                    "  field: value  \r\n" /* whitespace */
-	                    "number:    2\n"       /* extra space*/
-	                    "number    :3\n"       /* extra space*/
-	                    "number  :  4\n"       /* extra space*/
-	                    "\n"
-	                    " # A comment \n"
-	                    "not-a-comment: # value\n"
-	                    "-----BEGIN BLOCK1-----\r\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\r\n"
-	                    "-----END BLOCK1-----"; /* no new line */
+			    " [the header]\r\n"    /* bad line endings */
+			    "  field: value  \r\n" /* whitespace */
+			    "number:    2\n"       /* extra space*/
+			    "number    :3\n"       /* extra space*/
+			    "number  :  4\n"       /* extra space*/
+			    "\n"
+			    " # A comment \n"
+			    "not-a-comment: # value\n"
+			    "-----BEGIN BLOCK1-----\r\n"
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\r\n"
+			    "-----END BLOCK1-----"; /* no new line */
 
 	const expected_tok expected[] = {
 		{ TOK_SECTION, "the header" },
@@ -170,9 +170,9 @@ static void
 test_following (void)
 {
 	const char *input = "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
-	                    "-----END BLOCK1-----\n"
-	                    "field: value";
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
+			    "-----END BLOCK1-----\n"
+			    "field: value";
 
 	const expected_tok expected[] = {
 		{ TOK_PEM, "-----BEGIN BLOCK1-----\n", },
@@ -187,8 +187,8 @@ static void
 test_bad_pem (void)
 {
 	const char *input = "field: value\n"
-	                    "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n";
+			    "-----BEGIN BLOCK1-----\n"
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n";
 
 	const expected_tok expected[] = {
 		{ TOK_FIELD, "field", "value" },
@@ -206,8 +206,8 @@ static void
 test_bad_section (void)
 {
 	const char *input = "field: value\n"
-	                    "[section\n"
-	                    "bad]\n";
+			    "[section\n"
+			    "bad]\n";
 
 	const expected_tok expected[] = {
 		{ TOK_FIELD, "field", "value" },
@@ -225,8 +225,8 @@ static void
 test_bad_value (void)
 {
 	const char *input = "field_value\n"
-	                    "[section\n"
-	                    "bad]\n";
+			    "[section\n"
+			    "bad]\n";
 
 	const expected_tok expected[] = {
 		{ TOK_EOF }
@@ -240,7 +240,7 @@ test_bad_value (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_basic, "/lexer/basic");

@@ -72,7 +72,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -140,32 +140,32 @@
  */
 
 typedef struct _Module {
-	/*
-	 * When using managed modules, this forms the base of the
-	 * virtual stack into which all the other modules call. This is also
-	 * the first field in this structure so we can cast between them.
-	 */
+        /*
+         * When using managed modules, this forms the base of the
+         * virtual stack into which all the other modules call. This is also
+         * the first field in this structure so we can cast between them.
+         */
 	p11_virtual virt;
 
-	/* The initialize args built from configuration */
+        /* The initialize args built from configuration */
 	CK_C_INITIALIZE_ARGS init_args;
 	int ref_count;
 	int init_count;
 
-	/* Registered modules */
+        /* Registered modules */
 	char *name;
 	char *filename;
 	p11_dict *config;
 	bool critical;
 
-	/*
-	 * This is a pointer to the actual dl shared module, or perhaps
-	 * the RPC client context.
-	 */
+        /*
+         * This is a pointer to the actual dl shared module, or perhaps
+         * the RPC client context.
+         */
 	void *loaded_module;
 	p11_kit_destroyer loaded_destroy;
 
-	/* Initialization, mutex must be held */
+        /* Initialization, mutex must be held */
 	p11_mutex_t initialize_mutex;
 	unsigned int initialize_called;
 	p11_thread_id_t initialize_thread;
@@ -294,12 +294,12 @@ free_module_unlocked (void *data)
 
 	assert (mod != NULL);
 
-	/* Module must have no outstanding references */
+        /* Module must have no outstanding references */
 	assert (mod->ref_count == 0);
 
 	if (mod->init_count > 0) {
 		p11_debug_precond ("module unloaded without C_Finalize having been "
-		                   "called for each C_Initialize");
+				   "called for each C_Initialize");
 	} else {
 		assert (mod->initialize_thread == 0);
 	}
@@ -332,19 +332,19 @@ alloc_module_unlocked (void)
 	mod->init_args.flags = CKF_OS_LOCKING_OK;
 	p11_mutex_init (&mod->initialize_mutex);
 
-	/*
-	 * The default for configured modules is non-critical, but for
-	 * modules loaded explicitly, and not from config, we treat them
-	 * as critical. So this gets overridden for configured modules
-	 * later when the config is loaded.
-	 */
+        /*
+         * The default for configured modules is non-critical, but for
+         * modules loaded explicitly, and not from config, we treat them
+         * as critical. So this gets overridden for configured modules
+         * later when the config is loaded.
+         */
 	mod->critical = true;
 
 	return mod;
 }
 
 #ifdef __GNUC__
-bool       p11_proxy_module_check                    (CK_FUNCTION_LIST_PTR module) __attribute__((weak));
+bool       p11_proxy_module_check (CK_FUNCTION_LIST_PTR module) __attribute__((weak));
 
 bool
 p11_proxy_module_check (CK_FUNCTION_LIST_PTR module)
@@ -354,8 +354,8 @@ p11_proxy_module_check (CK_FUNCTION_LIST_PTR module)
 #endif
 
 static CK_RV
-dlopen_and_get_function_list (Module *mod,
-                              const char *path,
+dlopen_and_get_function_list (Module            *mod,
+                              const char        *path,
                               CK_FUNCTION_LIST **funcs)
 {
 	CK_C_GetFunctionList gfl;
@@ -377,13 +377,13 @@ dlopen_and_get_function_list (Module *mod,
 		return CKR_GENERAL_ERROR;
 	}
 
-	/* When the Module goes away, dlclose the loaded module */
+        /* When the Module goes away, dlclose the loaded module */
 	mod->loaded_destroy = (p11_kit_destroyer)p11_dl_close;
 	mod->loaded_module = dl;
 
 	gi = p11_dl_symbol (dl, "C_GetInterface");
 	if (gi) {
-		/* Get the default standard interface */
+                /* Get the default standard interface */
 		rv = gi ((unsigned char *)"PKCS 11", NULL, &interface, 0);
 		if (rv != CKR_OK) {
 			p11_message (_("call to C_GetInterface failed in module: %s: %s"),
@@ -391,7 +391,7 @@ dlopen_and_get_function_list (Module *mod,
 			return rv;
 		}
 
-		/* TODO check the version and flag it somehere? */
+                /* TODO check the version and flag it somehere? */
 		*funcs = interface->pFunctionList;
 	} else {
 		p11_debug ("C_GetInterface not available. Falling back to C_GetFunctionList()");
@@ -423,9 +423,9 @@ dlopen_and_get_function_list (Module *mod,
 }
 
 static CK_RV
-load_module_from_file_inlock (const char *name,
-                              const char *path,
-                              Module **result)
+load_module_from_file_inlock (const char  *name,
+                              const char  *path,
+                              Module     **result)
 {
 	CK_FUNCTION_LIST *funcs;
 	char *expand = NULL;
@@ -446,7 +446,7 @@ load_module_from_file_inlock (const char *name,
 	}
 
 	p11_debug ("loading module %s%sfrom path: %s",
-	           name ? name : "", name ? " " : "", path);
+		   name ? name : "", name ? " " : "", path);
 
 	mod->filename = strdup (path);
 
@@ -458,30 +458,30 @@ load_module_from_file_inlock (const char *name,
 		return rv;
 	}
 
-	/* Do we have a previous one like this, if so ignore load */
+        /* Do we have a previous one like this, if so ignore load */
 	prev = p11_dict_get (gl.unmanaged_by_funcs, funcs);
 
-	/* If same module was loaded previously, just take over config */
+        /* If same module was loaded previously, just take over config */
 	if (prev != NULL) {
 		if (!name || prev->name || prev->config)
 			p11_debug ("duplicate module %s, using previous", name);
 		free_module_unlocked (mod);
 		mod = prev;
 
-	/* This takes ownership of the module */
+                /* This takes ownership of the module */
 	} else if (!p11_dict_set (gl.modules, mod, mod) ||
 		   !p11_dict_set (gl.unmanaged_by_funcs, funcs, mod)) {
 		return_val_if_reached (CKR_HOST_MEMORY);
 	}
 
-	*result= mod;
+	*result = mod;
 	return CKR_OK;
 }
 
 static CK_RV
-setup_module_for_remote_inlock (const char *name,
-                                const char *remote,
-                                Module **result)
+setup_module_for_remote_inlock (const char  *name,
+                                const char  *remote,
+                                Module     **result)
 {
 	p11_rpc_transport *rpc;
 	Module *mod;
@@ -501,7 +501,7 @@ setup_module_for_remote_inlock (const char *name,
 	mod->loaded_module = rpc;
 	mod->loaded_destroy = p11_rpc_transport_free;
 
-	/* This takes ownership of the module */
+        /* This takes ownership of the module */
 	if (!p11_dict_set (gl.modules, mod, mod))
 		return_val_if_reached (CKR_HOST_MEMORY);
 
@@ -512,7 +512,7 @@ setup_module_for_remote_inlock (const char *name,
 static int
 is_list_delimiter (char ch)
 {
-	return ch == ',' ||  isspace (ch);
+	return ch == ',' || isspace (ch);
 }
 
 static bool
@@ -527,7 +527,7 @@ is_string_in_list (const char *list,
 		if (where == NULL)
 			return false;
 
-		/* Has to be at beginning/end of string, and delimiter before/after */
+                /* Has to be at beginning/end of string, and delimiter before/after */
 		if (where != list && !is_list_delimiter (*(where - 1))) {
 			start += strlen (string);
 			continue;
@@ -545,8 +545,8 @@ is_string_in_list (const char *list,
 
 static bool
 is_module_enabled_unlocked (const char *name,
-                            p11_dict *config,
-                            int flags)
+                            p11_dict   *config,
+                            int         flags)
 {
 	const char *progname;
 	const char *enable_in;
@@ -556,7 +556,7 @@ is_module_enabled_unlocked (const char *name,
 	enable_in = p11_dict_get (config, "enable-in");
 	disable_in = p11_dict_get (config, "disable-in");
 
-	/* Defaults to enabled if neither of these are set */
+        /* Defaults to enabled if neither of these are set */
 	if (!enable_in && !disable_in)
 		return true;
 
@@ -566,27 +566,27 @@ is_module_enabled_unlocked (const char *name,
 	if (enable_in) {
 		enable = (progname != NULL &&
 			  is_string_in_list (enable_in, progname)) ||
-			((flags & P11_KIT_MODULE_LOADED_FROM_PROXY) != 0 &&
-			 is_string_in_list (enable_in, "p11-kit-proxy"));
+			 ((flags & P11_KIT_MODULE_LOADED_FROM_PROXY) != 0 &&
+			  is_string_in_list (enable_in, "p11-kit-proxy"));
 	} else if (disable_in) {
 		enable = (progname == NULL ||
 			  !is_string_in_list (disable_in, progname)) &&
-			((flags & P11_KIT_MODULE_LOADED_FROM_PROXY) == 0 ||
-			 !is_string_in_list (disable_in, "p11-kit-proxy"));
+			 ((flags & P11_KIT_MODULE_LOADED_FROM_PROXY) == 0 ||
+			  !is_string_in_list (disable_in, "p11-kit-proxy"));
 	}
 
 	p11_debug ("%s module '%s' running in '%s'",
-	            enable ? "enabled" : "disabled",
-	            name,
-	            progname ? progname : "(null)");
+		   enable ? "enabled" : "disabled",
+		   name,
+		   progname ? progname : "(null)");
 	return enable;
 }
 
 static CK_RV
-take_config_and_load_module_inlock (char **name,
+take_config_and_load_module_inlock (char     **name,
                                     p11_dict **config,
-                                    bool critical,
-                                    bool verbose)
+                                    bool       critical,
+                                    bool       verbose)
 {
 	const char *filename = NULL;
 	const char *remote = NULL;
@@ -615,19 +615,17 @@ take_config_and_load_module_inlock (char **name,
 		rv = setup_module_for_remote_inlock (*name, remote, &mod);
 		if (rv != CKR_OK)
 			goto out;
-
 	} else {
-
 		rv = load_module_from_file_inlock (*name, filename, &mod);
 		if (rv != CKR_OK)
 			goto out;
 	}
 
-	/*
-	 * We support setting of CK_C_INITIALIZE_ARGS.pReserved from
-	 * 'x-init-reserved' setting in the config. This only works with specific
-	 * PKCS#11 modules, and is non-standard use of that field.
-	 */
+        /*
+         * We support setting of CK_C_INITIALIZE_ARGS.pReserved from
+         * 'x-init-reserved' setting in the config. This only works with specific
+         * PKCS#11 modules, and is non-standard use of that field.
+         */
 	init_reserved = p11_dict_get (*config, "x-init-reserved");
 	if (init_reserved) {
 		if (verbose) {
@@ -642,7 +640,7 @@ take_config_and_load_module_inlock (char **name,
 	}
 	mod->init_args.pReserved = init_reserved;
 
-	/* Take ownership of these variables */
+        /* Take ownership of these variables */
 	p11_dict_free (mod->config);
 	mod->config = *config;
 	*config = NULL;
@@ -671,7 +669,7 @@ load_registered_modules_unlocked (int flags)
 	if (gl.config)
 		return CKR_OK;
 
-	/* Load the global configuration files */
+        /* Load the global configuration files */
 	config = _p11_conf_load_globals (p11_config_system_file, p11_config_user_file, &mode);
 	if (config == NULL)
 		return CKR_GENERAL_ERROR;
@@ -679,9 +677,9 @@ load_registered_modules_unlocked (int flags)
 	assert (mode != CONF_USER_INVALID);
 
 	configs = _p11_conf_load_modules (mode,
-	                                  p11_config_package_modules,
-	                                  p11_config_system_modules,
-	                                  p11_config_user_modules);
+					  p11_config_package_modules,
+					  p11_config_system_modules,
+					  p11_config_user_modules);
 	if (configs == NULL) {
 		rv = CKR_GENERAL_ERROR;
 		p11_dict_free (config);
@@ -691,29 +689,29 @@ load_registered_modules_unlocked (int flags)
 	assert (gl.config == NULL);
 	gl.config = config;
 
-	/*
-	 * Now go through each config and turn it into a module. As we iterate
-	 * we steal the values of the config.
-	 */
+        /*
+         * Now go through each config and turn it into a module. As we iterate
+         * we steal the values of the config.
+         */
 	p11_dict_iterate (configs, &iter);
 	while (p11_dict_next (&iter, &key, NULL)) {
-		if (!p11_dict_steal (configs, key, (void**)&name, (void**)&config))
+		if (!p11_dict_steal (configs, key, (void **)&name, (void **)&config))
 			assert_not_reached ();
 
-		/* Is this a critical module, should abort loading of others? */
+                /* Is this a critical module, should abort loading of others? */
 		critical = _p11_conf_parse_boolean (p11_dict_get (config, "critical"), false);
 		verbose = (flags & P11_KIT_MODULE_VERBOSE) != 0;
 		rv = take_config_and_load_module_inlock (&name, &config, critical, verbose);
 
-		/*
-		 * These variables will be cleared if ownership is transeferred
-		 * by the above function call.
-		 */
+                /*
+                 * These variables will be cleared if ownership is transeferred
+                 * by the above function call.
+                 */
 		p11_dict_free (config);
 
 		if (critical && rv != CKR_OK) {
 			p11_message (_("aborting initialization because module '%s' was marked as critical"),
-			             name);
+				     name);
 			p11_dict_free (configs);
 			free (name);
 			return rv;
@@ -727,7 +725,8 @@ load_registered_modules_unlocked (int flags)
 }
 
 static CK_RV
-initialize_module_inlock_reentrant (Module *mod, CK_C_INITIALIZE_ARGS *init_args)
+initialize_module_inlock_reentrant (Module               *mod,
+                                    CK_C_INITIALIZE_ARGS *init_args)
 {
 	CK_RV rv = CKR_OK;
 	p11_thread_id_t self;
@@ -741,21 +740,21 @@ initialize_module_inlock_reentrant (Module *mod, CK_C_INITIALIZE_ARGS *init_args
 		return CKR_FUNCTION_FAILED;
 	}
 
-	/*
-	 * Increase ref first, so module doesn't get freed out from
-	 * underneath us when the mutex is unlocked below.
-	 */
+        /*
+         * Increase ref first, so module doesn't get freed out from
+         * underneath us when the mutex is unlocked below.
+         */
 	++mod->ref_count;
 	mod->initialize_thread = self;
 
-	/* Change over to the module specific mutex */
+        /* Change over to the module specific mutex */
 	p11_unlock ();
 	p11_mutex_lock (&mod->initialize_mutex);
 
 	if (mod->initialize_called != p11_forkid) {
 		p11_debug ("C_Initialize: calling");
 
-		/* The init_args argument takes precedence over mod->init_args */
+                /* The init_args argument takes precedence over mod->init_args */
 		if (init_args == NULL)
 			init_args = &mod->init_args;
 
@@ -764,17 +763,17 @@ initialize_module_inlock_reentrant (Module *mod, CK_C_INITIALIZE_ARGS *init_args
 
 		p11_debug ("C_Initialize: result: %lu", rv);
 
-		/* Module was initialized and C_Finalize should be called */
+                /* Module was initialized and C_Finalize should be called */
 		if (rv == CKR_OK)
 			mod->initialize_called = p11_forkid;
 		else
 			mod->initialize_called = 0;
 
-		/* Module was already initialized, we don't call C_Finalize */
+                /* Module was already initialized, we don't call C_Finalize */
 		if (rv == CKR_CRYPTOKI_ALREADY_INITIALIZED)
 			rv = CKR_OK;
 
-		/* Matches the init count in finalize_module_inlock_reentrant() */
+                /* Matches the init count in finalize_module_inlock_reentrant() */
 		if (rv == CKR_OK)
 			mod->init_count = 0;
 	}
@@ -783,7 +782,7 @@ initialize_module_inlock_reentrant (Module *mod, CK_C_INITIALIZE_ARGS *init_args
 	p11_lock ();
 
 	if (rv == CKR_OK) {
-		/* Matches the ref count in finalize_module_inlock_reentrant() */
+                /* Matches the ref count in finalize_module_inlock_reentrant() */
 		if (mod->init_count == 0)
 			mod->ref_count++;
 		mod->init_count++;
@@ -801,22 +800,22 @@ init_globals_unlocked (void)
 
 	if (!gl.modules) {
 		gl.modules = p11_dict_new (p11_dict_direct_hash,
-		                           p11_dict_direct_equal,
-		                           free_module_unlocked, NULL);
+					   p11_dict_direct_equal,
+					   free_module_unlocked, NULL);
 		return_val_if_fail (gl.modules != NULL, CKR_HOST_MEMORY);
 	}
 
 	if (!gl.unmanaged_by_funcs) {
 		gl.unmanaged_by_funcs = p11_dict_new (p11_dict_direct_hash,
-		                                      p11_dict_direct_equal,
-		                                      NULL, NULL);
+						      p11_dict_direct_equal,
+						      NULL, NULL);
 		return_val_if_fail (gl.unmanaged_by_funcs != NULL, CKR_HOST_MEMORY);
 	}
 
 	if (!gl.managed_by_closure) {
 		gl.managed_by_closure = p11_dict_new (p11_dict_direct_hash,
-		                                      p11_dict_direct_equal,
-		                                      NULL, NULL);
+						      p11_dict_direct_equal,
+						      NULL, NULL);
 		return_val_if_fail (gl.managed_by_closure != NULL, CKR_HOST_MEMORY);
 	}
 
@@ -835,7 +834,7 @@ free_modules_when_no_refs_unlocked (void)
 		Module *mod;
 		p11_dictiter iter;
 
-		/* Check if any modules have a ref count */
+                /* Check if any modules have a ref count */
 		p11_dict_iterate (gl.modules, &iter);
 		while (p11_dict_next (&iter, (void **)&mod, NULL)) {
 			if (mod->ref_count)
@@ -861,21 +860,21 @@ finalize_module_inlock_reentrant (Module *mod)
 {
 	assert (mod);
 
-	/*
-	 * We leave module info around until all are finalized
-	 * so we can encounter these zombie Module structures.
-	 */
+        /*
+         * We leave module info around until all are finalized
+         * so we can encounter these zombie Module structures.
+         */
 	if (mod->ref_count == 0)
 		return CKR_ARGUMENTS_BAD;
 
 	if (--mod->init_count > 0)
 		return CKR_OK;
 
-	/*
-	 * Because of the mutex unlock below, we temporarily increase
-	 * the ref count. This prevents module from being freed out
-	 * from ounder us.
-	 */
+        /*
+         * Because of the mutex unlock below, we temporarily increase
+         * the ref count. This prevents module from being freed out
+         * from ounder us.
+         */
 
 	p11_unlock ();
 	p11_mutex_lock (&mod->initialize_mutex);
@@ -888,7 +887,7 @@ finalize_module_inlock_reentrant (Module *mod)
 	p11_mutex_unlock (&mod->initialize_mutex);
 	p11_lock ();
 
-	/* Match the ref increment in initialize_module_inlock_reentrant() */
+        /* Match the ref increment in initialize_module_inlock_reentrant() */
 	mod->ref_count--;
 
 	free_modules_when_no_refs_unlocked ();
@@ -902,10 +901,10 @@ initialize_registered_inlock_reentrant (void)
 	Module *mod;
 	CK_RV rv;
 
-	/*
-	 * This is only called by deprecated code. The caller expects all
-	 * configured and enabled modules to be initialized.
-	 */
+        /*
+         * This is only called by deprecated code. The caller expects all
+         * configured and enabled modules to be initialized.
+         */
 
 	rv = init_globals_unlocked ();
 	if (rv != CKR_OK)
@@ -915,8 +914,7 @@ initialize_registered_inlock_reentrant (void)
 	if (rv == CKR_OK) {
 		p11_dict_iterate (gl.unmanaged_by_funcs, &iter);
 		while (rv == CKR_OK && p11_dict_next (&iter, NULL, (void **)&mod)) {
-
-			/* Skip all modules that aren't registered or enabled */
+                        /* Skip all modules that aren't registered or enabled */
 			if (mod->name == NULL || !is_module_enabled_unlocked (mod->name, mod->config, 0))
 				continue;
 
@@ -924,10 +922,10 @@ initialize_registered_inlock_reentrant (void)
 			if (rv != CKR_OK) {
 				if (mod->critical) {
 					p11_message (_("initialization of critical module '%s' failed: %s"),
-					             mod->name, p11_kit_strerror (rv));
+						     mod->name, p11_kit_strerror (rv));
 				} else {
 					p11_message (_("skipping module '%s' whose initialization failed: %s"),
-					             mod->name, p11_kit_strerror (rv));
+						     mod->name, p11_kit_strerror (rv));
 					rv = CKR_OK;
 				}
 			}
@@ -984,21 +982,21 @@ p11_kit_initialize_registered (void)
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		/* WARNING: Reentrancy can occur here */
-		rv = initialize_registered_inlock_reentrant ();
+        /* WARNING: Reentrancy can occur here */
+	rv = initialize_registered_inlock_reentrant ();
 
-		_p11_kit_default_message (rv);
+	_p11_kit_default_message (rv);
 
 	p11_unlock ();
 
-	/* Cleanup any partial initialization */
+        /* Cleanup any partial initialization */
 	if (rv != CKR_OK)
 		p11_kit_finalize_registered ();
 
@@ -1014,17 +1012,17 @@ finalize_registered_inlock_reentrant (void)
 	Module **to_finalize;
 	int i, count;
 
-	/*
-	 * This is only called from deprecated code. The caller expects all
-	 * modules initialized earlier to be finalized (once). If non-critical
-	 * modules failed to initialize, then it is not possible to completely
-	 * guarantee the internal state.
-	 */
+        /*
+         * This is only called from deprecated code. The caller expects all
+         * modules initialized earlier to be finalized (once). If non-critical
+         * modules failed to initialize, then it is not possible to completely
+         * guarantee the internal state.
+         */
 
 	if (!gl.modules)
 		return CKR_CRYPTOKI_NOT_INITIALIZED;
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 
 	to_finalize = calloc (p11_dict_size (gl.unmanaged_by_funcs) + 1, sizeof (Module *));
 	if (!to_finalize)
@@ -1033,8 +1031,7 @@ finalize_registered_inlock_reentrant (void)
 	count = 0;
 	p11_dict_iterate (gl.unmanaged_by_funcs, &iter);
 	while (p11_dict_next (&iter, NULL, (void **)&mod)) {
-
-		/* Skip all modules that aren't registered */
+                /* Skip all modules that aren't registered */
 		if (mod->name && mod->init_count)
 			to_finalize[count++] = mod;
 	}
@@ -1042,13 +1039,13 @@ finalize_registered_inlock_reentrant (void)
 	p11_debug ("finalizing %d modules", count);
 
 	for (i = 0; i < count; ++i) {
-		/* WARNING: Reentrant calls can occur here */
+                /* WARNING: Reentrant calls can occur here */
 		finalize_module_inlock_reentrant (to_finalize[i]);
 	}
 
 	free (to_finalize);
 
-	/* In case nothing loaded, free up internal memory */
+        /* In case nothing loaded, free up internal memory */
 	if (count == 0)
 		free_modules_when_no_refs_unlocked ();
 
@@ -1080,17 +1077,17 @@ p11_kit_finalize_registered (void)
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		/* WARNING: Reentrant calls can occur here */
-		rv = finalize_registered_inlock_reentrant ();
+        /* WARNING: Reentrant calls can occur here */
+	rv = finalize_registered_inlock_reentrant ();
 
-		_p11_kit_default_message (rv);
+	_p11_kit_default_message (rv);
 
 	p11_unlock ();
 
@@ -1118,15 +1115,15 @@ compar_priority (const void *one,
 	o1 = atoi (v1 ? v1 : "0");
 	o2 = atoi (v2 ? v2 : "0");
 
-	/* Priority is in descending order, highest first */
+        /* Priority is in descending order, highest first */
 	if (o1 != o2)
 		return o1 > o2 ? -1 : 1;
 
-	/*
-	 * Otherwise use the names alphabetically in ascending order. This
-	 * is really just to provide consistency between various loads of
-	 * the configuration.
-	 */
+        /*
+         * Otherwise use the names alphabetically in ascending order. This
+         * is really just to provide consistency between various loads of
+         * the configuration.
+         */
 	if (m1->name == m2->name)
 		return 0;
 	if (!m1->name)
@@ -1138,7 +1135,7 @@ compar_priority (const void *one,
 
 static void
 sort_modules_by_priority (CK_FUNCTION_LIST_PTR *modules,
-                          int count)
+                          int                   count)
 {
 	qsort (modules, count, sizeof (CK_FUNCTION_LIST_PTR), compar_priority);
 }
@@ -1152,30 +1149,29 @@ list_registered_modules_inlock (void)
 	p11_dictiter iter;
 	int i = 0;
 
-	/*
-	 * This is only called by deprecated code. The caller expects to get
-	 * a list of all registered enabled modules that have been initialized.
-	 */
+        /*
+         * This is only called by deprecated code. The caller expects to get
+         * a list of all registered enabled modules that have been initialized.
+         */
 
 	if (gl.unmanaged_by_funcs) {
 		result = calloc (p11_dict_size (gl.unmanaged_by_funcs) + 1,
-		                 sizeof (CK_FUNCTION_LIST *));
+				 sizeof (CK_FUNCTION_LIST *));
 		return_val_if_fail (result != NULL, NULL);
 
 		p11_dict_iterate (gl.unmanaged_by_funcs, &iter);
 		while (p11_dict_next (&iter, (void **)&funcs, (void **)&mod)) {
-
-			/*
-			 * We don't include unreferenced modules. We don't include
-			 * modules that have been initialized but aren't in the
-			 * registry. These have a NULL name.
-			 *
-			 * In addition we check again that the module isn't disabled
-			 * using enable-in or disable-in. This is because a caller
-			 * can change the progname we recognize the process as after
-			 * having initialized. This is a corner case, but want to make
-			 * sure to cover it.
-			 */
+                        /*
+                         * We don't include unreferenced modules. We don't include
+                         * modules that have been initialized but aren't in the
+                         * registry. These have a NULL name.
+                         *
+                         * In addition we check again that the module isn't disabled
+                         * using enable-in or disable-in. This is because a caller
+                         * can change the progname we recognize the process as after
+                         * having initialized. This is a corner case, but want to make
+                         * sure to cover it.
+                         */
 			if (mod->ref_count && mod->name && mod->init_count &&
 			    is_module_enabled_unlocked (mod->name, mod->config, 0)) {
 				result[i++] = funcs;
@@ -1213,9 +1209,9 @@ p11_kit_registered_modules (void)
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		result = list_registered_modules_inlock ();
+	result = list_registered_modules_inlock ();
 
 	p11_unlock ();
 
@@ -1237,7 +1233,7 @@ p11_kit_registered_modules (void)
  *     <code>NULL</code> if no such registered module exists. Use free() to
  *     free this string.
  */
-char*
+char *
 p11_kit_registered_module_to_name (CK_FUNCTION_LIST_PTR module)
 {
 	return_val_if_fail (module != NULL, NULL);
@@ -1271,13 +1267,13 @@ p11_kit_module_get_name (CK_FUNCTION_LIST *module)
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		if (gl.modules) {
-			mod = module_for_functions_inlock (module);
-			if (mod && mod->name)
-				name = strdup (mod->name);
-		}
+	if (gl.modules) {
+		mod = module_for_functions_inlock (module);
+		if (mod && mod->name)
+			name = strdup (mod->name);
+	}
 
 	p11_unlock ();
 
@@ -1311,13 +1307,13 @@ p11_kit_module_get_filename (CK_FUNCTION_LIST *module)
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		if (gl.modules) {
-			mod = module_for_functions_inlock (module);
-			if (mod && mod->filename)
-				name = strdup (mod->filename);
-		}
+	if (gl.modules) {
+		mod = module_for_functions_inlock (module);
+		if (mod && mod->filename)
+			name = strdup (mod->filename);
+	}
 
 	p11_unlock ();
 
@@ -1325,7 +1321,7 @@ p11_kit_module_get_filename (CK_FUNCTION_LIST *module)
 }
 
 static const char *
-module_get_option_inlock (Module *mod,
+module_get_option_inlock (Module     *mod,
                           const char *option)
 {
 	p11_dict *config;
@@ -1368,23 +1364,23 @@ p11_kit_module_get_flags (CK_FUNCTION_LIST *module)
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		if (gl.modules) {
-			if (p11_virtual_is_wrapper (module)) {
-				mod = p11_dict_get (gl.managed_by_closure, module);
-			} else {
-				flags |= P11_KIT_MODULE_UNMANAGED;
-				mod = p11_dict_get (gl.unmanaged_by_funcs, module);
-			}
-			if (!mod || mod->critical)
-				flags |= P11_KIT_MODULE_CRITICAL;
-			if (mod) {
-				trusted = module_get_option_inlock (mod, "trust-policy");
-				if (_p11_conf_parse_boolean (trusted, false))
-					flags |= P11_KIT_MODULE_TRUSTED;
-			}
+	if (gl.modules) {
+		if (p11_virtual_is_wrapper (module)) {
+			mod = p11_dict_get (gl.managed_by_closure, module);
+		} else {
+			flags |= P11_KIT_MODULE_UNMANAGED;
+			mod = p11_dict_get (gl.unmanaged_by_funcs, module);
 		}
+		if (!mod || mod->critical)
+			flags |= P11_KIT_MODULE_CRITICAL;
+		if (mod) {
+			trusted = module_get_option_inlock (mod, "trust-policy");
+			if (_p11_conf_parse_boolean (trusted, false))
+				flags |= P11_KIT_MODULE_TRUSTED;
+		}
+	}
 
 	p11_unlock ();
 
@@ -1418,7 +1414,6 @@ p11_kit_registered_name_to_module (const char *name)
 	p11_message_clear ();
 
 	if (gl.modules) {
-
 		assert (name);
 
 		p11_dict_iterate (gl.unmanaged_by_funcs, &iter);
@@ -1454,7 +1449,7 @@ p11_kit_registered_name_to_module (const char *name)
  */
 CK_FUNCTION_LIST *
 p11_kit_module_for_name (CK_FUNCTION_LIST **modules,
-                         const char *name)
+                         const char        *name)
 {
 	CK_FUNCTION_LIST *ret = NULL;
 	Module *mod;
@@ -1469,15 +1464,15 @@ p11_kit_module_for_name (CK_FUNCTION_LIST **modules,
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		for (i = 0; gl.modules && modules[i] != NULL; i++) {
-			mod = module_for_functions_inlock (modules[i]);
-			if (mod && mod->name && strcmp (mod->name, name) == 0) {
-				ret = modules[i];
-				break;
-			}
+	for (i = 0; gl.modules && modules[i] != NULL; i++) {
+		mod = module_for_functions_inlock (modules[i]);
+		if (mod && mod->name && strcmp (mod->name, name) == 0) {
+			ret = modules[i];
+			break;
 		}
+	}
 
 	p11_unlock ();
 
@@ -1499,8 +1494,9 @@ p11_kit_module_for_name (CK_FUNCTION_LIST **modules,
  *     <code>NULL</code> if the registered module or the option were not found.
  *     Use free() to free the returned string.
  */
-char*
-p11_kit_registered_option (CK_FUNCTION_LIST_PTR module, const char *field)
+char *
+p11_kit_registered_option (CK_FUNCTION_LIST_PTR  module,
+                           const char           *field)
 {
 	Module *mod = NULL;
 	char *option = NULL;
@@ -1512,16 +1508,16 @@ p11_kit_registered_option (CK_FUNCTION_LIST_PTR module, const char *field)
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		if (module == NULL)
-			mod = NULL;
-		else
-			mod = gl.unmanaged_by_funcs ? p11_dict_get (gl.unmanaged_by_funcs, module) : NULL;
+	if (module == NULL)
+		mod = NULL;
+	else
+		mod = gl.unmanaged_by_funcs ? p11_dict_get (gl.unmanaged_by_funcs, module) : NULL;
 
-		value = module_get_option_inlock (mod, field);
-		if (value)
-			option = strdup (value);
+	value = module_get_option_inlock (mod, field);
+	if (value)
+		option = strdup (value);
 
 	p11_unlock ();
 
@@ -1545,7 +1541,7 @@ p11_kit_registered_option (CK_FUNCTION_LIST_PTR module, const char *field)
  */
 char *
 p11_kit_config_option (CK_FUNCTION_LIST *module,
-                       const char *option)
+                       const char       *option)
 {
 	Module *mod = NULL;
 	const char *value = NULL;
@@ -1557,19 +1553,19 @@ p11_kit_config_option (CK_FUNCTION_LIST *module,
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		if (gl.modules) {
-			if (module != NULL) {
-				mod = module_for_functions_inlock (module);
-				if (mod == NULL)
-					goto cleanup;
-			}
-
-			value = module_get_option_inlock (mod, option);
-			if (value)
-				ret = strdup (value);
+	if (gl.modules) {
+		if (module != NULL) {
+			mod = module_for_functions_inlock (module);
+			if (mod == NULL)
+				goto cleanup;
 		}
+
+		value = module_get_option_inlock (mod, option);
+		if (value)
+			ret = strdup (value);
+	}
 
 
 cleanup:
@@ -1586,7 +1582,7 @@ typedef struct {
 
 static CK_RV
 managed_C_Initialize (CK_X_FUNCTION_LIST *self,
-                      CK_VOID_PTR init_args)
+                      CK_VOID_PTR         init_args)
 {
 	Managed *managed = ((Managed *)self);
 	p11_dict *sessions;
@@ -1597,11 +1593,10 @@ managed_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 	if (managed->initialized == p11_forkid) {
 		rv = CKR_CRYPTOKI_ALREADY_INITIALIZED;
-
 	} else {
 		sessions = p11_dict_new (p11_dict_ulongptr_hash,
-		                         p11_dict_ulongptr_equal,
-		                         free, free);
+					 p11_dict_ulongptr_equal,
+					 free, free);
 		if (!sessions)
 			rv = CKR_HOST_MEMORY;
 		else
@@ -1623,9 +1618,9 @@ managed_C_Initialize (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-managed_track_session_inlock (p11_dict *sessions,
-                              CK_SLOT_ID slot_id,
-                              CK_SESSION_HANDLE session)
+managed_track_session_inlock (p11_dict          *sessions,
+                              CK_SLOT_ID         slot_id,
+                              CK_SESSION_HANDLE  session)
 {
 	void *key;
 	void *value;
@@ -1643,17 +1638,17 @@ managed_track_session_inlock (p11_dict *sessions,
 }
 
 static void
-managed_untrack_session_inlock (p11_dict *sessions,
-                                CK_SESSION_HANDLE session)
+managed_untrack_session_inlock (p11_dict          *sessions,
+                                CK_SESSION_HANDLE  session)
 {
 	p11_dict_remove (sessions, &session);
 }
 
 static CK_SESSION_HANDLE *
-managed_steal_sessions_inlock (p11_dict *sessions,
-                        bool matching_slot_id,
-                        CK_SLOT_ID slot_id,
-                        int *count)
+managed_steal_sessions_inlock (p11_dict   *sessions,
+                               bool        matching_slot_id,
+                               CK_SLOT_ID  slot_id,
+                               int        *count)
 {
 	CK_SESSION_HANDLE *stolen;
 	CK_SESSION_HANDLE *key;
@@ -1674,11 +1669,11 @@ managed_steal_sessions_inlock (p11_dict *sessions,
 			stolen[at++] = *key;
 	}
 
-	/* Removed them all, clear the whole array */
+        /* Removed them all, clear the whole array */
 	if (at == p11_dict_size (sessions)) {
 		p11_dict_clear (sessions);
 
-	/* Only removed some, go through and remove those */
+                /* Only removed some, go through and remove those */
 	} else {
 		for (i = 0; i < at; i++) {
 			if (!p11_dict_remove (sessions, stolen + i))
@@ -1692,8 +1687,8 @@ managed_steal_sessions_inlock (p11_dict *sessions,
 
 static void
 managed_close_sessions (CK_X_FUNCTION_LIST *funcs,
-                        CK_SESSION_HANDLE *stolen,
-                        int count)
+                        CK_SESSION_HANDLE  *stolen,
+                        int                 count)
 {
 	CK_RV rv;
 	int i;
@@ -1707,7 +1702,7 @@ managed_close_sessions (CK_X_FUNCTION_LIST *funcs,
 
 static CK_RV
 managed_C_Finalize (CK_X_FUNCTION_LIST *self,
-                    CK_VOID_PTR reserved)
+                    CK_VOID_PTR         reserved)
 {
 	Managed *managed = ((Managed *)self);
 	CK_SESSION_HANDLE *sessions;
@@ -1719,22 +1714,20 @@ managed_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 	if (managed->initialized == 0) {
 		rv = CKR_CRYPTOKI_NOT_INITIALIZED;
-
 	} else if (managed->initialized != p11_forkid) {
-		/*
-		 * In theory we should be returning CKR_CRYPTOKI_NOT_INITIALIZED here
-		 * but enough callers are not completely aware of their forking.
-		 * So we just clean up any state we have, rather than forcing callers
-		 * to initialize just to finalize.
-		 */
+                /*
+                 * In theory we should be returning CKR_CRYPTOKI_NOT_INITIALIZED here
+                 * but enough callers are not completely aware of their forking.
+                 * So we just clean up any state we have, rather than forcing callers
+                 * to initialize just to finalize.
+                 */
 		p11_debug ("finalizing module in wrong process, skipping C_Finalize");
 		rv = CKR_OK;
-
 	} else {
 		sessions = managed_steal_sessions_inlock (managed->sessions, false, 0, &count);
 
 		if (sessions && count) {
-			/* WARNING: reentrancy can occur here */
+                        /* WARNING: reentrancy can occur here */
 			p11_unlock ();
 			managed_close_sessions (&managed->mod->virt.funcs, sessions, count);
 			p11_lock ();
@@ -1742,7 +1735,7 @@ managed_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 		free (sessions);
 
-		/* WARNING: reentrancy can occur here */
+                /* WARNING: reentrancy can occur here */
 		rv = finalize_module_inlock_reentrant (managed->mod);
 	}
 
@@ -1759,12 +1752,12 @@ managed_C_Finalize (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-managed_C_OpenSession (CK_X_FUNCTION_LIST *self,
-                       CK_SLOT_ID slot_id,
-                       CK_FLAGS flags,
-                       CK_VOID_PTR application,
-                       CK_NOTIFY notify,
-                       CK_SESSION_HANDLE_PTR session)
+managed_C_OpenSession (CK_X_FUNCTION_LIST    *self,
+                       CK_SLOT_ID             slot_id,
+                       CK_FLAGS               flags,
+                       CK_VOID_PTR            application,
+                       CK_NOTIFY              notify,
+                       CK_SESSION_HANDLE_PTR  session)
 {
 	Managed *managed = ((Managed *)self);
 	CK_RV rv;
@@ -1785,7 +1778,7 @@ managed_C_OpenSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 managed_C_CloseSession (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session)
+                        CK_SESSION_HANDLE   session)
 {
 	Managed *managed = ((Managed *)self);
 	CK_RV rv;
@@ -1804,7 +1797,7 @@ managed_C_CloseSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 managed_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
-                            CK_SLOT_ID slot_id)
+                            CK_SLOT_ID          slot_id)
 {
 	Managed *managed = ((Managed *)self);
 	CK_SESSION_HANDLE *stolen;
@@ -1822,7 +1815,6 @@ managed_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
 	} else {
 		return CKR_GENERAL_ERROR;
 	}
-
 }
 
 static void
@@ -1842,7 +1834,7 @@ managed_create_inlock (Module *mod)
 	return_val_if_fail (managed != NULL, NULL);
 
 	p11_virtual_init (&managed->virt, &p11_virtual_stack,
-	                  &mod->virt, NULL);
+			  &mod->virt, NULL);
 	managed->virt.funcs.C_Initialize = managed_C_Initialize;
 	managed->virt.funcs.C_Finalize = managed_C_Finalize;
 	managed->virt.funcs.C_CloseAllSessions = managed_C_CloseAllSessions;
@@ -1855,10 +1847,10 @@ managed_create_inlock (Module *mod)
 }
 
 static bool
-lookup_managed_option (Module *mod,
-                       bool supported,
+lookup_managed_option (Module     *mod,
+                       bool        supported,
                        const char *option,
-                       bool def_value)
+                       bool        def_value)
 {
 	const char *string;
 	bool value;
@@ -1875,11 +1867,11 @@ lookup_managed_option (Module *mod,
 	value = _p11_conf_parse_boolean (string, def_value);
 
 	if (!supported && value != supported) {
-	  /*
-	   * This is because the module is running in unmanaged mode, so turn off the
-	   */
-	  p11_message (_("the '%s' option for module '%s' is only supported for managed modules"),
-		       option, mod->name);
+                /*
+                 * This is because the module is running in unmanaged mode, so turn off the
+                 */
+		p11_message (_("the '%s' option for module '%s' is only supported for managed modules"),
+			     option, mod->name);
 	}
 
 	return value;
@@ -1887,13 +1879,13 @@ lookup_managed_option (Module *mod,
 
 static CK_RV
 release_module_inlock_rentrant (CK_FUNCTION_LIST *module,
-                                const char *caller_func)
+                                const char       *caller_func)
 {
 	Module *mod;
 
 	assert (module != NULL);
 
-	/* See if a managed module, and finalize if so */
+        /* See if a managed module, and finalize if so */
 	if (p11_virtual_is_wrapper (module)) {
 		mod = p11_dict_get (gl.managed_by_closure, module);
 		if (mod != NULL) {
@@ -1902,7 +1894,7 @@ release_module_inlock_rentrant (CK_FUNCTION_LIST *module,
 			p11_virtual_unwrap (module);
 		}
 
-	/* If an unmanaged module then caller should have finalized */
+                /* If an unmanaged module then caller should have finalized */
 	} else {
 		mod = p11_dict_get (gl.unmanaged_by_funcs, module);
 	}
@@ -1912,7 +1904,7 @@ release_module_inlock_rentrant (CK_FUNCTION_LIST *module,
 		return CKR_ARGUMENTS_BAD;
 	}
 
-	/* Matches the ref in prepare_module_inlock_reentrant() */
+        /* Matches the ref in prepare_module_inlock_reentrant() */
 	mod->ref_count--;
 	return CKR_OK;
 }
@@ -1932,15 +1924,15 @@ p11_modules_release_inlock_reentrant (CK_FUNCTION_LIST **modules)
 
 	free (modules);
 
-	/* In case nothing loaded, free up internal memory */
+        /* In case nothing loaded, free up internal memory */
 	free_modules_when_no_refs_unlocked ();
 
 	return ret;
 }
 
 static CK_RV
-prepare_module_inlock_reentrant (Module *mod,
-                                 int flags,
+prepare_module_inlock_reentrant (Module            *mod,
+                                 int                flags,
                                  CK_FUNCTION_LIST **module)
 {
 	p11_destroyer destroyer;
@@ -1970,7 +1962,7 @@ prepare_module_inlock_reentrant (Module *mod,
 		return_val_if_fail (virt != NULL, CKR_HOST_MEMORY);
 		destroyer = managed_free_inlock;
 
-		/* Add the logger if configured */
+                /* Add the logger if configured */
 		if (p11_log_force || with_log) {
 			virt = p11_log_subclass (virt, destroyer);
 			destroyer = p11_log_release;
@@ -1982,20 +1974,19 @@ prepare_module_inlock_reentrant (Module *mod,
 
 		if (!p11_dict_set (gl.managed_by_closure, *module, mod))
 			return_val_if_reached (CKR_HOST_MEMORY);
-
 	} else {
 		*module = unmanaged_for_module_inlock (mod);
 		if (*module == NULL)
 			return CKR_FUNCTION_NOT_SUPPORTED;
 	}
 
-	/* Matches the deref in release_module_inlock_rentrant() */
+        /* Matches the deref in release_module_inlock_rentrant() */
 	mod->ref_count++;
 	return CKR_OK;
 }
 
 CK_RV
-p11_modules_load_inlock_reentrant (int flags,
+p11_modules_load_inlock_reentrant (int                 flags,
                                    CK_FUNCTION_LIST ***results)
 {
 	CK_FUNCTION_LIST **modules;
@@ -2020,18 +2011,17 @@ p11_modules_load_inlock_reentrant (int flags,
 
 	p11_dict_iterate (gl.modules, &iter);
 	while (p11_dict_next (&iter, NULL, (void **)&mod)) {
-
-		/*
-		 * We don't include unreferenced modules. We don't include
-		 * modules that have been initialized but aren't in the
-		 * registry. These have a NULL name.
-		 *
-		 * In addition we check again that the module isn't disabled
-		 * using enable-in or disable-in. This is because a caller
-		 * can change the progname we recognize the process as after
-		 * having initialized. This is a corner case, but want to make
-		 * sure to cover it.
-		 */
+                /*
+                 * We don't include unreferenced modules. We don't include
+                 * modules that have been initialized but aren't in the
+                 * registry. These have a NULL name.
+                 *
+                 * In addition we check again that the module isn't disabled
+                 * using enable-in or disable-in. This is because a caller
+                 * can change the progname we recognize the process as after
+                 * having initialized. This is a corner case, but want to make
+                 * sure to cover it.
+                 */
 		if (!mod->name || !is_module_enabled_unlocked (mod->name, mod->config, flags))
 			continue;
 
@@ -2092,28 +2082,28 @@ p11_modules_load_inlock_reentrant (int flags,
  */
 CK_FUNCTION_LIST **
 p11_kit_modules_load (const char *reserved,
-                      int flags)
+                      int         flags)
 {
 	CK_FUNCTION_LIST **modules;
 	CK_RV rv;
 
-	/* progname attribute not implemented yet */
+        /* progname attribute not implemented yet */
 	return_val_if_fail (reserved == NULL, NULL);
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 	p11_debug ("in");
 
-	/* mask out internal flags */
+        /* mask out internal flags */
 	flags &= P11_KIT_MODULE_MASK;
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		/* WARNING: Reentrancy can occur here */
-		rv = p11_modules_load_inlock_reentrant (flags, &modules);
+        /* WARNING: Reentrancy can occur here */
+	rv = p11_modules_load_inlock_reentrant (flags, &modules);
 
 	p11_unlock ();
 
@@ -2163,11 +2153,11 @@ p11_kit_modules_load (const char *reserved,
  * load the same module.
  *
  * Returns: <literal>CKR_OK</literal> or the failure code of the last critical
- * 	module that failed to initialize.
+ *      module that failed to initialize.
  */
 CK_RV
-p11_kit_modules_initialize (CK_FUNCTION_LIST **modules,
-                            p11_kit_destroyer failure_callback)
+p11_kit_modules_initialize (CK_FUNCTION_LIST  **modules,
+                            p11_kit_destroyer   failure_callback)
 {
 	CK_RV ret = CKR_OK;
 	CK_RV rv;
@@ -2201,14 +2191,14 @@ p11_kit_modules_initialize (CK_FUNCTION_LIST **modules,
 			if (rv == CKR_CRYPTOKI_ALREADY_INITIALIZED) {
 				name = p11_kit_module_get_name (modules[i]);
 				p11_message (_("%s: module was already initialized"),
-				             name ? name : "(unknown)");
+					     name ? name : "(unknown)");
 				free (name);
 			}
 			modules[out] = modules[i];
 		}
 	}
 
-	/* NULL terminate after above changes */
+        /* NULL terminate after above changes */
 	modules[out] = NULL;
 	return ret;
 }
@@ -2230,7 +2220,7 @@ p11_kit_modules_initialize (CK_FUNCTION_LIST **modules,
  * same as with p11_kit_modules_load().
  *
  * Returns: a <literal>NULL</literal> terminated list of modules, or
- * 	<literal>NULL</literal> on failure
+ *      <literal>NULL</literal> on failure
  */
 CK_FUNCTION_LIST **
 p11_kit_modules_load_and_initialize (int flags)
@@ -2238,7 +2228,7 @@ p11_kit_modules_load_and_initialize (int flags)
 	CK_FUNCTION_LIST **modules;
 	CK_RV rv;
 
-	/* mask out internal flags */
+        /* mask out internal flags */
 	flags &= P11_KIT_MODULE_MASK;
 
 	modules = p11_kit_modules_load (NULL, flags);
@@ -2280,7 +2270,7 @@ p11_kit_modules_load_and_initialize (int flags)
  * different threads.
  *
  * Returns: <literal>CKR_OK</literal> or the failure code of the last
- * 	module that failed to finalize
+ *      module that failed to finalize
  */
 CK_RV
 p11_kit_modules_finalize (CK_FUNCTION_LIST **modules)
@@ -2297,7 +2287,7 @@ p11_kit_modules_finalize (CK_FUNCTION_LIST **modules)
 		if (rv != CKR_OK) {
 			name = p11_kit_module_get_name (modules[i]);
 			p11_message (_("%s: module failed to finalize: %s"),
-			             name ? name : "(unknown)", p11_kit_strerror (rv));
+				     name ? name : "(unknown)", p11_kit_strerror (rv));
 			free (name);
 			ret = rv;
 		}
@@ -2326,13 +2316,13 @@ p11_kit_modules_release (CK_FUNCTION_LIST **modules)
 
 	return_if_fail (modules != NULL);
 
-	/* WARNING: This function must be reentrant */
+        /* WARNING: This function must be reentrant */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
-		p11_modules_release_inlock_reentrant (modules);
+	p11_message_clear ();
+	p11_modules_release_inlock_reentrant (modules);
 
 	p11_unlock ();
 
@@ -2417,27 +2407,27 @@ p11_kit_initialize_module (CK_FUNCTION_LIST_PTR module)
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant for the same arguments */
+        /* WARNING: This function must be reentrant for the same arguments */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		flags = P11_KIT_MODULE_CRITICAL | P11_KIT_MODULE_UNMANAGED;
-		rv = p11_module_load_inlock_reentrant (module, flags, &result);
+	flags = P11_KIT_MODULE_CRITICAL | P11_KIT_MODULE_UNMANAGED;
+	rv = p11_module_load_inlock_reentrant (module, flags, &result);
 
-		/* An unmanaged module should return the same pointer */
-		assert (rv != CKR_OK || result == module);
+        /* An unmanaged module should return the same pointer */
+	assert (rv != CKR_OK || result == module);
 
-		if (rv == CKR_OK) {
-			mod = p11_dict_get (gl.unmanaged_by_funcs, module);
-			assert (mod != NULL);
-			rv = initialize_module_inlock_reentrant (mod, NULL);
-			if (rv != CKR_OK) {
-				p11_message (_("module initialization failed: %s"), p11_kit_strerror (rv));
-			}
+	if (rv == CKR_OK) {
+		mod = p11_dict_get (gl.unmanaged_by_funcs, module);
+		assert (mod != NULL);
+		rv = initialize_module_inlock_reentrant (mod, NULL);
+		if (rv != CKR_OK) {
+			p11_message (_("module initialization failed: %s"), p11_kit_strerror (rv));
 		}
+	}
 
 	p11_unlock ();
 
@@ -2446,8 +2436,8 @@ p11_kit_initialize_module (CK_FUNCTION_LIST_PTR module)
 }
 
 CK_RV
-p11_module_load_inlock_reentrant (CK_FUNCTION_LIST *module,
-                                  int flags,
+p11_module_load_inlock_reentrant (CK_FUNCTION_LIST  *module,
+                                  int                flags,
                                   CK_FUNCTION_LIST **result)
 {
 	Module *allocated = NULL;
@@ -2456,7 +2446,6 @@ p11_module_load_inlock_reentrant (CK_FUNCTION_LIST *module,
 
 	rv = init_globals_unlocked ();
 	if (rv == CKR_OK) {
-
 		mod = p11_dict_get (gl.unmanaged_by_funcs, module);
 		if (mod == NULL) {
 			p11_debug ("allocating new module");
@@ -2465,7 +2454,7 @@ p11_module_load_inlock_reentrant (CK_FUNCTION_LIST *module,
 			p11_virtual_init (&mod->virt, &p11_virtual_base, module, NULL);
 		}
 
-		/* If this was newly allocated, add it to the list */
+                /* If this was newly allocated, add it to the list */
 		if (allocated) {
 			if (!p11_dict_set (gl.modules, allocated, allocated) ||
 			    !p11_dict_set (gl.unmanaged_by_funcs, module, allocated))
@@ -2473,17 +2462,17 @@ p11_module_load_inlock_reentrant (CK_FUNCTION_LIST *module,
 			allocated = NULL;
 		}
 
-			/* WARNING: Reentrancy can occur here */
-			rv = prepare_module_inlock_reentrant (mod, flags, result);
+                /* WARNING: Reentrancy can occur here */
+		rv = prepare_module_inlock_reentrant (mod, flags, result);
 
 		free (allocated);
 	}
 
-	/*
-	 * If initialization failed, we may need to cleanup.
-	 * If we added this module above, then this will
-	 * clean things up as expected.
-	 */
+        /*
+         * If initialization failed, we may need to cleanup.
+         * If we added this module above, then this will
+         * clean things up as expected.
+         */
 	if (rv != CKR_OK)
 		free_modules_when_no_refs_unlocked ();
 
@@ -2522,7 +2511,7 @@ p11_module_load_inlock_reentrant (CK_FUNCTION_LIST *module,
  */
 CK_FUNCTION_LIST *
 p11_kit_module_load (const char *module_path,
-                     int flags)
+                     int         flags)
 {
 	CK_FUNCTION_LIST *module = NULL;
 	CK_RV rv;
@@ -2532,41 +2521,39 @@ p11_kit_module_load (const char *module_path,
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant for the same arguments */
+        /* WARNING: This function must be reentrant for the same arguments */
 	p11_debug ("in: %s", module_path);
 
-	/* mask out internal flags */
+        /* mask out internal flags */
 	flags &= P11_KIT_MODULE_MASK;
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		rv = init_globals_unlocked ();
+	rv = init_globals_unlocked ();
+	if (rv == CKR_OK) {
+		rv = load_module_from_file_inlock (NULL, module_path, &mod);
 		if (rv == CKR_OK) {
-
-			rv = load_module_from_file_inlock (NULL, module_path, &mod);
-			if (rv == CKR_OK) {
-				/* WARNING: Reentrancy can occur here */
-				rv = prepare_module_inlock_reentrant (mod, flags, &module);
-				if (rv != CKR_OK)
-					module = NULL;
-			}
+                        /* WARNING: Reentrancy can occur here */
+			rv = prepare_module_inlock_reentrant (mod, flags, &module);
+			if (rv != CKR_OK)
+				module = NULL;
 		}
+	}
 
-		/*
-		 * If initialization failed, we may need to cleanup.
-		 * If we added this module above, then this will
-		 * clean things up as expected.
-		 */
-		if (rv != CKR_OK)
-			free_modules_when_no_refs_unlocked ();
+        /*
+         * If initialization failed, we may need to cleanup.
+         * If we added this module above, then this will
+         * clean things up as expected.
+         */
+	if (rv != CKR_OK)
+		free_modules_when_no_refs_unlocked ();
 
 	p11_unlock ();
 
 	p11_debug ("out: %s", module ? "success" : "fail");
 	return module;
-
 }
 
 /**
@@ -2592,7 +2579,7 @@ p11_kit_module_load (const char *module_path,
  * p11_kit_message() function.
  *
  * Deprecated: Since 0.19.0: Use p11_kit_module_finalize() and
- * 	p11_kit_module_release() instead.
+ *      p11_kit_module_release() instead.
  *
  * Returns: CKR_OK if the finalization was successful.
  */
@@ -2606,23 +2593,23 @@ p11_kit_finalize_module (CK_FUNCTION_LIST *module)
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant for the same arguments */
+        /* WARNING: This function must be reentrant for the same arguments */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		mod = gl.unmanaged_by_funcs ? p11_dict_get (gl.unmanaged_by_funcs, module) : NULL;
-		if (mod == NULL) {
-			p11_debug ("module not found");
-			rv = CKR_ARGUMENTS_BAD;
-		} else {
-			/* WARNING: Rentrancy can occur here */
-			rv = finalize_module_inlock_reentrant (mod);
-		}
+	mod = gl.unmanaged_by_funcs ? p11_dict_get (gl.unmanaged_by_funcs, module) : NULL;
+	if (mod == NULL) {
+		p11_debug ("module not found");
+		rv = CKR_ARGUMENTS_BAD;
+	} else {
+                /* WARNING: Rentrancy can occur here */
+		rv = finalize_module_inlock_reentrant (mod);
+	}
 
-		_p11_kit_default_message (rv);
+	_p11_kit_default_message (rv);
 
 	p11_unlock ();
 
@@ -2668,7 +2655,7 @@ p11_kit_module_initialize (CK_FUNCTION_LIST *module)
 	if (rv != CKR_OK) {
 		name = p11_kit_module_get_name (module);
 		p11_message (_("%s: module failed to initialize: %s"),
-		             name ? name : "(unknown)", p11_kit_strerror (rv));
+			     name ? name : "(unknown)", p11_kit_strerror (rv));
 		free (name);
 	}
 
@@ -2709,12 +2696,11 @@ p11_kit_module_finalize (CK_FUNCTION_LIST *module)
 	if (rv != CKR_OK) {
 		name = p11_kit_module_get_name (module);
 		p11_message (_("%s: module failed to finalize: %s"),
-		             name ? name : "(unknown)", p11_kit_strerror (rv));
+			     name ? name : "(unknown)", p11_kit_strerror (rv));
 		free (name);
 	}
 
 	return rv;
-
 }
 
 
@@ -2734,14 +2720,14 @@ p11_kit_module_release (CK_FUNCTION_LIST *module)
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant for the same arguments */
+        /* WARNING: This function must be reentrant for the same arguments */
 	p11_debug ("in");
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		release_module_inlock_rentrant (module, __PRETTY_FUNCTION__);
+	release_module_inlock_rentrant (module, __PRETTY_FUNCTION__);
 
 	p11_unlock ();
 
@@ -2790,8 +2776,8 @@ p11_module_release_inlock_reentrant (CK_FUNCTION_LIST *module)
  * Returns: CKR_OK if the initialization was successful.
  */
 CK_RV
-p11_kit_load_initialize_module (const char *module_path,
-                                CK_FUNCTION_LIST_PTR_PTR module)
+p11_kit_load_initialize_module (const char               *module_path,
+                                CK_FUNCTION_LIST_PTR_PTR  module)
 {
 	Module *mod;
 	CK_RV rv = CKR_OK;
@@ -2801,38 +2787,36 @@ p11_kit_load_initialize_module (const char *module_path,
 
 	p11_library_init_once ();
 
-	/* WARNING: This function must be reentrant for the same arguments */
+        /* WARNING: This function must be reentrant for the same arguments */
 	p11_debug ("in: %s", module_path);
 
 	p11_lock ();
 
-		p11_message_clear ();
+	p11_message_clear ();
 
-		rv = init_globals_unlocked ();
+	rv = init_globals_unlocked ();
+	if (rv == CKR_OK) {
+		rv = load_module_from_file_inlock (NULL, module_path, &mod);
 		if (rv == CKR_OK) {
-
-			rv = load_module_from_file_inlock (NULL, module_path, &mod);
-			if (rv == CKR_OK) {
-
-				/* WARNING: Reentrancy can occur here */
-				rv = initialize_module_inlock_reentrant (mod, NULL);
-			}
+                        /* WARNING: Reentrancy can occur here */
+			rv = initialize_module_inlock_reentrant (mod, NULL);
 		}
+	}
 
-		if (rv == CKR_OK) {
-			*module = unmanaged_for_module_inlock (mod);
-			assert (*module != NULL);
-		}
+	if (rv == CKR_OK) {
+		*module = unmanaged_for_module_inlock (mod);
+		assert (*module != NULL);
+	}
 
-		/*
-		 * If initialization failed, we may need to cleanup.
-		 * If we added this module above, then this will
-		 * clean things up as expected.
-		 */
-		if (rv != CKR_OK)
-			free_modules_when_no_refs_unlocked ();
+        /*
+         * If initialization failed, we may need to cleanup.
+         * If we added this module above, then this will
+         * clean things up as expected.
+         */
+	if (rv != CKR_OK)
+		free_modules_when_no_refs_unlocked ();
 
-		_p11_kit_default_message (rv);
+	_p11_kit_default_message (rv);
 
 	p11_unlock ();
 

@@ -84,7 +84,7 @@ setup (void *unused)
 
 	memset (&test, 0, sizeof (test));
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&test.module);
 	assert (rv == CKR_OK);
 
@@ -141,7 +141,7 @@ setup_writable (void *unused)
 
 	memset (&test, 0, sizeof (test));
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&test.module);
 	assert (rv == CKR_OK);
 
@@ -184,7 +184,7 @@ setup_unreadable (void *unused)
 
 	memset (&test, 0, sizeof (test));
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&test.module);
 	assert (rv == CKR_OK);
 
@@ -274,7 +274,7 @@ test_null_initialize (void)
 	CK_FUNCTION_LIST *module;
 	CK_RV rv;
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&module);
 	assert_num_eq (rv, CKR_OK);
 
@@ -289,7 +289,7 @@ static void
 test_multi_initialize (void)
 {
 	static CK_C_INITIALIZE_ARGS args =
-		{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
+	{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
 	CK_FUNCTION_LIST *module;
 	CK_SESSION_HANDLE session;
 	CK_SLOT_ID slots[8];
@@ -297,7 +297,7 @@ test_multi_initialize (void)
 	CK_ULONG count;
 	CK_RV rv;
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&module);
 	assert_num_eq (rv, CKR_OK);
 
@@ -345,7 +345,7 @@ test_get_slot_info (void)
 	CK_RV rv;
 	int i;
 
-	/* These are the paths passed in in setup() */
+        /* These are the paths passed in in setup() */
 	const char *paths[] = {
 		SRCDIR "/trust/input",
 		SRCDIR "/trust/fixtures/self-signed-with-ku.der",
@@ -362,7 +362,7 @@ test_get_slot_info (void)
 		assert_num_eq (CKR_OK, rv);
 
 		memset (description, ' ', sizeof (description));
-		length = strlen(paths[i]);
+		length = strlen (paths[i]);
 		if (length > sizeof (description))
 			length = sizeof (description);
 		memcpy (description, paths[i], length);
@@ -382,22 +382,22 @@ test_get_token_info (void)
 	CK_RV rv;
 	int i;
 
-	/* These are the paths passed in in setup() */
+        /* These are the paths passed in in setup() */
 	const char *labels[] = {
 		"System Trust",
 		"Default Trust",
 		"the-basename",
 	};
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&module);
 	assert (rv == CKR_OK);
 
 	memset (&args, 0, sizeof (args));
 	args.pReserved = "paths='" \
-		P11_SYSTEM_TRUST_PREFIX "/trust/input" P11_PATH_SEP \
-		P11_DEFAULT_TRUST_PREFIX "/trust/fixtures/blah" P11_PATH_SEP \
-		"/some/other/path/the-basename'";
+			 P11_SYSTEM_TRUST_PREFIX "/trust/input" P11_PATH_SEP \
+			 P11_DEFAULT_TRUST_PREFIX "/trust/fixtures/blah" P11_PATH_SEP \
+			 "/some/other/path/the-basename'";
 	args.flags = CKF_OS_LOCKING_OK;
 
 	rv = module->C_Initialize (&args);
@@ -436,7 +436,7 @@ test_get_session_info (void)
 	assert_num_eq (CKR_OK, rv);
 	assert_num_eq (NUM_SLOTS, count);
 
-	/* Open two sessions with each token */
+        /* Open two sessions with each token */
 	for (i = 0; i < NUM_SLOTS; i++) {
 		rv = test.module->C_OpenSession (slots[i], CKF_SERIAL_SESSION, NULL, NULL, &sessions[i]);
 		assert_num_eq (CKR_OK, rv);
@@ -464,7 +464,7 @@ test_close_all_sessions (void)
 	assert_num_eq (CKR_OK, rv);
 	assert_num_eq (NUM_SLOTS, count);
 
-	/* Open two sessions with each token */
+        /* Open two sessions with each token */
 	for (i = 0; i < NUM_SLOTS; i++) {
 		rv = test.module->C_OpenSession (slots[i], CKF_SERIAL_SESSION, NULL, NULL, &sessions[i][0]);
 		assert_num_eq (CKR_OK, rv);
@@ -479,17 +479,17 @@ test_close_all_sessions (void)
 		assert_num_eq (CKR_OK, rv);
 	}
 
-	/* Close all the sessions on the first token */
+        /* Close all the sessions on the first token */
 	rv = test.module->C_CloseAllSessions (slots[0]);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Those sessions should be closed */
+        /* Those sessions should be closed */
 	rv = test.module->C_GetSessionInfo (sessions[0][0], &info);
 	assert_num_eq (CKR_SESSION_HANDLE_INVALID, rv);
 	rv = test.module->C_GetSessionInfo (sessions[0][1], &info);
 	assert_num_eq (CKR_SESSION_HANDLE_INVALID, rv);
 
-	/* Other sessions should still be open */
+        /* Other sessions should still be open */
 	for (i = 1; i < NUM_SLOTS; i++) {
 		rv = test.module->C_GetSessionInfo (sessions[i][0], &info);
 		assert_num_eq (CKR_OK, rv);
@@ -499,10 +499,10 @@ test_close_all_sessions (void)
 }
 
 static CK_ULONG
-find_objects (CK_ATTRIBUTE *match,
+find_objects (CK_ATTRIBUTE     *match,
               CK_OBJECT_HANDLE *sessions,
               CK_OBJECT_HANDLE *objects,
-              CK_ULONG max_objects)
+              CK_ULONG          max_objects)
 {
 	CK_SESSION_HANDLE session;
 	CK_RV rv;
@@ -532,9 +532,9 @@ find_objects (CK_ATTRIBUTE *match,
 }
 
 static void
-check_trust_object_equiv (CK_SESSION_HANDLE session,
-                          CK_OBJECT_HANDLE trust,
-                          CK_ATTRIBUTE *cert)
+check_trust_object_equiv (CK_SESSION_HANDLE  session,
+                          CK_OBJECT_HANDLE   trust,
+                          CK_ATTRIBUTE      *cert)
 {
 	unsigned char subject[1024];
 	unsigned char issuer[1024];
@@ -543,7 +543,7 @@ check_trust_object_equiv (CK_SESSION_HANDLE session,
 	CK_BBOOL token;
 	CK_RV rv;
 
-	/* The following attributes should be equivalent to the certificate */
+        /* The following attributes should be equivalent to the certificate */
 	CK_ATTRIBUTE equiv[] = {
 		{ CKA_TOKEN, &token, sizeof (token) },
 		{ CKA_PRIVATE, &private, sizeof (private) },
@@ -560,9 +560,9 @@ check_trust_object_equiv (CK_SESSION_HANDLE session,
 }
 
 static void
-check_trust_object_hashes (CK_SESSION_HANDLE session,
-                           CK_OBJECT_HANDLE trust,
-                           CK_ATTRIBUTE *cert)
+check_trust_object_hashes (CK_SESSION_HANDLE  session,
+                           CK_OBJECT_HANDLE   trust,
+                           CK_ATTRIBUTE      *cert)
 {
 	unsigned char sha1[P11_DIGEST_SHA1_LEN];
 	unsigned char md5[P11_DIGEST_MD5_LEN];
@@ -615,9 +615,9 @@ check_has_trust_object (CK_ATTRIBUTE *cert)
 
 static void
 check_certificate (CK_SESSION_HANDLE session,
-                   CK_OBJECT_HANDLE handle)
+                   CK_OBJECT_HANDLE  handle)
 {
-	unsigned char label[4096]= { 0, };
+	unsigned char label[4096] = { 0, };
 	CK_OBJECT_CLASS klass;
 	unsigned char value[4096];
 	unsigned char subject[1024];
@@ -651,11 +651,11 @@ check_certificate (CK_SESSION_HANDLE session,
 		{ CKA_INVALID, },
 	};
 
-	/* Note that we don't pass the CKA_INVALID attribute in */
+        /* Note that we don't pass the CKA_INVALID attribute in */
 	rv = test.module->C_GetAttributeValue (session, handle, attrs, 14);
 	assert_num_eq (rv, CKR_OK);
 
-	/* If this is the cacert3 certificate, check its values */
+        /* If this is the cacert3 certificate, check its values */
 	if (memcmp (value, test_cacert3_ca_der, sizeof (test_cacert3_ca_der)) == 0) {
 		CK_BBOOL trusted;
 		CK_BBOOL vtrue = CK_TRUE;
@@ -672,14 +672,14 @@ check_certificate (CK_SESSION_HANDLE session,
 
 		test_check_cacert3_ca (attrs, NULL);
 
-		/* Get anchor specific attributes */
+                /* Get anchor specific attributes */
 		rv = test.module->C_GetAttributeValue (session, handle, anchor, 1);
 		assert (rv == CKR_OK);
 
-		/* It lives in the trusted directory */
+                /* It lives in the trusted directory */
 		test_check_attrs (check, anchor);
 
-	/* Other certificates, we can't check the values */
+                /* Other certificates, we can't check the values */
 	} else {
 		test_check_object (attrs, CKO_CERTIFICATE, NULL);
 	}
@@ -768,7 +768,7 @@ test_find_builtin (void)
 	CK_SESSION_HANDLE sessions[16];
 	CK_ULONG count;
 
-	/* One per token */
+        /* One per token */
 	count = find_objects (match, sessions, objects, 16);
 	assert_num_eq (NUM_SLOTS, count);
 }
@@ -1038,16 +1038,16 @@ test_find_serial_der_decoded (void)
 	CK_ULONG count;
 	CK_RV rv;
 
-	/*
-	 * WORKAROUND: NSS calls us asking for CKA_SERIAL_NUMBER items that are
-	 * not DER encoded. It shouldn't be doing this. We never return any certificate
-	 * serial numbers that are not DER encoded.
-	 *
-	 * So work around the issue here while the NSS guys fix this issue.
-	 * This code should be removed in future versions.
-	 *
-	 * See work_around_broken_nss_serial_number_lookups().
-	 */
+        /*
+         * WORKAROUND: NSS calls us asking for CKA_SERIAL_NUMBER items that are
+         * not DER encoded. It shouldn't be doing this. We never return any certificate
+         * serial numbers that are not DER encoded.
+         *
+         * So work around the issue here while the NSS guys fix this issue.
+         * This code should be removed in future versions.
+         *
+         * See work_around_broken_nss_serial_number_lookups().
+         */
 
 	rv = test.module->C_OpenSession (test.slots[0], CKF_SERIAL_SESSION, NULL, NULL, &session);
 	assert_num_eq (CKR_OK, rv);
@@ -1055,7 +1055,7 @@ test_find_serial_der_decoded (void)
 	rv = test.module->C_CreateObject (session, object, 2, &handle);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Do a standard find for the same object */
+        /* Do a standard find for the same object */
 	rv = test.module->C_FindObjectsInit (session, object, 2);
 	assert_num_eq (CKR_OK, rv);
 	rv = test.module->C_FindObjects (session, &check, 1, &count);
@@ -1065,7 +1065,7 @@ test_find_serial_der_decoded (void)
 	rv = test.module->C_FindObjectsFinal (session);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Do a find for the serial number decoded */
+        /* Do a find for the serial number decoded */
 	rv = test.module->C_FindObjectsInit (session, match_decoded, 2);
 	assert_num_eq (CKR_OK, rv);
 	rv = test.module->C_FindObjects (session, &check, 1, &count);
@@ -1105,7 +1105,7 @@ test_find_serial_der_mismatch (void)
 	rv = test.module->C_CreateObject (session, object, 2, &handle);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Do a find with a null serial number, no match */
+        /* Do a find with a null serial number, no match */
 	rv = test.module->C_FindObjectsInit (session, match, 2);
 	assert_num_eq (CKR_OK, rv);
 	rv = test.module->C_FindObjects (session, &check, 1, &count);
@@ -1114,7 +1114,7 @@ test_find_serial_der_mismatch (void)
 	rv = test.module->C_FindObjectsFinal (session);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Do a find with a wrong length, no match */
+        /* Do a find with a wrong length, no match */
 	match[0].pValue = "at";
 	match[0].ulValueLen = 2;
 	rv = test.module->C_FindObjectsInit (session, match, 2);
@@ -1125,7 +1125,7 @@ test_find_serial_der_mismatch (void)
 	rv = test.module->C_FindObjectsFinal (session);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Do a find with a right length, wrong value, no match */
+        /* Do a find with a right length, wrong value, no match */
 	match[0].pValue = "one";
 	match[0].ulValueLen = 3;
 	rv = test.module->C_FindObjectsInit (session, match, 2);
@@ -1146,7 +1146,7 @@ test_login_logout (void)
 	rv = test.module->C_OpenSession (test.slots[0], CKF_SERIAL_SESSION, NULL, NULL, &session);
 	assert (rv == CKR_OK);
 
-	/* Just testing our stubs for now */
+        /* Just testing our stubs for now */
 
 	rv = test.module->C_Login (session, CKU_USER, NULL, 0);
 	assert (rv == CKR_USER_TYPE_INVALID);
@@ -1182,12 +1182,12 @@ test_session_read_only_create (void)
 	CK_OBJECT_HANDLE handle;
 	CK_RV rv;
 
-	/* Read-only session */
+        /* Read-only session */
 	rv = test.module->C_OpenSession (test.slots[0], CKF_SERIAL_SESSION,
-	                                 NULL, NULL, &session);
+					 NULL, NULL, &session);
 	assert (rv == CKR_OK);
 
-	/* Create a token object */
+        /* Create a token object */
 	rv = test.module->C_CreateObject (session, original, 4, &handle);
 	assert_num_eq (rv, CKR_SESSION_READ_ONLY);
 }
@@ -1219,16 +1219,16 @@ test_create_and_write (void)
 	CK_RV rv;
 	int ret;
 
-	/* Read-only session */
+        /* Read-only session */
 	rv = test.module->C_OpenSession (test.slots[0], CKF_SERIAL_SESSION | CKF_RW_SESSION,
-	                                 NULL, NULL, &session);
+					 NULL, NULL, &session);
 	assert_num_eq (rv, CKR_OK);
 
-	/* Create a token object */
+        /* Create a token object */
 	rv = test.module->C_CreateObject (session, original, 4, &handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* The expected file name */
+        /* The expected file name */
 	path = p11_path_build (test.directory, "yay.p11-kit", NULL);
 	p11_parser_formats (test.parser, p11_parser_format_persist, NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
@@ -1269,23 +1269,23 @@ test_modify_and_write (void)
 	CK_RV rv;
 	int ret;
 
-	/* Read-only session */
+        /* Read-only session */
 	rv = test.module->C_OpenSession (test.slots[0], CKF_SERIAL_SESSION | CKF_RW_SESSION,
-	                                 NULL, NULL, &session);
+					 NULL, NULL, &session);
 	assert_num_eq (rv, CKR_OK);
 
-	/* Create a token object */
+        /* Create a token object */
 	rv = test.module->C_CreateObject (session, original, 5, &handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* Now modify the object */
+        /* Now modify the object */
 	original[0].pValue = "nine";
 	original[0].ulValueLen = 4;
 
 	rv = test.module->C_SetAttributeValue (session, handle, original, 5);
 	assert_num_eq (rv, CKR_OK);
 
-	/* The expected file name */
+        /* The expected file name */
 	path = p11_path_build (test.directory, "yay.p11-kit", NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
 	assert_num_eq (ret, P11_PARSE_SUCCESS);
@@ -1309,22 +1309,22 @@ test_token_write_protected (void)
 	CK_RV rv;
 	int i;
 
-	/* These are the paths passed in in setup() */
+        /* These are the paths passed in in setup() */
 	const char *labels[] = {
 		"System Trust",
 		"Default Trust",
 		"the-basename",
 	};
 
-	/* This is the entry point of the trust module, linked to this test */
+        /* This is the entry point of the trust module, linked to this test */
 	rv = C_GetFunctionList (&module);
 	assert (rv == CKR_OK);
 
 	memset (&args, 0, sizeof (args));
 	args.pReserved = "paths='" \
-		P11_SYSTEM_TRUST_PREFIX "/trust/input" P11_PATH_SEP \
-		P11_DEFAULT_TRUST_PREFIX "/trust/fixtures/blah" P11_PATH_SEP \
-		"/some/other/path/the-basename'";
+			 P11_SYSTEM_TRUST_PREFIX "/trust/input" P11_PATH_SEP \
+			 P11_DEFAULT_TRUST_PREFIX "/trust/fixtures/blah" P11_PATH_SEP \
+			 "/some/other/path/the-basename'";
 	args.flags = CKF_OS_LOCKING_OK;
 
 	rv = module->C_Initialize (&args);
@@ -1344,14 +1344,14 @@ test_token_write_protected (void)
 		assert (memcmp (info.label, label, sizeof (label)) == 0);
 
 		switch (i) {
-		case 0:
-			assert_num_cmp (0, ==, info.flags & CKF_WRITE_PROTECTED);
-			break;
-		case 1:
-			assert_num_cmp (0, !=, info.flags & CKF_WRITE_PROTECTED);
-			break;
-		default:
-			break;
+			case 0:
+				assert_num_cmp (0, ==, info.flags & CKF_WRITE_PROTECTED);
+				break;
+			case 1:
+				assert_num_cmp (0, !=, info.flags & CKF_WRITE_PROTECTED);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -1360,7 +1360,7 @@ test_token_write_protected (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

@@ -44,14 +44,14 @@
 static size_t called = 0;
 
 static CK_RV
-override_get_slot_list (CK_BBOOL token_present,
-			CK_SLOT_ID_PTR slot_list,
-			CK_ULONG_PTR count)
+override_get_slot_list (CK_BBOOL       token_present,
+                        CK_SLOT_ID_PTR slot_list,
+                        CK_ULONG_PTR   count)
 {
-	/* Return 0 on the first attempt to retrieve slot list.  Note
-	 * that this function is typically called twice: first to get
-	 * the number of slots, and then to retrieve the slot list.
-	 */
+        /* Return 0 on the first attempt to retrieve slot list.  Note
+         * that this function is typically called twice: first to get
+         * the number of slots, and then to retrieve the slot list.
+         */
 	if (called++ < 2) {
 		*count = 0;
 		return CKR_OK;

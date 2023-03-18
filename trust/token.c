@@ -66,7 +66,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -89,31 +89,31 @@ struct _p11_token {
 };
 
 static bool
-loader_is_necessary (p11_token *token,
-                     const char *filename,
-                     struct stat *sb)
+loader_is_necessary (p11_token   *token,
+		     const char  *filename,
+		     struct stat *sb)
 {
 	struct stat *last;
 
 	last = p11_dict_get (token->loaded, filename);
 
-	/* Never seen this before, load it */
+        /* Never seen this before, load it */
 	if (last == NULL)
 		return true;
 
-	/*
-	 * If any of these are different assume that the file
-	 * needs to be reloaded
-	 */
+        /*
+         * If any of these are different assume that the file
+         * needs to be reloaded
+         */
 	return (sb->st_mode != last->st_mode ||
-	        sb->st_mtime != last->st_mtime ||
-	        sb->st_size != last->st_size);
+		sb->st_mtime != last->st_mtime ||
+		sb->st_size != last->st_size);
 }
 
 static void
-loader_was_loaded (p11_token *token,
-                   const char *filename,
-                   struct stat *sb)
+loader_was_loaded (p11_token   *token,
+		   const char  *filename,
+		   struct stat *sb)
 {
 	char *key;
 
@@ -123,21 +123,21 @@ loader_was_loaded (p11_token *token,
 	sb = memdup (sb, sizeof (struct stat));
 	return_if_fail (sb != NULL);
 
-	/* Track the info about this file, so we don't reload unnecessarily */
+        /* Track the info about this file, so we don't reload unnecessarily */
 	if (!p11_dict_set (token->loaded, key, sb))
 		return_if_reached ();
 }
 
 static bool
-loader_not_loaded (p11_token *token,
+loader_not_loaded (p11_token  *token,
                    const char *filename)
 {
-	/* No longer track info about this file */
+        /* No longer track info about this file */
 	return p11_dict_remove (token->loaded, filename);
 }
 
 static void
-loader_gone_file (p11_token *token,
+loader_gone_file (p11_token  *token,
                   const char *filename)
 {
 	CK_ATTRIBUTE origin[] = {
@@ -149,20 +149,20 @@ loader_gone_file (p11_token *token,
 
 	p11_index_load (token->index);
 
-	/* Remove everything at this origin */
+        /* Remove everything at this origin */
 	rv = p11_index_replace_all (token->index, origin, CKA_INVALID, NULL);
 	return_if_fail (rv == CKR_OK);
 
 	p11_index_finish (token->index);
 
-	/* No longer track info about this file */
+        /* No longer track info about this file */
 	loader_not_loaded (token, filename);
 }
 
 static int
-loader_load_file (p11_token *token,
-                  const char *filename,
-                  struct stat *sb)
+loader_load_file (p11_token   *token,
+		  const char  *filename,
+		  struct stat *sb)
 {
 	CK_ATTRIBUTE origin[] = {
 		{ CKA_X_ORIGIN, (void *)filename, strlen (filename) },
@@ -175,41 +175,41 @@ loader_load_file (p11_token *token,
 	int ret;
 	int i;
 
-	/* Check if this file is already loaded */
+        /* Check if this file is already loaded */
 	if (!loader_is_necessary (token, filename, sb))
 		return 0;
 
 	flags = P11_PARSE_FLAG_NONE;
 
-	/* If it's in the anchors subdirectory, treat as an anchor */
+        /* If it's in the anchors subdirectory, treat as an anchor */
 	if (p11_path_prefix (filename, token->anchors))
 		flags = P11_PARSE_FLAG_ANCHOR;
 
-	/* If it's in the blocklist subdirectory, treat as a blocklist */
+        /* If it's in the blocklist subdirectory, treat as a blocklist */
 	else if (p11_path_prefix (filename, token->blocklist))
 		flags = P11_PARSE_FLAG_BLOCKLIST;
 
-	/* If the token is just one path, then assume they are anchors */
+        /* If the token is just one path, then assume they are anchors */
 	else if (strcmp (filename, token->path) == 0 && !S_ISDIR (sb->st_mode))
 		flags = P11_PARSE_FLAG_ANCHOR;
 
 	ret = p11_parse_file (token->parser, filename, sb, flags);
 
 	switch (ret) {
-	case P11_PARSE_SUCCESS:
-		p11_debug ("loaded: %s", filename);
-		break;
-	case P11_PARSE_UNRECOGNIZED:
-		p11_debug ("skipped: %s", filename);
-		loader_gone_file (token, filename);
-		return 0;
-	default:
-		p11_debug ("failed to parse: %s", filename);
-		loader_gone_file (token, filename);
-		return -1;
+		case P11_PARSE_SUCCESS:
+			p11_debug ("loaded: %s", filename);
+			break;
+		case P11_PARSE_UNRECOGNIZED:
+			p11_debug ("skipped: %s", filename);
+			loader_gone_file (token, filename);
+			return 0;
+		default:
+			p11_debug ("failed to parse: %s", filename);
+			loader_gone_file (token, filename);
+			return -1;
 	}
 
-	/* Update each parsed object with the origin */
+        /* Update each parsed object with the origin */
 	parsed = p11_parser_parsed (token->parser);
 	for (i = 0; i < parsed->num; i++) {
 		parsed->elem[i] = p11_attrs_build (parsed->elem[i], origin, NULL);
@@ -218,7 +218,7 @@ loader_load_file (p11_token *token,
 
 	p11_index_load (token->index);
 
-	/* Now place all of these in the index */
+        /* Now place all of these in the index */
 	rv = p11_index_replace_all (token->index, origin, CKA_CLASS, parsed);
 
 	p11_index_finish (token->index);
@@ -233,7 +233,7 @@ loader_load_file (p11_token *token,
 }
 
 static int
-loader_load_if_file (p11_token *token,
+loader_load_if_file (p11_token  *token,
                      const char *path)
 {
 	struct stat sb;
@@ -241,20 +241,19 @@ loader_load_if_file (p11_token *token,
 	if (stat (path, &sb) < 0) {
 		if (errno != ENOENT)
 			p11_message_err (errno, _("couldn't stat path: %d: %s"), errno, path);
-
 	} else if (!S_ISDIR (sb.st_mode)) {
 		return loader_load_file (token, path, &sb);
 	}
 
-	/* Perhaps the file became unloadable, so track properly */
+        /* Perhaps the file became unloadable, so track properly */
 	loader_gone_file (token, path);
 	return 0;
 }
 
 static int
-loader_load_directory (p11_token *token,
+loader_load_directory (p11_token  *token,
                        const char *directory,
-                       p11_dict *present)
+                       p11_dict   *present)
 {
 	p11_dictiter iter;
 	struct dirent *dp;
@@ -263,7 +262,7 @@ loader_load_directory (p11_token *token,
 	int ret;
 	DIR *dir;
 
-	/* First we load all the modules */
+        /* First we load all the modules */
 	dir = opendir (directory);
 	if (!dir) {
 		p11_message_err (errno, _("couldn't list directory: %s"), directory);
@@ -279,7 +278,7 @@ loader_load_directory (p11_token *token,
 		if (ret >= 0)
 			total += ret;
 
-		/* Make note that this file was seen */
+                /* Make note that this file was seen */
 		p11_dict_remove (present, path);
 
 		free (path);
@@ -287,7 +286,7 @@ loader_load_directory (p11_token *token,
 
 	closedir (dir);
 
-	/* All other files that were present, not here now */
+        /* All other files that were present, not here now */
 	p11_dict_iterate (present, &iter);
 	while (p11_dict_next (&iter, (void **)&path, NULL))
 		loader_gone_file (token, path);
@@ -296,9 +295,9 @@ loader_load_directory (p11_token *token,
 }
 
 static int
-loader_load_path (p11_token *token,
+loader_load_path (p11_token  *token,
                   const char *path,
-                  bool *is_dir)
+                  bool       *is_dir)
 {
 	p11_dictiter iter;
 	p11_dict *present;
@@ -313,12 +312,11 @@ loader_load_path (p11_token *token,
 		loader_gone_file (token, path);
 		*is_dir = false;
 		ret = 0;
-
 	} else if (S_ISDIR (sb.st_mode)) {
 		*is_dir = true;
 		ret = 0;
 
-		/* All the files we know about at this path */
+                /* All the files we know about at this path */
 		present = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, NULL, NULL);
 		p11_dict_iterate (token->loaded, &iter);
 		while (p11_dict_next (&iter, (void **)&filename, NULL)) {
@@ -328,11 +326,11 @@ loader_load_path (p11_token *token,
 			}
 		}
 
-		/* If the directory has changed, reload it */
+                /* If the directory has changed, reload it */
 		if (loader_is_necessary (token, path, &sb)) {
 			ret = loader_load_directory (token, path, present);
 
-		/* Directory didn't change, but maybe files changed? */
+                        /* Directory didn't change, but maybe files changed? */
 		} else {
 			total = 0;
 			p11_dict_iterate (present, &iter);
@@ -345,7 +343,6 @@ loader_load_path (p11_token *token,
 
 		p11_dict_free (present);
 		loader_was_loaded (token, path, &sb);
-
 	} else {
 		*is_dir = false;
 		ret = loader_load_file (token, path, &sb);
@@ -404,7 +401,7 @@ p11_token_load (p11_token *token)
 }
 
 bool
-p11_token_reload (p11_token *token,
+p11_token_reload (p11_token    *token,
                   CK_ATTRIBUTE *attrs)
 {
 	CK_ATTRIBUTE *attr;
@@ -426,7 +423,6 @@ p11_token_reload (p11_token *token,
 			p11_message_err (errno, _("cannot access trust file: %s"), origin);
 		}
 		ret = false;
-
 	} else {
 		ret = loader_load_file (token, origin, &sb) > 0;
 	}
@@ -437,19 +433,19 @@ p11_token_reload (p11_token *token,
 
 static bool
 check_directory (const char *path,
-                 bool *make_directory,
-                 bool *is_writable)
+                 bool       *make_directory,
+                 bool       *is_writable)
 {
 	struct stat sb;
 	char *parent;
 	bool dummy;
 	bool ret;
 
-	/*
-	 * This function attempts to determine whether a later write
-	 * to this token will succeed so we can setup the appropriate
-	 * token flags. Yes, it is racy, but that's inherent to the problem.
-	 */
+        /*
+         * This function attempts to determine whether a later write
+         * to this token will succeed so we can setup the appropriate
+         * token flags. Yes, it is racy, but that's inherent to the problem.
+         */
 
 	if (stat (path, &sb) == 0) {
 		*make_directory = false;
@@ -458,22 +454,22 @@ check_directory (const char *path,
 	}
 
 	switch (errno) {
-	case EACCES:
-		*is_writable = false;
-		*make_directory = false;
-		return true;
-	case ENOENT:
-		*make_directory = true;
-		parent = p11_path_parent (path);
-		if (parent == NULL)
-			ret = false;
-		else
-			ret = check_directory (parent, &dummy, is_writable);
-		free (parent);
-		return ret;
-	default:
-		p11_message_err (errno, _("couldn't access: %s"), path);
-		return false;
+		case EACCES:
+			*is_writable = false;
+			*make_directory = false;
+			return true;
+		case ENOENT:
+			*make_directory = true;
+			parent = p11_path_parent (path);
+			if (parent == NULL)
+				ret = false;
+			else
+				ret = check_directory (parent, &dummy, is_writable);
+			free (parent);
+			return ret;
+		default:
+			p11_message_err (errno, _("couldn't access: %s"), path);
+			return false;
 	}
 }
 
@@ -482,16 +478,16 @@ check_token_directory (p11_token *token)
 {
 	if (!token->checked_path) {
 		token->checked_path = check_directory (token->path,
-		                                       &token->make_directory,
-		                                       &token->is_writable);
+						       &token->make_directory,
+						       &token->is_writable);
 	}
 
 	return token->checked_path;
 }
 
 static bool
-writer_remove_origin (p11_token *token,
-                         CK_ATTRIBUTE *origin)
+writer_remove_origin (p11_token    *token,
+                      CK_ATTRIBUTE *origin)
 {
 	bool ret = true;
 	char *path;
@@ -509,7 +505,7 @@ writer_remove_origin (p11_token *token,
 }
 
 static p11_save_file *
-writer_overwrite_origin (p11_token *token,
+writer_overwrite_origin (p11_token    *token,
                          CK_ATTRIBUTE *origin)
 {
 	p11_save_file *file;
@@ -544,7 +540,7 @@ writer_suggest_name (CK_ATTRIBUTE *attrs)
 }
 
 static p11_save_file *
-writer_create_origin (p11_token *token,
+writer_create_origin (p11_token    *token,
                       CK_ATTRIBUTE *attrs)
 {
 	p11_save_file *file;
@@ -587,9 +583,9 @@ writer_put_header (p11_save_file *file)
 
 static CK_RV
 writer_put_object (p11_save_file *file,
-                   p11_persist *persist,
-                   p11_buffer *buffer,
-                   CK_ATTRIBUTE *attrs)
+                   p11_persist   *persist,
+                   p11_buffer    *buffer,
+                   CK_ATTRIBUTE  *attrs)
 {
 	if (!p11_buffer_reset (buffer, 0))
 		assert_not_reached ();
@@ -616,32 +612,32 @@ mkdir_with_parents (const char *path)
 		return true;
 
 	switch (errno) {
-	case ENOENT:
-		parent = p11_path_parent (path);
-		if (parent != NULL) {
-			ret = mkdir_with_parents (parent);
-			free (parent);
-			if (ret == true) {
+		case ENOENT:
+			parent = p11_path_parent (path);
+			if (parent != NULL) {
+				ret = mkdir_with_parents (parent);
+				free (parent);
+				if (ret == true) {
 #ifdef OS_UNIX
-				if (mkdir (path, mode) == 0)
+					if (mkdir (path, mode) == 0)
 #else
-				if (mkdir (path) == 0)
+					if (mkdir (path) == 0)
 #endif
-					return true;
+						return true;
+				}
 			}
-		}
-		/* fall through */
-	default:
-		p11_message_err (errno, _("couldn't create directory: %s"), path);
-		return false;
+                /* fall through */
+		default:
+			p11_message_err (errno, _("couldn't create directory: %s"), path);
+			return false;
 	}
 }
 
 static CK_RV
-on_index_build (void *data,
-                p11_index *index,
-                CK_ATTRIBUTE *attrs,
-                CK_ATTRIBUTE *merge,
+on_index_build (void          *data,
+                p11_index     *index,
+                CK_ATTRIBUTE  *attrs,
+                CK_ATTRIBUTE  *merge,
                 CK_ATTRIBUTE **extra)
 {
 	p11_token *token = data;
@@ -649,10 +645,10 @@ on_index_build (void *data,
 }
 
 static CK_RV
-on_index_store (void *data,
-                p11_index *index,
-                CK_OBJECT_HANDLE handle,
-                CK_ATTRIBUTE **attrs)
+on_index_store (void              *data,
+                p11_index         *index,
+                CK_OBJECT_HANDLE   handle,
+                CK_ATTRIBUTE     **attrs)
 {
 	p11_token *token = data;
 	CK_OBJECT_HANDLE *other;
@@ -666,7 +662,7 @@ on_index_store (void *data,
 	CK_RV rv;
 	int i;
 
-	/* Signifies that data is being loaded, don't write out */
+        /* Signifies that data is being loaded, don't write out */
 	if (p11_index_loading (index))
 		return CKR_OK;
 
@@ -679,13 +675,12 @@ on_index_store (void *data,
 		token->make_directory = false;
 	}
 
-	/* Do we already have a filename? */
+        /* Do we already have a filename? */
 	origin = p11_attrs_find (*attrs, CKA_X_ORIGIN);
 	if (origin == NULL) {
 		file = writer_create_origin (token, *attrs);
 		creating = true;
 		other = NULL;
-
 	} else {
 		other = p11_index_find_all (index, origin, 1);
 		file = writer_overwrite_origin (token, origin);
@@ -732,8 +727,8 @@ on_index_store (void *data,
 }
 
 static CK_RV
-on_index_remove (void *data,
-                 p11_index *index,
+on_index_remove (void         *data,
+                 p11_index    *index,
                  CK_ATTRIBUTE *attrs)
 {
 	p11_token *token = data;
@@ -746,18 +741,18 @@ on_index_remove (void *data,
 	CK_RV rv = CKR_OK;
 	int i;
 
-	/* Signifies that data is being loaded, don't write out */
+        /* Signifies that data is being loaded, don't write out */
 	if (p11_index_loading (index))
 		return CKR_OK;
 
 	if (!check_token_directory (token))
 		return CKR_FUNCTION_FAILED;
 
-	/* We should have a file name */
+        /* We should have a file name */
 	origin = p11_attrs_find (attrs, CKA_X_ORIGIN);
 	return_val_if_fail (origin != NULL, CKR_GENERAL_ERROR);
 
-	/* If there are other objects in this file, then rewrite it */
+        /* If there are other objects in this file, then rewrite it */
 	other = p11_index_find_all (index, origin, 1);
 	if (other && other[0]) {
 		file = writer_overwrite_origin (token, origin);
@@ -786,7 +781,7 @@ on_index_remove (void *data,
 		p11_persist_free (persist);
 		p11_buffer_uninit (&buffer);
 
-	/* Otherwise just remove the file */
+                /* Otherwise just remove the file */
 	} else {
 		if (!writer_remove_origin (token, origin))
 			rv = CKR_FUNCTION_FAILED;
@@ -798,10 +793,10 @@ on_index_remove (void *data,
 }
 
 static void
-on_index_notify (void *data,
-                 p11_index *index,
-                 CK_OBJECT_HANDLE handle,
-                 CK_ATTRIBUTE *attrs)
+on_index_notify (void             *data,
+                 p11_index        *index,
+                 CK_OBJECT_HANDLE  handle,
+                 CK_ATTRIBUTE     *attrs)
 {
 	p11_token *token = data;
 	p11_builder_changed (token->builder, index, handle, attrs);
@@ -825,10 +820,10 @@ p11_token_free (p11_token *token)
 }
 
 p11_token *
-p11_token_new (CK_SLOT_ID slot,
+p11_token_new (CK_SLOT_ID  slot,
                const char *path,
                const char *label,
-               int flags)
+               int         flags)
 {
 	p11_token *token;
 
@@ -845,16 +840,16 @@ p11_token_new (CK_SLOT_ID slot,
 	}
 
 	token->index = p11_index_new (on_index_build,
-	                              on_index_store,
-	                              on_index_remove,
-	                              on_index_notify,
-	                              token);
+				      on_index_store,
+				      on_index_remove,
+				      on_index_notify,
+				      token);
 	return_val_if_fail (token->index != NULL, NULL);
 
 	token->parser = p11_parser_new (p11_builder_get_cache (token->builder));
 	return_val_if_fail (token->parser != NULL, NULL);
 	p11_parser_formats (token->parser, p11_parser_format_persist,
-	                    p11_parser_format_x509, p11_parser_format_pem, NULL);
+			    p11_parser_format_x509, p11_parser_format_pem, NULL);
 
 	token->loaded = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, free, free);
 	return_val_if_fail (token->loaded != NULL, NULL);

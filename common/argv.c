@@ -43,8 +43,8 @@
 
 bool
 p11_argv_parse (const char *string,
-                void (*sink) (char *, void *),
-                void *argument)
+		void ( *sink ) (char *, void *),
+		void *argument)
 {
 	char quote = '\0';
 	char *src, *dup, *at, *arg;
@@ -58,12 +58,11 @@ p11_argv_parse (const char *string,
 
 	arg = at = src;
 	for (src = dup; *src; src++) {
-
-		/* Matching quote */
+                /* Matching quote */
 		if (quote == *src) {
 			quote = '\0';
 
-		/* Inside of quotes */
+                        /* Inside of quotes */
 		} else if (quote != '\0') {
 			if (*src == '\\') {
 				src++;
@@ -76,29 +75,29 @@ p11_argv_parse (const char *string,
 			}
 			*at++ = *src;
 
-		/* Space, not inside of quotes */
+                        /* Space, not inside of quotes */
 		} else if (isspace (*src)) {
 			*at = 0;
 			sink (arg, argument);
 			arg = at;
 
-		/* Other character outside of quotes */
+                        /* Other character outside of quotes */
 		} else {
 			switch (*src) {
-			case '\'':
-			case '"':
-				quote = *src;
-				break;
-			case '\\':
-				*at++ = *src++;
-				if (!*src) {
-					ret = false;
-					goto done;
-				}
-			/* fall through */
-			default:
-				*at++ = *src;
-				break;
+				case '\'':
+				case '"':
+					quote = *src;
+					break;
+				case '\\':
+					*at++ = *src++;
+					if (!*src) {
+						ret = false;
+						goto done;
+					}
+                                /* fall through */
+				default:
+					*at++ = *src;
+					break;
 			}
 		}
 	}

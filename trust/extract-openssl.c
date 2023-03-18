@@ -59,20 +59,20 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 /* These functions are declared with a global scope for testing */
 
-void        p11_openssl_canon_string           (char *str,
-                                                size_t *len);
+void        p11_openssl_canon_string (char   *str,
+				      size_t *len);
 
-bool        p11_openssl_canon_string_der       (p11_buffer *der);
+bool        p11_openssl_canon_string_der (p11_buffer *der);
 
-bool        p11_openssl_canon_name_der         (p11_dict *asn1_defs,
-                                                p11_buffer *der);
+bool        p11_openssl_canon_name_der (p11_dict   *asn1_defs,
+					p11_buffer *der);
 
 static p11_array *
 empty_usages (void)
@@ -86,7 +86,7 @@ known_usages (p11_array *oids)
 	char *string;
 	int i;
 
-	static const char *const strings[] = {
+	static const char * const strings[] = {
 		P11_OID_SERVER_AUTH_STR,
 		P11_OID_CLIENT_AUTH_STR,
 		P11_OID_CODE_SIGNING_STR,
@@ -109,9 +109,9 @@ known_usages (p11_array *oids)
 }
 
 static bool
-load_usage_ext (p11_enumerate *ex,
-                const unsigned char *ext_oid,
-                p11_array **oids)
+load_usage_ext (p11_enumerate       *ex,
+		const unsigned char *ext_oid,
+		p11_array          **oids)
 {
 	unsigned char *value;
 	asn1_node ext = NULL;
@@ -135,22 +135,21 @@ load_usage_ext (p11_enumerate *ex,
 }
 
 static bool
-write_usages (asn1_node asn,
+write_usages (asn1_node   asn,
               const char *field,
-              p11_array *oids)
+              p11_array  *oids)
 {
 	char *last;
 	int ret;
 	int i;
 
-	/*
-	 * No oids? Then doing this will make the entire optional
-	 * field go away
-	 */
+        /*
+         * No oids? Then doing this will make the entire optional
+         * field go away
+         */
 	if (oids == NULL) {
 		ret = asn1_write_value (asn, field, NULL, 0);
 		return_val_if_fail (ret == ASN1_SUCCESS, false);
-
 	} else {
 		if (asprintf (&last, "%s.?LAST", field) < 0)
 			return_val_if_reached (false);
@@ -169,7 +168,7 @@ write_usages (asn1_node asn,
 
 static bool
 write_trust_and_rejects (p11_enumerate *ex,
-                         asn1_node asn)
+                         asn1_node      asn)
 {
 	p11_array *trusts = NULL;
 	p11_array *rejects = NULL;
@@ -185,12 +184,11 @@ write_trust_and_rejects (p11_enumerate *ex,
 		return_val_if_reached (false);
 
 	if (distrust) {
-
-		/*
-		 * If this is on the blocklist then, make sure we have
-		 * an empty trusts field and add as many things to rejects
-		 * as possible.
-		 */
+                /*
+                 * If this is on the blocklist then, make sure we have
+                 * an empty trusts field and add as many things to rejects
+                 * as possible.
+                 */
 		trusts = NULL;
 
 		if (!rejects)
@@ -198,23 +196,19 @@ write_trust_and_rejects (p11_enumerate *ex,
 		if (!known_usages (rejects))
 			return_val_if_reached (false);
 		return_val_if_fail (rejects != NULL, false);
-
 	} else if (trust) {
-
-		/*
-		 * If this is an anchor, then try and guarantee that there
-		 * are some trust anchors.
-		 */
+                /*
+                 * If this is an anchor, then try and guarantee that there
+                 * are some trust anchors.
+                 */
 
 		if (!load_usage_ext (ex, P11_OID_EXTENDED_KEY_USAGE, &trusts))
 			return_val_if_reached (false);
-
 	} else {
-
-		/*
-		 * This is not an anchor, always put an empty trusts
-		 * section, with possible rejects, loaded above
-		 */
+                /*
+                 * This is not an anchor, always put an empty trusts
+                 * section, with possible rejects, loaded above
+                 */
 
 		trusts = empty_usages ();
 	}
@@ -230,7 +224,7 @@ write_trust_and_rejects (p11_enumerate *ex,
 
 static bool
 write_keyid (p11_enumerate *ex,
-             asn1_node asn)
+             asn1_node      asn)
 {
 	unsigned char *value = NULL;
 	asn1_node ext = NULL;
@@ -253,7 +247,7 @@ write_keyid (p11_enumerate *ex,
 
 static bool
 write_alias (p11_enumerate *ex,
-             asn1_node asn)
+             asn1_node      asn)
 {
 	CK_ATTRIBUTE *label;
 	int ret;
@@ -272,7 +266,7 @@ write_alias (p11_enumerate *ex,
 
 static bool
 write_other (p11_enumerate *ex,
-             asn1_node asn)
+             asn1_node      asn)
 {
 	int ret;
 
@@ -284,7 +278,7 @@ write_other (p11_enumerate *ex,
 
 static bool
 prepare_pem_contents (p11_enumerate *ex,
-                      p11_buffer *buffer)
+                      p11_buffer    *buffer)
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
 	unsigned char *der;
@@ -323,7 +317,7 @@ prepare_pem_contents (p11_enumerate *ex,
 
 bool
 p11_extract_openssl_bundle (p11_enumerate *ex,
-                            const char *destination)
+                            const char    *destination)
 {
 	p11_save_file *file;
 	p11_buffer output;
@@ -370,10 +364,10 @@ p11_extract_openssl_bundle (p11_enumerate *ex,
 		ret = false;
 	}
 
-	/*
-	 * This will produce an empty file (which is a valid PEM bundle) if no
-	 * certificates were found.
-	 */
+        /*
+         * This will produce an empty file (which is a valid PEM bundle) if no
+         * certificates were found.
+         */
 
 	if (!p11_save_finish_file (file, NULL, ret))
 		ret = false;
@@ -381,7 +375,7 @@ p11_extract_openssl_bundle (p11_enumerate *ex,
 }
 
 void
-p11_openssl_canon_string (char *str,
+p11_openssl_canon_string (char   *str,
                           size_t *len)
 {
 	bool nsp;
@@ -390,22 +384,22 @@ p11_openssl_canon_string (char *str,
 	char *out;
 	char *end;
 
-	/*
-	 * Now that the string is UTF-8 here we convert the string to the
-	 * OpenSSL canonical form. This is a bit odd and openssl specific.
-	 * Basically they ignore any char over 127, do ascii tolower() stuff
-	 * and collapse spaces based on isspace().
-	 */
+        /*
+         * Now that the string is UTF-8 here we convert the string to the
+         * OpenSSL canonical form. This is a bit odd and openssl specific.
+         * Basically they ignore any char over 127, do ascii tolower() stuff
+         * and collapse spaces based on isspace().
+         */
 
 	for (in = out = str, end = out + *len, sp = false, nsp = false; in < end; in++) {
 		if (*in & 0x80 || !isspace (*in)) {
-			/* If there has been a space, then add one */
+                        /* If there has been a space, then add one */
 			if (sp)
 				*out++ = ' ';
 			*out++ = (*in & 0x80) ? *in : p11_ascii_tolower (*in);
 			sp = false;
 			nsp = true;
-		/* If there has been a non-space, then note we should get one */
+                        /* If there has been a non-space, then note we should get one */
 		} else if (nsp) {
 			nsp = false;
 			sp = true;
@@ -430,7 +424,7 @@ p11_openssl_canon_string_der (p11_buffer *der)
 
 	string = p11_x509_parse_directory_string (der->data, der->len, &unknown_string, &length);
 
-	/* Just pass through all the non-string types */
+        /* Just pass through all the non-string types */
 	if (string == NULL)
 		return unknown_string;
 
@@ -455,7 +449,7 @@ p11_openssl_canon_string_der (p11_buffer *der)
 }
 
 bool
-p11_openssl_canon_name_der (p11_dict *asn1_defs,
+p11_openssl_canon_name_der (p11_dict   *asn1_defs,
                             p11_buffer *der)
 {
 	p11_buffer value;
@@ -507,11 +501,11 @@ p11_openssl_canon_name_der (p11_dict *asn1_defs,
 			}
 		}
 
-		/*
-		 * Yes the OpenSSL canon strangeness, is a concatenation
-		 * of all the RelativeDistinguishedName DER encodings, without
-		 * an outside wrapper.
-		 */
+                /*
+                 * Yes the OpenSSL canon strangeness, is a concatenation
+                 * of all the RelativeDistinguishedName DER encodings, without
+                 * an outside wrapper.
+                 */
 		if (!failed) {
 			len = -1;
 			ret = asn1_der_coding (name, outer, NULL, &len, NULL);
@@ -548,16 +542,16 @@ symlink_for_subject_hash (p11_enumerate *ex)
 		return NULL;
 
 	p11_buffer_init_full (&der, memdup (subject->pValue, subject->ulValueLen),
-	                      subject->ulValueLen, 0, realloc, free);
+			      subject->ulValueLen, 0, realloc, free);
 	return_val_if_fail (der.data != NULL, NULL);
 
 	if (p11_openssl_canon_name_der (ex->asn1_defs, &der)) {
 		p11_digest_sha1 (md, der.data, der.len, NULL);
 
 		hash = (
-		        ((unsigned long)md[0]       ) | ((unsigned long)md[1] << 8L) |
-		        ((unsigned long)md[2] << 16L) | ((unsigned long)md[3] << 24L)
-		) & 0xffffffffL;
+			((unsigned long)md[0]) | ((unsigned long)md[1] << 8L) |
+			((unsigned long)md[2] << 16L) | ((unsigned long)md[3] << 24L)
+			) & 0xffffffffL;
 
 		if (asprintf (&linkname, "%08lx", hash) < 0)
 			return_val_if_reached (NULL);
@@ -582,9 +576,9 @@ symlink_for_subject_old_hash (p11_enumerate *ex)
 	p11_digest_md5 (md, subject->pValue, (size_t)subject->ulValueLen, NULL);
 
 	hash = (
-	         ((unsigned long)md[0]       ) | ((unsigned long)md[1] << 8L) |
-	         ((unsigned long)md[2] << 16L) | ((unsigned long)md[3] << 24L)
-	       ) & 0xffffffffL;
+		((unsigned long)md[0]) | ((unsigned long)md[1] << 8L) |
+		((unsigned long)md[2] << 16L) | ((unsigned long)md[3] << 24L)
+		) & 0xffffffffL;
 
 	if (asprintf (&linkname, "%08lx", hash) < 0)
 		return_val_if_reached (NULL);
@@ -609,8 +603,8 @@ symlink_for_subject_old_hash (p11_enumerate *ex)
  */
 bool
 p11_openssl_symlink (p11_enumerate *ex,
-                     p11_save_dir *dir,
-                     const char *filename)
+                     p11_save_dir  *dir,
+                     const char    *filename)
 {
 	bool ret = true;
 #ifdef OS_UNIX
@@ -635,7 +629,7 @@ p11_openssl_symlink (p11_enumerate *ex,
 
 bool
 p11_extract_openssl_directory (p11_enumerate *ex,
-                               const char *destination)
+                               const char    *destination)
 {
 	char *filename;
 	p11_save_file *file;
@@ -678,7 +672,7 @@ p11_extract_openssl_directory (p11_enumerate *ex,
 				if (ret)
 					filename = p11_path_base (path);
 			}
-			ret = p11_openssl_symlink(ex, dir, filename);
+			ret = p11_openssl_symlink (ex, dir, filename);
 
 			free (filename);
 			free (path);

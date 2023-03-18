@@ -47,13 +47,13 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 int
-p11_kit_print_config (int argc,
+p11_kit_print_config (int   argc,
 		      char *argv[]);
 
 static int
@@ -92,11 +92,11 @@ print_config (void)
 
 	p11_dict_free (global_conf);
 	p11_dict_free (modules_conf);
-        return 0;
+	return 0;
 }
 
 int
-p11_kit_print_config (int argc,
+p11_kit_print_config (int   argc,
 		      char *argv[])
 {
 	int opt;
@@ -117,14 +117,14 @@ p11_kit_print_config (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_help:
-			p11_tool_usage (usages, options);
-			return 0;
-		case '?':
-			return 2;
-		default:
-			assert_not_reached ();
-			break;
+			case opt_help:
+				p11_tool_usage (usages, options);
+				return 0;
+			case '?':
+				return 2;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 

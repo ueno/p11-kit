@@ -51,10 +51,10 @@
 #include <string.h>
 
 void
-p11_lexer_init (p11_lexer *lexer,
+p11_lexer_init (p11_lexer  *lexer,
                 const char *filename,
                 const char *data,
-                size_t length)
+                size_t      length)
 {
 	return_if_fail (lexer != NULL);
 
@@ -71,16 +71,16 @@ static void
 clear_state (p11_lexer *lexer)
 {
 	switch (lexer->tok_type) {
-	case TOK_FIELD:
-		free (lexer->tok.field.name);
-		free (lexer->tok.field.value);
-		break;
-	case TOK_SECTION:
-		free (lexer->tok.section.name);
-		break;
-	case TOK_PEM:
-	case TOK_EOF:
-		break;
+		case TOK_FIELD:
+			free (lexer->tok.field.name);
+			free (lexer->tok.field.value);
+			break;
+		case TOK_SECTION:
+			free (lexer->tok.section.name);
+			break;
+		case TOK_PEM:
+		case TOK_EOF:
+			break;
 	}
 
 	memset (&lexer->tok, 0, sizeof (lexer->tok));
@@ -90,7 +90,7 @@ clear_state (p11_lexer *lexer)
 
 bool
 p11_lexer_next (p11_lexer *lexer,
-                bool *failed)
+                bool      *failed)
 {
 	const char *colon;
 	const char *value;
@@ -105,11 +105,11 @@ p11_lexer_next (p11_lexer *lexer,
 	if (failed)
 		*failed = false;
 
-	/* Go through lines and process them */
+        /* Go through lines and process them */
 	while (lexer->remaining != 0) {
 		assert (lexer->remaining > 0);
 
-		/* Is this line the start of a PEM block? */
+                /* Is this line the start of a PEM block? */
 		if (strncmp (lexer->at, "-----BEGIN ", 11) == 0) {
 			pos = strnstr (lexer->at, "\n-----END ", lexer->remaining);
 			if (pos != NULL) {
@@ -145,17 +145,17 @@ p11_lexer_next (p11_lexer *lexer,
 			lexer->at = end + 1;
 		}
 
-		/* Strip whitespace from line */
+                /* Strip whitespace from line */
 		while (line != end && isspace (line[0]))
 			++line;
 		while (line != end && isspace (*(end - 1)))
 			--end;
 
-		/* Empty lines / comments at start */
+                /* Empty lines / comments at start */
 		if (line == end || line[0] == '#')
 			continue;
 
-		/* Is the the a section ? */
+                /* Is the the a section ? */
 		if (line[0] == '[') {
 			if (*(end - 1) != ']') {
 				part = strndup (line, end - line);
@@ -172,7 +172,7 @@ p11_lexer_next (p11_lexer *lexer,
 			return true;
 		}
 
-		/* Look for the break between name: value on the same line */
+                /* Look for the break between name: value on the same line */
 		colon = memchr (line, ':', end - line);
 		if (!colon) {
 			part = strndup (line, end - line);
@@ -183,7 +183,7 @@ p11_lexer_next (p11_lexer *lexer,
 			return false;
 		}
 
-		/* Strip whitespace from name and value */
+                /* Strip whitespace from name and value */
 		value = colon + 1;
 		while (value != end && isspace (value[0]))
 			++value;
@@ -210,7 +210,7 @@ p11_lexer_done (p11_lexer *lexer)
 }
 
 void
-p11_lexer_msg (p11_lexer *lexer,
+p11_lexer_msg (p11_lexer  *lexer,
                const char *msg)
 {
 	return_if_fail (lexer != NULL);
@@ -219,20 +219,20 @@ p11_lexer_msg (p11_lexer *lexer,
 		return;
 
 	switch (lexer->tok_type) {
-	case TOK_FIELD:
-		p11_message ("%s: %s: %s", lexer->filename,
-		             lexer->tok.field.name, msg);
-		break;
-	case TOK_SECTION:
-		p11_message ("%s: [%s]: %s", lexer->filename,
-		             lexer->tok.section.name, msg);
-		break;
-	case TOK_PEM:
-		p11_message ("%s: BEGIN ...: %s", lexer->filename, msg);
-		break;
-	default:
-		p11_message ("%s: %s", lexer->filename, msg);
-		break;
+		case TOK_FIELD:
+			p11_message ("%s: %s: %s", lexer->filename,
+				     lexer->tok.field.name, msg);
+			break;
+		case TOK_SECTION:
+			p11_message ("%s: [%s]: %s", lexer->filename,
+				     lexer->tok.section.name, msg);
+			break;
+		case TOK_PEM:
+			p11_message ("%s: BEGIN ...: %s", lexer->filename, msg);
+			break;
+		default:
+			p11_message ("%s: %s", lexer->filename, msg);
+			break;
 	}
 
 	lexer->complained = true;

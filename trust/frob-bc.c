@@ -46,12 +46,12 @@
 
 #define err_if_fail(ret, msg) \
 	do { if ((ret) != ASN1_SUCCESS) { \
-		fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
-		exit (1); \
-	} } while (0)
+		     fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
+		     exit (1); \
+	     } } while (0)
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };

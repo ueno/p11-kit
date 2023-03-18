@@ -61,7 +61,7 @@
 #endif
 
 bool
-p11_vsock_parse_addr (const char *target,
+p11_vsock_parse_addr (const char   *target,
 		      unsigned int *cid,
 		      unsigned int *port)
 {
@@ -72,7 +72,7 @@ p11_vsock_parse_addr (const char *target,
 
 	while (*target) {
 		if (strncmp (target, "cid=", 4) == 0) {
-			val = strtoul(target + 4, &endptr, 0);
+			val = strtoul (target + 4, &endptr, 0);
 			if (val > UINT_MAX || endptr == target + 4)
 				return false;
 			*cid = val;
@@ -94,11 +94,11 @@ p11_vsock_parse_addr (const char *target,
 			return false;
 	}
 
-	/* Port is mandatory */
+        /* Port is mandatory */
 	if (!port_found)
 		return false;
 
-	/* CID is optional, defaulting to VMADDR_CID_ANY */
+        /* CID is optional, defaulting to VMADDR_CID_ANY */
 	if (!cid_found)
 		*cid = VMADDR_CID_ANY;
 
@@ -117,7 +117,7 @@ p11_vsock_get_local_cid (unsigned int *cid)
 	if (fd == -1)
 		return false;
 
-	rc = ioctl (fd, IOCTL_VM_SOCKETS_GET_LOCAL_CID, cid, sizeof(*cid));
+	rc = ioctl (fd, IOCTL_VM_SOCKETS_GET_LOCAL_CID, cid, sizeof (*cid));
 	close (fd);
 
 	return (rc == 0);

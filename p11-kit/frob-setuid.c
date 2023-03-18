@@ -52,17 +52,17 @@ main (void)
 	int ret;
 	int i;
 
-	/*
-	 * Use 'chmod ug+s frob-setuid' to change this program
-	 * and test the output with/without setuid or setgid.
-	 */
+        /*
+         * Use 'chmod ug+s frob-setuid' to change this program
+         * and test the output with/without setuid or setgid.
+         */
 
 	putenv ("P11_KIT_STRICT=1");
 
 	modules = p11_kit_modules_load_and_initialize (0);
 	assert (modules != NULL);
 
-	/* This is a system configured module */
+        /* This is a system configured module */
 	module = p11_kit_module_for_name (modules, "one");
 	assert (module != NULL);
 

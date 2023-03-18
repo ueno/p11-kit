@@ -66,7 +66,7 @@ static const p11_tool_command commands[] = {
 };
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	return p11_tool_main (argc, argv, commands);

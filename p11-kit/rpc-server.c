@@ -61,7 +61,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -77,8 +77,8 @@ typedef struct {
 
 static CK_RV
 proto_read_byte_buffer (p11_rpc_message *msg,
-                        CK_BYTE_PTR *buffer,
-                        CK_ULONG *n_buffer)
+                        CK_BYTE_PTR     *buffer,
+                        CK_ULONG        *n_buffer)
 {
 	uint32_t length;
 
@@ -87,23 +87,23 @@ proto_read_byte_buffer (p11_rpc_message *msg,
 	assert (n_buffer != NULL);
 	assert (msg->input != NULL);
 
-	/* Check that we're supposed to be reading this at this point */
+        /* Check that we're supposed to be reading this at this point */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "fy"));
 
-	/* The number of ulongs there's room for on the other end */
+        /* The number of ulongs there's room for on the other end */
 	if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &length))
 		return PARSE_ERROR;
 
 	*n_buffer = length;
 	*buffer = NULL;
 
-	/* length = -1 indicates length = 0, but buffer not NULL */
+        /* length = -1 indicates length = 0, but buffer not NULL */
 	if (length == (uint32_t)-1) {
 		*n_buffer = 0;
 		length = 1; /*allocate 1 dummy byte */
 	}
 
-	/* If set to zero, then they just want the length */
+        /* If set to zero, then they just want the length */
 	if (length == 0)
 		return CKR_OK;
 
@@ -116,8 +116,8 @@ proto_read_byte_buffer (p11_rpc_message *msg,
 
 static CK_RV
 proto_read_byte_array (p11_rpc_message *msg,
-                       CK_BYTE_PTR *array,
-                       CK_ULONG *n_array)
+                       CK_BYTE_PTR     *array,
+                       CK_ULONG        *n_array)
 {
 	const unsigned char *data;
 	unsigned char valid;
@@ -127,10 +127,10 @@ proto_read_byte_array (p11_rpc_message *msg,
 	assert (msg != NULL);
 	assert (msg->input != NULL);
 
-	/* Check that we're supposed to have this at this point */
+        /* Check that we're supposed to have this at this point */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "ay"));
 
-	/* Read out the byte which says whether data is present or not */
+        /* Read out the byte which says whether data is present or not */
 	if (!p11_rpc_buffer_get_byte (msg->input, &msg->parsed, &valid))
 		return PARSE_ERROR;
 
@@ -142,7 +142,7 @@ proto_read_byte_array (p11_rpc_message *msg,
 		return CKR_OK;
 	}
 
-	/* Point our arguments into the buffer */
+        /* Point our arguments into the buffer */
 	if (!p11_rpc_buffer_get_byte_array (msg->input, &msg->parsed, &data, &n_data))
 		return PARSE_ERROR;
 
@@ -153,28 +153,28 @@ proto_read_byte_array (p11_rpc_message *msg,
 
 static CK_RV
 proto_write_byte_array (p11_rpc_message *msg,
-                        CK_BYTE_PTR array,
-                        CK_ULONG len,
-                        CK_RV ret)
+                        CK_BYTE_PTR      array,
+                        CK_ULONG         len,
+                        CK_RV            ret)
 {
 	assert (msg != NULL);
 
-	/*
-	 * When returning an byte array, in many cases we need to pass
-	 * an invalid array along with a length, which signifies CKR_BUFFER_TOO_SMALL.
-	 */
+        /*
+         * When returning an byte array, in many cases we need to pass
+         * an invalid array along with a length, which signifies CKR_BUFFER_TOO_SMALL.
+         */
 
 	switch (ret) {
-	case CKR_BUFFER_TOO_SMALL:
-		array = NULL;
-		/* fall through */
-	case CKR_OK:
-		break;
+		case CKR_BUFFER_TOO_SMALL:
+			array = NULL;
+                /* fall through */
+		case CKR_OK:
+			break;
 
-	/* Pass all other errors straight through */
-	default:
-		return ret;
-	};
+                /* Pass all other errors straight through */
+		default:
+			return ret;
+	}
 
 	if (!p11_rpc_message_write_byte_array (msg, array, len))
 		return PREP_ERROR;
@@ -184,8 +184,8 @@ proto_write_byte_array (p11_rpc_message *msg,
 
 static CK_RV
 proto_read_ulong_buffer (p11_rpc_message *msg,
-                         CK_ULONG_PTR *buffer,
-                         CK_ULONG *n_buffer)
+                         CK_ULONG_PTR    *buffer,
+                         CK_ULONG        *n_buffer)
 {
 	uint32_t length;
 
@@ -194,17 +194,17 @@ proto_read_ulong_buffer (p11_rpc_message *msg,
 	assert (n_buffer != NULL);
 	assert (msg->input != NULL);
 
-	/* Check that we're supposed to be reading this at this point */
+        /* Check that we're supposed to be reading this at this point */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "fu"));
 
-	/* The number of ulongs there's room for on the other end */
+        /* The number of ulongs there's room for on the other end */
 	if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &length))
 		return PARSE_ERROR;
 
 	*n_buffer = length;
 	*buffer = NULL;
 
-	/* If set to zero, then they just want the length */
+        /* If set to zero, then they just want the length */
 	if (length == 0)
 		return CKR_OK;
 
@@ -217,28 +217,28 @@ proto_read_ulong_buffer (p11_rpc_message *msg,
 
 static CK_RV
 proto_write_ulong_array (p11_rpc_message *msg,
-                         CK_ULONG_PTR array,
-                         CK_ULONG len,
-                         CK_RV ret)
+                         CK_ULONG_PTR     array,
+                         CK_ULONG         len,
+                         CK_RV            ret)
 {
 	assert (msg != NULL);
 
-	/*
-	 * When returning an ulong array, in many cases we need to pass
-	 * an invalid array along with a length, which signifies CKR_BUFFER_TOO_SMALL.
-	 */
+        /*
+         * When returning an ulong array, in many cases we need to pass
+         * an invalid array along with a length, which signifies CKR_BUFFER_TOO_SMALL.
+         */
 
 	switch (ret) {
-	case CKR_BUFFER_TOO_SMALL:
-		array = NULL;
-		/* fall through */
-	case CKR_OK:
-		break;
+		case CKR_BUFFER_TOO_SMALL:
+			array = NULL;
+                /* fall through */
+		case CKR_OK:
+			break;
 
-	/* Pass all other errors straight through */
-	default:
-		return ret;
-	};
+                /* Pass all other errors straight through */
+		default:
+			return ret;
+	}
 
 	if (!p11_rpc_message_write_ulong_array (msg, array, len))
 		return PREP_ERROR;
@@ -247,9 +247,9 @@ proto_write_ulong_array (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_read_attribute_buffer (p11_rpc_message *msg,
+proto_read_attribute_buffer (p11_rpc_message  *msg,
                              CK_ATTRIBUTE_PTR *result,
-                             CK_ULONG *n_result)
+                             CK_ULONG         *n_result)
 {
 	CK_ATTRIBUTE_PTR attrs;
 	uint32_t n_attrs, i;
@@ -260,28 +260,27 @@ proto_read_attribute_buffer (p11_rpc_message *msg,
 	assert (n_result != NULL);
 	assert (msg->input != NULL);
 
-	/* Make sure this is in the right order */
+        /* Make sure this is in the right order */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "fA"));
 
-	/* Read the number of attributes */
+        /* Read the number of attributes */
 	if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &n_attrs))
 		return PARSE_ERROR;
 
-	/* Allocate memory for the attribute structures */
+        /* Allocate memory for the attribute structures */
 	attrs = p11_rpc_message_alloc_extra_array (msg, n_attrs, sizeof (CK_ATTRIBUTE));
 	if (attrs == NULL)
 		return CKR_DEVICE_MEMORY;
 
-	/* Now go through and fill in each one */
+        /* Now go through and fill in each one */
 	for (i = 0; i < n_attrs; ++i) {
-
-		/* The attribute type */
+                /* The attribute type */
 		if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &value))
 			return PARSE_ERROR;
 
 		attrs[i].type = value;
 
-		/* The number of bytes to allocate */
+                /* The number of bytes to allocate */
 		if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &value))
 			return PARSE_ERROR;
 
@@ -302,9 +301,9 @@ proto_read_attribute_buffer (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_read_attribute_array (p11_rpc_message *msg,
+proto_read_attribute_array (p11_rpc_message  *msg,
                             CK_ATTRIBUTE_PTR *result,
-                            CK_ULONG *n_result)
+                            CK_ULONG         *n_result)
 {
 	CK_ATTRIBUTE_PTR attrs;
 	uint32_t n_attrs, i;
@@ -314,24 +313,24 @@ proto_read_attribute_array (p11_rpc_message *msg,
 	assert (n_result != NULL);
 	assert (msg->input != NULL);
 
-	/* Make sure this is in the right order */
+        /* Make sure this is in the right order */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "aA"));
 
-	/* Read the number of attributes */
+        /* Read the number of attributes */
 	if (!p11_rpc_buffer_get_uint32 (msg->input, &msg->parsed, &n_attrs))
 		return PARSE_ERROR;
 
-	/* Allocate memory for the attribute structures */
+        /* Allocate memory for the attribute structures */
 	attrs = p11_rpc_message_alloc_extra_array (msg, n_attrs, sizeof (CK_ATTRIBUTE));
 	if (attrs == NULL)
 		return CKR_DEVICE_MEMORY;
 
-	/* Now go through and fill in each one */
+        /* Now go through and fill in each one */
 	for (i = 0; i < n_attrs; ++i) {
 		size_t offset = msg->parsed;
 		CK_ATTRIBUTE temp;
 
-		/* Check the length needed to store the value */
+                /* Check the length needed to store the value */
 		memset (&temp, 0, sizeof (temp));
 		if (!p11_rpc_buffer_get_attribute (msg->input, &offset, &temp)) {
 			msg->parsed = offset;
@@ -339,13 +338,13 @@ proto_read_attribute_array (p11_rpc_message *msg,
 		}
 
 		if (IS_ATTRIBUTE_ARRAY (&temp)) {
-			p11_debug("recursive attribute array is not supported");
+			p11_debug ("recursive attribute array is not supported");
 			return PARSE_ERROR;
 		}
 
 		attrs[i].type = temp.type;
 
-		/* Whether this one is valid or not */
+                /* Whether this one is valid or not */
 		if (temp.ulValueLen != ((CK_ULONG)-1)) {
 			size_t offset2 = msg->parsed;
 			attrs[i].pValue = p11_rpc_message_alloc_extra (msg, temp.ulValueLen);
@@ -367,30 +366,30 @@ proto_read_attribute_array (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_write_attribute_array (p11_rpc_message *msg,
-                             CK_ATTRIBUTE_PTR array,
-                             CK_ULONG len,
-                             CK_RV ret)
+proto_write_attribute_array (p11_rpc_message  *msg,
+                             CK_ATTRIBUTE_PTR  array,
+                             CK_ULONG          len,
+                             CK_RV             ret)
 {
 	assert (msg != NULL);
 
-	/*
-	 * When returning an attribute array, certain errors aren't
-	 * actually real errors, these are passed through to the other
-	 * side along with the attribute array.
-	 */
+        /*
+         * When returning an attribute array, certain errors aren't
+         * actually real errors, these are passed through to the other
+         * side along with the attribute array.
+         */
 
 	switch (ret) {
-	case CKR_ATTRIBUTE_SENSITIVE:
-	case CKR_ATTRIBUTE_TYPE_INVALID:
-	case CKR_BUFFER_TOO_SMALL:
-	case CKR_OK:
-		break;
+		case CKR_ATTRIBUTE_SENSITIVE:
+		case CKR_ATTRIBUTE_TYPE_INVALID:
+		case CKR_BUFFER_TOO_SMALL:
+		case CKR_OK:
+			break;
 
-	/* Pass all other errors straight through */
-	default:
-		return ret;
-	};
+                /* Pass all other errors straight through */
+		default:
+			return ret;
+	}
 
 	if (!p11_rpc_message_write_attribute_array (msg, array, len) ||
 	    !p11_rpc_message_write_ulong (msg, ret))
@@ -410,13 +409,13 @@ proto_read_null_string (p11_rpc_message *msg,
 	assert (val != NULL);
 	assert (msg->input != NULL);
 
-	/* Check that we're supposed to have this at this point */
+        /* Check that we're supposed to have this at this point */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "z"));
 
 	if (!p11_rpc_buffer_get_byte_array (msg->input, &msg->parsed, &data, &n_data))
 		return PARSE_ERROR;
 
-	/* Allocate a block of memory for it */
+        /* Allocate a block of memory for it */
 	*val = p11_rpc_message_alloc_extra (msg, n_data + 1);
 	if (*val == NULL)
 		return CKR_DEVICE_MEMORY;
@@ -428,7 +427,7 @@ proto_read_null_string (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_read_mechanism (p11_rpc_message *msg,
+proto_read_mechanism (p11_rpc_message  *msg,
                       CK_MECHANISM_PTR *mech)
 {
 	size_t offset;
@@ -438,10 +437,10 @@ proto_read_mechanism (p11_rpc_message *msg,
 	assert (mech != NULL);
 	assert (msg->input != NULL);
 
-	/* Make sure this is in the right order */
+        /* Make sure this is in the right order */
 	assert (!msg->signature || p11_rpc_message_verify_part (msg, "M"));
 
-	/* Check the length needed to store the parameter */
+        /* Check the length needed to store the parameter */
 	memset (&temp, 0, sizeof (temp));
 	offset = msg->parsed;
 	if (!p11_rpc_buffer_get_mechanism (msg->input, &offset, &temp)) {
@@ -456,7 +455,7 @@ proto_read_mechanism (p11_rpc_message *msg,
 
 	(*mech)->mechanism = temp.mechanism;
 
-	/* The mechanism doesn't require parameter */
+        /* The mechanism doesn't require parameter */
 	if (temp.ulParameterLen == 0) {
 		(*mech)->pParameter = NULL;
 		(*mech)->ulParameterLen = 0;
@@ -464,7 +463,7 @@ proto_read_mechanism (p11_rpc_message *msg,
 		return CKR_OK;
 	}
 
-	/* Actually retrieve the parameter */
+        /* Actually retrieve the parameter */
 	(*mech)->pParameter = p11_rpc_message_alloc_extra (msg, temp.ulParameterLen);
 	if (!p11_rpc_buffer_get_mechanism (msg->input, &msg->parsed, *mech))
 		return PARSE_ERROR;
@@ -476,7 +475,7 @@ proto_read_mechanism (p11_rpc_message *msg,
 
 static CK_RV
 proto_write_info (p11_rpc_message *msg,
-                  CK_INFO_PTR info)
+                  CK_INFO_PTR      info)
 {
 	assert (msg != NULL);
 	assert (info != NULL);
@@ -492,8 +491,8 @@ proto_write_info (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_write_slot_info (p11_rpc_message *msg,
-                       CK_SLOT_INFO_PTR info)
+proto_write_slot_info (p11_rpc_message  *msg,
+                       CK_SLOT_INFO_PTR  info)
 {
 	assert (msg != NULL);
 	assert (info != NULL);
@@ -509,8 +508,8 @@ proto_write_slot_info (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_write_token_info (p11_rpc_message *msg,
-                        CK_TOKEN_INFO_PTR info)
+proto_write_token_info (p11_rpc_message   *msg,
+                        CK_TOKEN_INFO_PTR  info)
 {
 	assert (msg != NULL);
 	assert (info != NULL);
@@ -539,8 +538,8 @@ proto_write_token_info (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_write_mechanism_info (p11_rpc_message *msg,
-                            CK_MECHANISM_INFO_PTR info)
+proto_write_mechanism_info (p11_rpc_message       *msg,
+                            CK_MECHANISM_INFO_PTR  info)
 {
 	assert (msg != NULL);
 	assert (info != NULL);
@@ -554,8 +553,8 @@ proto_write_mechanism_info (p11_rpc_message *msg,
 }
 
 static CK_RV
-proto_write_session_info (p11_rpc_message *msg,
-                          CK_SESSION_INFO_PTR info)
+proto_write_session_info (p11_rpc_message     *msg,
+                          CK_SESSION_INFO_PTR  info)
 {
 	assert (msg != NULL);
 	assert (info != NULL);
@@ -574,10 +573,10 @@ call_ready (p11_rpc_message *msg)
 {
 	assert (msg->output);
 
-	/*
-	 * Called right before invoking the actual PKCS#11 function
-	 * Reading out of data is complete, get ready to write return values.
-	 */
+        /*
+         * Called right before invoking the actual PKCS#11 function
+         * Reading out of data is complete, get ready to write return values.
+         */
 
 	if (p11_buffer_failed (msg->output)) {
 		p11_message (_("invalid request from module, probably too short")); \
@@ -586,7 +585,7 @@ call_ready (p11_rpc_message *msg)
 
 	assert (p11_rpc_message_is_verified (msg));
 
-	/* All done parsing input */
+        /* All done parsing input */
 	msg->input = NULL;
 
 	if (!p11_rpc_message_prep (msg, msg->call_id, P11_RPC_RESPONSE)) {
@@ -606,28 +605,28 @@ call_ready (p11_rpc_message *msg)
 	assert (msg != NULL); \
 	assert (self != NULL); \
 	{  \
-		CK_X_##call_id _func = self->C_##call_id; \
+		CK_X_ ## call_id _func = self->C_ ## call_id; \
 		CK_RV _ret = CKR_OK; \
 		if (!_func) { _ret = CKR_GENERAL_ERROR; goto _cleanup; }
 
 #define PROCESS_CALL(args) \
-		_ret = call_ready (msg); \
-		if (_ret != CKR_OK) { goto _cleanup; } \
-		_ret = _func args
+	_ret = call_ready (msg); \
+	if (_ret != CKR_OK) { goto _cleanup; } \
+	_ret = _func args
 
 #define END_CALL \
-	_cleanup: \
-		p11_debug ("ret: %d", (int)_ret); \
-		return _ret; \
+_cleanup: \
+	p11_debug ("ret: %d", (int)_ret); \
+	return _ret; \
 	}
 
 #define IN_BYTE(val) \
 	if (!p11_rpc_message_read_byte (msg, &val)) \
-		{ _ret = PARSE_ERROR; goto _cleanup; }
+	{ _ret = PARSE_ERROR; goto _cleanup; }
 
 #define IN_ULONG(val) \
 	if (!p11_rpc_message_read_ulong (msg, &val)) \
-		{ _ret = PARSE_ERROR; goto _cleanup; }
+	{ _ret = PARSE_ERROR; goto _cleanup; }
 
 #define IN_STRING(val) \
 	_ret = proto_read_null_string (msg, &val); \
@@ -660,39 +659,39 @@ call_ready (p11_rpc_message *msg)
 
 #define OUT_ULONG(val) \
 	if (_ret == CKR_OK && !p11_rpc_message_write_ulong (msg, val)) \
-		_ret = PREP_ERROR;
+	_ret = PREP_ERROR;
 
 #define OUT_BYTE_ARRAY(array, len) \
-	/* Note how we filter return codes */ \
+        /* Note how we filter return codes */ \
 	_ret = proto_write_byte_array (msg, array, len, _ret);
 
 #define OUT_ULONG_ARRAY(array, len) \
-	/* Note how we filter return codes */ \
+        /* Note how we filter return codes */ \
 	_ret = proto_write_ulong_array (msg, array, len, _ret);
 
 #define OUT_ATTRIBUTE_ARRAY(array, len) \
-	/* Note how we filter return codes */ \
+        /* Note how we filter return codes */ \
 	_ret = proto_write_attribute_array (msg, array, len, _ret);
 
 #define OUT_INFO(val) \
 	if (_ret == CKR_OK) \
-		_ret = proto_write_info (msg, &val);
+	_ret = proto_write_info (msg, &val);
 
 #define OUT_SLOT_INFO(val) \
 	if (_ret == CKR_OK) \
-		_ret = proto_write_slot_info (msg, &val);
+	_ret = proto_write_slot_info (msg, &val);
 
 #define OUT_TOKEN_INFO(val) \
 	if (_ret == CKR_OK) \
-		_ret = proto_write_token_info (msg, &val);
+	_ret = proto_write_token_info (msg, &val);
 
 #define OUT_MECHANISM_INFO(val) \
 	if (_ret == CKR_OK) \
-		_ret = proto_write_mechanism_info (msg, &val);
+	_ret = proto_write_mechanism_info (msg, &val);
 
 #define OUT_SESSION_INFO(val) \
 	if (_ret == CKR_OK) \
-		_ret = proto_write_session_info (msg, &val);
+	_ret = proto_write_session_info (msg, &val);
 
 /* ---------------------------------------------------------------------------
  * DISPATCH SPECIFIC CALLS
@@ -700,7 +699,7 @@ call_ready (p11_rpc_message *msg)
 
 static CK_RV
 rpc_C_Initialize (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_X_Initialize func;
 	CK_C_INITIALIZE_ARGS init_args;
@@ -718,8 +717,7 @@ rpc_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 	ret = proto_read_byte_array (msg, &handshake, &n_handshake);
 	if (ret == CKR_OK) {
-
-		/* Check to make sure the header matches */
+                /* Check to make sure the header matches */
 		if (!handshake ||
 		    n_handshake != P11_RPC_HANDSHAKE_LEN ||
 		    memcmp (handshake, P11_RPC_HANDSHAKE, n_handshake) != 0) {
@@ -746,9 +744,9 @@ rpc_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 		func = self->C_Initialize;
 		assert (func != NULL);
-		ret = (func) (self, &init_args);
+		ret = (func)(self, &init_args);
 
-		/* Empty response */
+                /* Empty response */
 		if (ret == CKR_OK)
 			ret = call_ready (msg);
 	}
@@ -759,7 +757,7 @@ rpc_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 rpc_C_Finalize (CK_X_FUNCTION_LIST *self,
-                p11_rpc_message *msg)
+                p11_rpc_message    *msg)
 {
 	BEGIN_CALL (Finalize);
 	PROCESS_CALL ((self, NULL));
@@ -768,95 +766,95 @@ rpc_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 rpc_C_GetInfo (CK_X_FUNCTION_LIST *self,
-               p11_rpc_message *msg)
+               p11_rpc_message    *msg)
 {
 	CK_INFO info;
 
 	BEGIN_CALL (GetInfo);
 	PROCESS_CALL ((self, &info));
-		OUT_INFO (info);
+	OUT_INFO (info);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetSlotList (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_BBOOL token_present;
 	CK_SLOT_ID_PTR slot_list;
 	CK_ULONG count;
 
 	BEGIN_CALL (GetSlotList);
-		IN_BYTE (token_present);
-		IN_ULONG_BUFFER (slot_list, count);
+	IN_BYTE (token_present);
+	IN_ULONG_BUFFER (slot_list, count);
 	PROCESS_CALL ((self, token_present, slot_list, &count));
-		OUT_ULONG_ARRAY (slot_list, count);
+	OUT_ULONG_ARRAY (slot_list, count);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_SLOT_INFO info;
 
 	BEGIN_CALL (GetSlotInfo);
-		IN_ULONG (slot_id);
+	IN_ULONG (slot_id);
 	PROCESS_CALL ((self, slot_id, &info));
-		OUT_SLOT_INFO (info);
+	OUT_SLOT_INFO (info);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_TOKEN_INFO info;
 
 	BEGIN_CALL (GetTokenInfo);
-		IN_ULONG (slot_id);
+	IN_ULONG (slot_id);
 	PROCESS_CALL ((self, slot_id, &info));
-		OUT_TOKEN_INFO (info);
+	OUT_TOKEN_INFO (info);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_MECHANISM_TYPE_PTR mechanism_list;
 	CK_ULONG count;
 
 	BEGIN_CALL (GetMechanismList);
-		IN_ULONG (slot_id);
-		IN_ULONG_BUFFER (mechanism_list, count);
+	IN_ULONG (slot_id);
+	IN_ULONG_BUFFER (mechanism_list, count);
 	PROCESS_CALL ((self, slot_id, mechanism_list, &count));
-		OUT_ULONG_ARRAY (mechanism_list, count);
+	OUT_ULONG_ARRAY (mechanism_list, count);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_MECHANISM_TYPE type;
 	CK_MECHANISM_INFO info;
 
 	BEGIN_CALL (GetMechanismInfo);
-		IN_ULONG (slot_id);
-		IN_ULONG (type);
+	IN_ULONG (slot_id);
+	IN_ULONG (type);
 	PROCESS_CALL ((self, slot_id, type, &info));
-		OUT_MECHANISM_INFO (info);
+	OUT_MECHANISM_INFO (info);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_InitToken (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_UTF8CHAR_PTR pin;
@@ -864,102 +862,102 @@ rpc_C_InitToken (CK_X_FUNCTION_LIST *self,
 	CK_UTF8CHAR_PTR label;
 
 	BEGIN_CALL (InitToken);
-		IN_ULONG (slot_id);
-		IN_BYTE_ARRAY (pin, pin_len);
-		IN_STRING (label);
+	IN_ULONG (slot_id);
+	IN_BYTE_ARRAY (pin, pin_len);
+	IN_STRING (label);
 	PROCESS_CALL ((self, slot_id, pin, pin_len, label));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_FLAGS flags;
 	CK_SLOT_ID slot_id;
 
 	BEGIN_CALL (WaitForSlotEvent);
-		IN_ULONG (flags);
+	IN_ULONG (flags);
 	PROCESS_CALL ((self, flags, &slot_id, NULL));
-		OUT_ULONG (slot_id);
+	OUT_ULONG (slot_id);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_OpenSession (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 	CK_FLAGS flags;
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (OpenSession);
-		IN_ULONG (slot_id);
-		IN_ULONG (flags);
+	IN_ULONG (slot_id);
+	IN_ULONG (flags);
 	PROCESS_CALL ((self, slot_id, flags, NULL, NULL, &session));
-		OUT_ULONG (session);
+	OUT_ULONG (session);
 	END_CALL;
 }
 
 
 static CK_RV
 rpc_C_CloseSession (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (CloseSession);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SLOT_ID slot_id;
 
-	/* Slot id becomes apartment so lower layers can tell clients apart. */
+        /* Slot id becomes apartment so lower layers can tell clients apart. */
 
 	BEGIN_CALL (CloseAllSessions);
-		IN_ULONG (slot_id);
+	IN_ULONG (slot_id);
 	PROCESS_CALL ((self, slot_id));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetSessionInfo (CK_X_FUNCTION_LIST *self,
-                      p11_rpc_message *msg)
+                      p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_SESSION_INFO info;
 
 	BEGIN_CALL (GetSessionInfo);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session, &info));
-		OUT_SESSION_INFO (info);
+	OUT_SESSION_INFO (info);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_InitPIN (CK_X_FUNCTION_LIST *self,
-               p11_rpc_message *msg)
+               p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_UTF8CHAR_PTR pin;
 	CK_ULONG pin_len;
 
 	BEGIN_CALL (InitPIN);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (pin, pin_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (pin, pin_len);
 	PROCESS_CALL ((self, session, pin, pin_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SetPIN (CK_X_FUNCTION_LIST *self,
-              p11_rpc_message *msg)
+              p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_UTF8CHAR_PTR old_pin;
@@ -968,32 +966,32 @@ rpc_C_SetPIN (CK_X_FUNCTION_LIST *self,
 	CK_ULONG new_len;
 
 	BEGIN_CALL (SetPIN);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (old_pin, old_len);
-		IN_BYTE_ARRAY (new_pin, new_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (old_pin, old_len);
+	IN_BYTE_ARRAY (new_pin, new_len);
 	PROCESS_CALL ((self, session, old_pin, old_len, new_pin, new_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetOperationState (CK_X_FUNCTION_LIST *self,
-                                p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR operation_state;
 	CK_ULONG operation_state_len;
 
 	BEGIN_CALL (GetOperationState);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (operation_state, operation_state_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (operation_state, operation_state_len);
 	PROCESS_CALL ((self, session, operation_state, &operation_state_len));
-		OUT_BYTE_ARRAY (operation_state, operation_state_len);
+	OUT_BYTE_ARRAY (operation_state, operation_state_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SetOperationState (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR operation_state;
@@ -1002,17 +1000,17 @@ rpc_C_SetOperationState (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE authentication_key;
 
 	BEGIN_CALL (SetOperationState);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (operation_state, operation_state_len);
-		IN_ULONG (encryption_key);
-		IN_ULONG (authentication_key);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (operation_state, operation_state_len);
+	IN_ULONG (encryption_key);
+	IN_ULONG (authentication_key);
 	PROCESS_CALL ((self, session, operation_state, operation_state_len, encryption_key, authentication_key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Login (CK_X_FUNCTION_LIST *self,
-             p11_rpc_message *msg)
+             p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_USER_TYPE user_type;
@@ -1020,28 +1018,28 @@ rpc_C_Login (CK_X_FUNCTION_LIST *self,
 	CK_ULONG pin_len;
 
 	BEGIN_CALL (Login);
-		IN_ULONG (session);
-		IN_ULONG (user_type);
-		IN_BYTE_ARRAY (pin, pin_len);
+	IN_ULONG (session);
+	IN_ULONG (user_type);
+	IN_BYTE_ARRAY (pin, pin_len);
 	PROCESS_CALL ((self, session, user_type, pin, pin_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Logout (CK_X_FUNCTION_LIST *self,
-              p11_rpc_message *msg)
+              p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (Logout);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_CreateObject (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_ATTRIBUTE_PTR template;
@@ -1049,16 +1047,16 @@ rpc_C_CreateObject (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE new_object;
 
 	BEGIN_CALL (CreateObject);
-		IN_ULONG (session);
-		IN_ATTRIBUTE_ARRAY (template, count);
+	IN_ULONG (session);
+	IN_ATTRIBUTE_ARRAY (template, count);
 	PROCESS_CALL ((self, session, template, count, &new_object));
-		OUT_ULONG (new_object);
+	OUT_ULONG (new_object);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_CopyObject (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE object;
@@ -1067,47 +1065,47 @@ rpc_C_CopyObject (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE new_object;
 
 	BEGIN_CALL (CopyObject);
-		IN_ULONG (session);
-		IN_ULONG (object);
-		IN_ATTRIBUTE_ARRAY (template, count);
+	IN_ULONG (session);
+	IN_ULONG (object);
+	IN_ATTRIBUTE_ARRAY (template, count);
 	PROCESS_CALL ((self, session, object, template, count, &new_object));
-		OUT_ULONG (new_object);
+	OUT_ULONG (new_object);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DestroyObject (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE object;
 
 	BEGIN_CALL (DestroyObject);
-		IN_ULONG (session);
-		IN_ULONG (object);
+	IN_ULONG (session);
+	IN_ULONG (object);
 	PROCESS_CALL ((self, session, object));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetObjectSize (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE object;
 	CK_ULONG size;
 
 	BEGIN_CALL (GetObjectSize);
-		IN_ULONG (session);
-		IN_ULONG (object);
+	IN_ULONG (session);
+	IN_ULONG (object);
 	PROCESS_CALL ((self, session, object, &size));
-		OUT_ULONG (size);
+	OUT_ULONG (size);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE object;
@@ -1115,17 +1113,17 @@ rpc_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
 	CK_ULONG count;
 
 	BEGIN_CALL (GetAttributeValue);
-		IN_ULONG (session);
-		IN_ULONG (object);
-		IN_ATTRIBUTE_BUFFER (template, count);
+	IN_ULONG (session);
+	IN_ULONG (object);
+	IN_ATTRIBUTE_BUFFER (template, count);
 	PROCESS_CALL ((self, session, object, template, count));
-		OUT_ATTRIBUTE_ARRAY (template, count);
+	OUT_ATTRIBUTE_ARRAY (template, count);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE object;
@@ -1133,31 +1131,31 @@ rpc_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
 	CK_ULONG count;
 
 	BEGIN_CALL (SetAttributeValue);
-		IN_ULONG (session);
-		IN_ULONG (object);
-		IN_ATTRIBUTE_ARRAY (template, count);
+	IN_ULONG (session);
+	IN_ULONG (object);
+	IN_ATTRIBUTE_ARRAY (template, count);
 	PROCESS_CALL ((self, session, object, template, count));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_FindObjectsInit (CK_X_FUNCTION_LIST *self,
-                       p11_rpc_message *msg)
+                       p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_ATTRIBUTE_PTR template;
 	CK_ULONG count;
 
 	BEGIN_CALL (FindObjectsInit);
-		IN_ULONG (session);
-		IN_ATTRIBUTE_ARRAY (template, count);
+	IN_ULONG (session);
+	IN_ATTRIBUTE_ARRAY (template, count);
 	PROCESS_CALL ((self, session, template, count));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_FindObjects (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE_PTR objects;
@@ -1165,28 +1163,28 @@ rpc_C_FindObjects (CK_X_FUNCTION_LIST *self,
 	CK_ULONG object_count;
 
 	BEGIN_CALL (FindObjects);
-		IN_ULONG (session);
-		IN_ULONG_BUFFER (objects, max_object_count);
+	IN_ULONG (session);
+	IN_ULONG_BUFFER (objects, max_object_count);
 	PROCESS_CALL ((self, session, objects, max_object_count, &object_count));
-		OUT_ULONG_ARRAY (objects, object_count);
+	OUT_ULONG_ARRAY (objects, object_count);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_FindObjectsFinal (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (FindObjectsFinal);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptInit (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1194,17 +1192,16 @@ rpc_C_EncryptInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (EncryptInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
-
 }
 
 static CK_RV
 rpc_C_Encrypt (CK_X_FUNCTION_LIST *self,
-               p11_rpc_message *msg)
+               p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR data;
@@ -1213,17 +1210,17 @@ rpc_C_Encrypt (CK_X_FUNCTION_LIST *self,
 	CK_ULONG encrypted_data_len;
 
 	BEGIN_CALL (Encrypt);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_BUFFER (encrypted_data, encrypted_data_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_BUFFER (encrypted_data, encrypted_data_len);
 	PROCESS_CALL ((self, session, data, data_len, encrypted_data, &encrypted_data_len));
-		OUT_BYTE_ARRAY (encrypted_data, encrypted_data_len);
+	OUT_BYTE_ARRAY (encrypted_data, encrypted_data_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptUpdate (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
@@ -1232,33 +1229,33 @@ rpc_C_EncryptUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG encrypted_part_len;
 
 	BEGIN_CALL (EncryptUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
-		IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
+	IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
 	PROCESS_CALL ((self, session, part, part_len, encrypted_part, &encrypted_part_len));
-		OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptFinal (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR last_encrypted_part;
 	CK_ULONG last_encrypted_part_len;
 
 	BEGIN_CALL (EncryptFinal);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (last_encrypted_part, last_encrypted_part_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (last_encrypted_part, last_encrypted_part_len);
 	PROCESS_CALL ((self, session, last_encrypted_part, &last_encrypted_part_len));
-		OUT_BYTE_ARRAY (last_encrypted_part, last_encrypted_part_len);
+	OUT_BYTE_ARRAY (last_encrypted_part, last_encrypted_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptInit (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1266,16 +1263,16 @@ rpc_C_DecryptInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (DecryptInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Decrypt (CK_X_FUNCTION_LIST *self,
-               p11_rpc_message *msg)
+               p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR encrypted_data;
@@ -1284,17 +1281,17 @@ rpc_C_Decrypt (CK_X_FUNCTION_LIST *self,
 	CK_ULONG data_len;
 
 	BEGIN_CALL (Decrypt);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (encrypted_data, encrypted_data_len);
-		IN_BYTE_BUFFER (data, data_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (encrypted_data, encrypted_data_len);
+	IN_BYTE_BUFFER (data, data_len);
 	PROCESS_CALL ((self, session, encrypted_data, encrypted_data_len, data, &data_len));
-		OUT_BYTE_ARRAY (data, data_len);
+	OUT_BYTE_ARRAY (data, data_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptUpdate (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR encrypted_part;
@@ -1303,48 +1300,48 @@ rpc_C_DecryptUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG part_len;
 
 	BEGIN_CALL (DecryptUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
-		IN_BYTE_BUFFER (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	IN_BYTE_BUFFER (part, part_len);
 	PROCESS_CALL ((self, session, encrypted_part, encrypted_part_len, part, &part_len));
-		OUT_BYTE_ARRAY (part, part_len);
+	OUT_BYTE_ARRAY (part, part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptFinal (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR last_part;
 	CK_ULONG last_part_len;
 
 	BEGIN_CALL (DecryptFinal);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (last_part, last_part_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (last_part, last_part_len);
 	PROCESS_CALL ((self, session, last_part, &last_part_len));
-		OUT_BYTE_ARRAY (last_part, last_part_len);
+	OUT_BYTE_ARRAY (last_part, last_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DigestInit (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
 	CK_MECHANISM_PTR mechanism = &mechanism_;
 
 	BEGIN_CALL (DigestInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
 	PROCESS_CALL ((self, session, mechanism));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Digest (CK_X_FUNCTION_LIST *self,
-              p11_rpc_message *msg)
+              p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR data;
@@ -1353,62 +1350,62 @@ rpc_C_Digest (CK_X_FUNCTION_LIST *self,
 	CK_ULONG digest_len;
 
 	BEGIN_CALL (Digest);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_BUFFER (digest, digest_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_BUFFER (digest, digest_len);
 	PROCESS_CALL ((self, session, data, data_len, digest, &digest_len));
-		OUT_BYTE_ARRAY (digest, digest_len);
+	OUT_BYTE_ARRAY (digest, digest_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DigestUpdate (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
 	CK_ULONG part_len;
 
 	BEGIN_CALL (DigestUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
 	PROCESS_CALL ((self, session, part, part_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DigestKey (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (DigestKey);
-		IN_ULONG (session);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DigestFinal (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR digest;
 	CK_ULONG digest_len;
 
 	BEGIN_CALL (DigestFinal);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (digest, digest_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (digest, digest_len);
 	PROCESS_CALL ((self, session, digest, &digest_len));
-		OUT_BYTE_ARRAY (digest, digest_len);
+	OUT_BYTE_ARRAY (digest, digest_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignInit (CK_X_FUNCTION_LIST *self,
-                p11_rpc_message *msg)
+                p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1416,16 +1413,16 @@ rpc_C_SignInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (SignInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Sign (CK_X_FUNCTION_LIST *self,
-            p11_rpc_message *msg)
+            p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
@@ -1434,49 +1431,48 @@ rpc_C_Sign (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (Sign);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
-		IN_BYTE_BUFFER (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
+	IN_BYTE_BUFFER (signature, signature_len);
 	PROCESS_CALL ((self, session, part, part_len, signature, &signature_len));
-		OUT_BYTE_ARRAY (signature, signature_len);
+	OUT_BYTE_ARRAY (signature, signature_len);
 	END_CALL;
-
 }
 
 static CK_RV
 rpc_C_SignUpdate (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
 	CK_ULONG part_len;
 
 	BEGIN_CALL (SignUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
 	PROCESS_CALL ((self, session, part, part_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignFinal (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR signature;
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (SignFinal);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (signature, signature_len);
 	PROCESS_CALL ((self, session, signature, &signature_len));
-		OUT_BYTE_ARRAY (signature, signature_len);
+	OUT_BYTE_ARRAY (signature, signature_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
-                       p11_rpc_message *msg)
+                       p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1484,16 +1480,16 @@ rpc_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (SignRecoverInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignRecover (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR data;
@@ -1502,17 +1498,17 @@ rpc_C_SignRecover (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (SignRecover);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_BUFFER (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_BUFFER (signature, signature_len);
 	PROCESS_CALL ((self, session, data, data_len, signature, &signature_len));
-		OUT_BYTE_ARRAY (signature, signature_len);
+	OUT_BYTE_ARRAY (signature, signature_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyInit (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1520,16 +1516,16 @@ rpc_C_VerifyInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (VerifyInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_Verify (CK_X_FUNCTION_LIST *self,
-              p11_rpc_message *msg)
+              p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR data;
@@ -1538,46 +1534,46 @@ rpc_C_Verify (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (Verify);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_ARRAY (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_ARRAY (signature, signature_len);
 	PROCESS_CALL ((self, session, data, data_len, signature, signature_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyUpdate (CK_X_FUNCTION_LIST *self,
-                    p11_rpc_message *msg)
+                    p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
 	CK_ULONG part_len;
 
 	BEGIN_CALL (VerifyUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
 	PROCESS_CALL ((self, session, part, part_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyFinal (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR signature;
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (VerifyFinal);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (signature, signature_len);
 	PROCESS_CALL ((self, session, signature, signature_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1585,16 +1581,16 @@ rpc_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (VerifyRecoverInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyRecover (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR signature;
@@ -1603,17 +1599,17 @@ rpc_C_VerifyRecover (CK_X_FUNCTION_LIST *self,
 	CK_ULONG data_len;
 
 	BEGIN_CALL (VerifyRecover);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (signature, signature_len);
-		IN_BYTE_BUFFER (data, data_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (signature, signature_len);
+	IN_BYTE_BUFFER (data, data_len);
 	PROCESS_CALL ((self, session, signature, signature_len, data, &data_len));
-		OUT_BYTE_ARRAY (data, data_len);
+	OUT_BYTE_ARRAY (data, data_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DigestEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
@@ -1622,17 +1618,17 @@ rpc_C_DigestEncryptUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG encrypted_part_len;
 
 	BEGIN_CALL (DigestEncryptUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
-		IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
+	IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
 	PROCESS_CALL ((self, session, part, part_len, encrypted_part, &encrypted_part_len));
-		OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptDigestUpdate (CK_X_FUNCTION_LIST *self,
-                                    p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR encrypted_part;
@@ -1641,17 +1637,17 @@ rpc_C_DecryptDigestUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG part_len;
 
 	BEGIN_CALL (DecryptDigestUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
-		IN_BYTE_BUFFER (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	IN_BYTE_BUFFER (part, part_len);
 	PROCESS_CALL ((self, session, encrypted_part, encrypted_part_len, part, &part_len));
-		OUT_BYTE_ARRAY (part, part_len);
+	OUT_BYTE_ARRAY (part, part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR part;
@@ -1660,17 +1656,17 @@ rpc_C_SignEncryptUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG encrypted_part_len;
 
 	BEGIN_CALL (SignEncryptUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (part, part_len);
-		IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (part, part_len);
+	IN_BYTE_BUFFER (encrypted_part, encrypted_part_len);
 	PROCESS_CALL ((self, session, part, part_len, encrypted_part, &encrypted_part_len));
-		OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	OUT_BYTE_ARRAY (encrypted_part, encrypted_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptVerifyUpdate (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR encrypted_part;
@@ -1679,17 +1675,17 @@ rpc_C_DecryptVerifyUpdate (CK_X_FUNCTION_LIST *self,
 	CK_ULONG part_len;
 
 	BEGIN_CALL (DecryptVerifyUpdate);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
-		IN_BYTE_BUFFER (part, part_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (encrypted_part, encrypted_part_len);
+	IN_BYTE_BUFFER (part, part_len);
 	PROCESS_CALL ((self, session, encrypted_part, encrypted_part_len, part, &part_len));
-		OUT_BYTE_ARRAY (part, part_len);
+	OUT_BYTE_ARRAY (part, part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GenerateKey (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1699,17 +1695,17 @@ rpc_C_GenerateKey (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (GenerateKey);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ATTRIBUTE_ARRAY (template, count);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ATTRIBUTE_ARRAY (template, count);
 	PROCESS_CALL ((self, session, mechanism, template, count, &key));
-		OUT_ULONG (key);
+	OUT_ULONG (key);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GenerateKeyPair (CK_X_FUNCTION_LIST *self,
-                       p11_rpc_message *msg)
+                       p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1722,20 +1718,20 @@ rpc_C_GenerateKeyPair (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE private_key;
 
 	BEGIN_CALL (GenerateKeyPair);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ATTRIBUTE_ARRAY (public_key_template, public_key_attribute_count);
-		IN_ATTRIBUTE_ARRAY (private_key_template, private_key_attribute_count);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ATTRIBUTE_ARRAY (public_key_template, public_key_attribute_count);
+	IN_ATTRIBUTE_ARRAY (private_key_template, private_key_attribute_count);
 	PROCESS_CALL ((self, session, mechanism, public_key_template, public_key_attribute_count,
-	               private_key_template, private_key_attribute_count, &public_key, &private_key));
-		OUT_ULONG (public_key);
-		OUT_ULONG (private_key);
+		       private_key_template, private_key_attribute_count, &public_key, &private_key));
+	OUT_ULONG (public_key);
+	OUT_ULONG (private_key);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_WrapKey (CK_X_FUNCTION_LIST *self,
-               p11_rpc_message *msg)
+               p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1746,19 +1742,19 @@ rpc_C_WrapKey (CK_X_FUNCTION_LIST *self,
 	CK_ULONG wrapped_key_len;
 
 	BEGIN_CALL (WrapKey);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (wrapping_key);
-		IN_ULONG (key);
-		IN_BYTE_BUFFER (wrapped_key, wrapped_key_len);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (wrapping_key);
+	IN_ULONG (key);
+	IN_BYTE_BUFFER (wrapped_key, wrapped_key_len);
 	PROCESS_CALL ((self, session, mechanism, wrapping_key, key, wrapped_key, &wrapped_key_len));
-		OUT_BYTE_ARRAY (wrapped_key, wrapped_key_len);
+	OUT_BYTE_ARRAY (wrapped_key, wrapped_key_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_UnwrapKey (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1771,19 +1767,19 @@ rpc_C_UnwrapKey (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (UnwrapKey);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (unwrapping_key);
-		IN_BYTE_ARRAY (wrapped_key, wrapped_key_len);
-		IN_ATTRIBUTE_ARRAY (template, attribute_count);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (unwrapping_key);
+	IN_BYTE_ARRAY (wrapped_key, wrapped_key_len);
+	IN_ATTRIBUTE_ARRAY (template, attribute_count);
 	PROCESS_CALL ((self, session, mechanism, unwrapping_key, wrapped_key, wrapped_key_len, template, attribute_count, &key));
-		OUT_ULONG (key);
+	OUT_ULONG (key);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DeriveKey (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1794,49 +1790,49 @@ rpc_C_DeriveKey (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (DeriveKey);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (base_key);
-		IN_ATTRIBUTE_ARRAY (template, attribute_count);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (base_key);
+	IN_ATTRIBUTE_ARRAY (template, attribute_count);
 	PROCESS_CALL ((self, session, mechanism, base_key, template, attribute_count, &key));
-		OUT_ULONG (key);
+	OUT_ULONG (key);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SeedRandom (CK_X_FUNCTION_LIST *self,
-                  p11_rpc_message *msg)
+                  p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR seed;
 	CK_ULONG seed_len;
 
 	BEGIN_CALL (SeedRandom);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (seed, seed_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (seed, seed_len);
 	PROCESS_CALL ((self, session, seed, seed_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_GenerateRandom (CK_X_FUNCTION_LIST *self,
-                      p11_rpc_message *msg)
+                      p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR random_data;
 	CK_ULONG random_len;
 
 	BEGIN_CALL (GenerateRandom);
-		IN_ULONG (session);
-		IN_BYTE_BUFFER (random_data, random_len);
+	IN_ULONG (session);
+	IN_BYTE_BUFFER (random_data, random_len);
 	PROCESS_CALL ((self, session, random_data, random_len));
-		OUT_BYTE_ARRAY (random_data, random_len);
+	OUT_BYTE_ARRAY (random_data, random_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_LoginUser (CK_X_FUNCTION_LIST *self,
-                 p11_rpc_message *msg)
+                 p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_USER_TYPE user_type;
@@ -1846,31 +1842,31 @@ rpc_C_LoginUser (CK_X_FUNCTION_LIST *self,
 	CK_ULONG username_len;
 
 	BEGIN_CALL (LoginUser);
-		IN_ULONG (session);
-		IN_ULONG (user_type);
-		IN_BYTE_ARRAY (pin, pin_len);
-		IN_BYTE_ARRAY (username, username_len);
+	IN_ULONG (session);
+	IN_ULONG (user_type);
+	IN_BYTE_ARRAY (pin, pin_len);
+	IN_BYTE_ARRAY (username, username_len);
 	PROCESS_CALL ((self, session, user_type, pin, pin_len, username, username_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SessionCancel (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_FLAGS flags;
 
 	BEGIN_CALL (SessionCancel);
-		IN_ULONG (session);
-		IN_ULONG (flags);
+	IN_ULONG (session);
+	IN_ULONG (flags);
 	PROCESS_CALL ((self, session, flags));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1878,16 +1874,16 @@ rpc_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (MessageEncryptInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptMessage (CK_X_FUNCTION_LIST *self,
-                      p11_rpc_message *msg)
+                      p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -1900,20 +1896,20 @@ rpc_C_EncryptMessage (CK_X_FUNCTION_LIST *self,
 	CK_ULONG ciphertext_len;
 
 	BEGIN_CALL (EncryptMessage);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (associated_data, associated_data_len);
-		IN_BYTE_ARRAY (plaintext, plaintext_len);
-		IN_BYTE_BUFFER (ciphertext, ciphertext_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (associated_data, associated_data_len);
+	IN_BYTE_ARRAY (plaintext, plaintext_len);
+	IN_BYTE_BUFFER (ciphertext, ciphertext_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, associated_data, associated_data_len,
-	               plaintext, plaintext_len, ciphertext, &ciphertext_len));
-		OUT_BYTE_ARRAY (ciphertext, ciphertext_len);
+		       plaintext, plaintext_len, ciphertext, &ciphertext_len));
+	OUT_BYTE_ARRAY (ciphertext, ciphertext_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -1922,16 +1918,16 @@ rpc_C_EncryptMessageBegin (CK_X_FUNCTION_LIST *self,
 	CK_ULONG associated_data_len;
 
 	BEGIN_CALL (EncryptMessageBegin);
-		IN_ULONG (session)
-		IN_BYTE_ARRAY (parameter, parameter_len)
-		IN_BYTE_ARRAY (associated_data, associated_data_len)
+	IN_ULONG (session)
+	IN_BYTE_ARRAY (parameter, parameter_len)
+	IN_BYTE_ARRAY (associated_data, associated_data_len)
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, associated_data, associated_data_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_EncryptMessageNext (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -1943,32 +1939,32 @@ rpc_C_EncryptMessageNext (CK_X_FUNCTION_LIST *self,
 	CK_FLAGS flags;
 
 	BEGIN_CALL (EncryptMessageNext);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (plaintext_part, plaintext_part_len);
-		IN_BYTE_BUFFER (ciphertext_part, ciphertext_part_len);
-		IN_ULONG (flags);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (plaintext_part, plaintext_part_len);
+	IN_BYTE_BUFFER (ciphertext_part, ciphertext_part_len);
+	IN_ULONG (flags);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, plaintext_part, plaintext_part_len,
-	               ciphertext_part, &ciphertext_part_len, flags));
-		OUT_BYTE_ARRAY (ciphertext_part, ciphertext_part_len)
+		       ciphertext_part, &ciphertext_part_len, flags));
+	OUT_BYTE_ARRAY (ciphertext_part, ciphertext_part_len)
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageEncryptFinal (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (MessageEncryptFinal);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -1976,16 +1972,16 @@ rpc_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (MessageDecryptInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptMessage (CK_X_FUNCTION_LIST *self,
-                      p11_rpc_message *msg)
+                      p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -1998,20 +1994,20 @@ rpc_C_DecryptMessage (CK_X_FUNCTION_LIST *self,
 	CK_ULONG plaintext_len;
 
 	BEGIN_CALL (DecryptMessage);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (associated_data, associated_data_len);
-		IN_BYTE_ARRAY (ciphertext, ciphertext_len);
-		IN_BYTE_BUFFER (plaintext, plaintext_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (associated_data, associated_data_len);
+	IN_BYTE_ARRAY (ciphertext, ciphertext_len);
+	IN_BYTE_BUFFER (plaintext, plaintext_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, associated_data, associated_data_len,
-	               ciphertext, ciphertext_len, plaintext, &plaintext_len));
-		OUT_BYTE_ARRAY (plaintext, plaintext_len);
+		       ciphertext, ciphertext_len, plaintext, &plaintext_len));
+	OUT_BYTE_ARRAY (plaintext, plaintext_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2020,16 +2016,16 @@ rpc_C_DecryptMessageBegin (CK_X_FUNCTION_LIST *self,
 	CK_ULONG associated_data_len;
 
 	BEGIN_CALL (DecryptMessageBegin);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (associated_data, associated_data_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (associated_data, associated_data_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, associated_data, associated_data_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_DecryptMessageNext (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2041,32 +2037,32 @@ rpc_C_DecryptMessageNext (CK_X_FUNCTION_LIST *self,
 	CK_FLAGS flags;
 
 	BEGIN_CALL (DecryptMessageNext);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (ciphertext_part, ciphertext_part_len);
-		IN_BYTE_BUFFER (plaintext_part, plaintext_part_len);
-		IN_ULONG (flags);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (ciphertext_part, ciphertext_part_len);
+	IN_BYTE_BUFFER (plaintext_part, plaintext_part_len);
+	IN_ULONG (flags);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, ciphertext_part, ciphertext_part_len,
-	               plaintext_part, &plaintext_part_len, flags));
-		OUT_BYTE_ARRAY (plaintext_part, plaintext_part_len);
+		       plaintext_part, &plaintext_part_len, flags));
+	OUT_BYTE_ARRAY (plaintext_part, plaintext_part_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageDecryptFinal (CK_X_FUNCTION_LIST *self,
-                           p11_rpc_message *msg)
+                           p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (MessageDecryptFinal);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
-                       p11_rpc_message *msg)
+                       p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -2074,16 +2070,16 @@ rpc_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (MessageSignInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignMessage (CK_X_FUNCTION_LIST *self,
-                   p11_rpc_message *msg)
+                   p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2094,34 +2090,34 @@ rpc_C_SignMessage (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (SignMessage);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_BUFFER (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_BUFFER (signature, signature_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, data, data_len,
-	               signature, &signature_len));
-		OUT_BYTE_ARRAY (signature, signature_len);
+		       signature, &signature_len));
+	OUT_BYTE_ARRAY (signature, signature_len);
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignMessageBegin (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
 	CK_ULONG parameter_len;
 
 	BEGIN_CALL (SignMessageBegin);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_SignMessageNext (CK_X_FUNCTION_LIST *self,
-                       p11_rpc_message *msg)
+                       p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2133,33 +2129,33 @@ rpc_C_SignMessageNext (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (SignMessageNext);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE (signature_expected);
-		IN_BYTE_BUFFER (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE (signature_expected);
+	IN_BYTE_BUFFER (signature, signature_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, data, data_len,
 		       (signature_expected ? signature : NULL),
 		       (signature_expected ? &signature_len : NULL)));
-		OUT_BYTE_ARRAY (signature, (signature_expected ? signature_len : 0));
+	OUT_BYTE_ARRAY (signature, (signature_expected ? signature_len : 0));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageSignFinal (CK_X_FUNCTION_LIST *self,
-                        p11_rpc_message *msg)
+                        p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (MessageSignFinal);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_MECHANISM mechanism_;
@@ -2167,16 +2163,16 @@ rpc_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
 	CK_OBJECT_HANDLE key;
 
 	BEGIN_CALL (MessageVerifyInit);
-		IN_ULONG (session);
-		IN_MECHANISM (mechanism);
-		IN_ULONG (key);
+	IN_ULONG (session);
+	IN_MECHANISM (mechanism);
+	IN_ULONG (key);
 	PROCESS_CALL ((self, session, mechanism, key));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyMessage (CK_X_FUNCTION_LIST *self,
-                     p11_rpc_message *msg)
+                     p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2187,33 +2183,33 @@ rpc_C_VerifyMessage (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (VerifyMessage);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_ARRAY (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_ARRAY (signature, signature_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, data, data_len,
-	               signature, signature_len));
+		       signature, signature_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyMessageBegin (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
 	CK_ULONG parameter_len;
 
 	BEGIN_CALL (VerifyMessageBegin);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_VerifyMessageNext (CK_X_FUNCTION_LIST *self,
-                         p11_rpc_message *msg)
+                         p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 	CK_BYTE_PTR parameter;
@@ -2224,30 +2220,30 @@ rpc_C_VerifyMessageNext (CK_X_FUNCTION_LIST *self,
 	CK_ULONG signature_len;
 
 	BEGIN_CALL (VerifyMessageNext);
-		IN_ULONG (session);
-		IN_BYTE_ARRAY (parameter, parameter_len);
-		IN_BYTE_ARRAY (data, data_len);
-		IN_BYTE_ARRAY (signature, signature_len);
+	IN_ULONG (session);
+	IN_BYTE_ARRAY (parameter, parameter_len);
+	IN_BYTE_ARRAY (data, data_len);
+	IN_BYTE_ARRAY (signature, signature_len);
 	PROCESS_CALL ((self, session, (void *)parameter, parameter_len, data, data_len, signature, signature_len));
 	END_CALL;
 }
 
 static CK_RV
 rpc_C_MessageVerifyFinal (CK_X_FUNCTION_LIST *self,
-                          p11_rpc_message *msg)
+                          p11_rpc_message    *msg)
 {
 	CK_SESSION_HANDLE session;
 
 	BEGIN_CALL (MessageVerifyFinal);
-		IN_ULONG (session);
+	IN_ULONG (session);
 	PROCESS_CALL ((self, session));
 	END_CALL;
 }
 
 bool
 p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
-                       p11_buffer *request,
-                       p11_buffer *response)
+                       p11_buffer         *request,
+                       p11_buffer         *response)
 {
 	p11_rpc_message msg;
 	CK_RV ret;
@@ -2267,16 +2263,16 @@ p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
 		return false;
 	}
 
-	/* This should have been checked by the parsing code */
+        /* This should have been checked by the parsing code */
 	assert (msg.call_id > P11_RPC_CALL_ERROR);
 	assert (msg.call_id < P11_RPC_CALL_MAX);
 	req_id = msg.call_id;
 
 	switch(req_id) {
 	#define CASE_CALL(name) \
-	case P11_RPC_CALL_##name: \
-		ret = rpc_##name (self, &msg); \
-		break;
+		case P11_RPC_CALL_ ## name: \
+			ret = rpc_ ## name (self, &msg); \
+			break;
 	CASE_CALL (C_Initialize)
 	CASE_CALL (C_Finalize)
 	CASE_CALL (C_GetInfo)
@@ -2342,7 +2338,7 @@ p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
 	CASE_CALL (C_SeedRandom)
 	CASE_CALL (C_GenerateRandom)
 	CASE_CALL (C_WaitForSlotEvent)
-	/* PKCS #11 3.0 */
+        /* PKCS #11 3.0 */
 	CASE_CALL (C_LoginUser)
 	CASE_CALL (C_SessionCancel)
 	CASE_CALL (C_MessageEncryptInit)
@@ -2366,11 +2362,11 @@ p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
 	CASE_CALL (C_VerifyMessageNext)
 	CASE_CALL (C_MessageVerifyFinal)
 	#undef CASE_CALL
-	default:
-		/* This should have been caught by the parse code */
-		assert (0 && "Unchecked call");
-		break;
-	};
+		default:
+                        /* This should have been caught by the parse code */
+			assert (0 && "Unchecked call");
+			break;
+	}
 
 	if (p11_buffer_failed (msg.output)) {
 		p11_message (_("out of memory error putting together message"));
@@ -2378,21 +2374,20 @@ p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
 		return false;
 	}
 
-	/* A filled in response */
+        /* A filled in response */
 	if (ret == CKR_OK) {
-
-		/*
-		 * Since we're dealing with many many functions above generating
-		 * these messages we want to make sure each of them actually
-		 * does what it's supposed to.
-		 */
+                /*
+                 * Since we're dealing with many many functions above generating
+                 * these messages we want to make sure each of them actually
+                 * does what it's supposed to.
+                 */
 		assert (p11_rpc_message_is_verified (&msg));
 		assert (msg.call_type == P11_RPC_RESPONSE);
 		assert (msg.call_id == req_id);
 		assert (p11_rpc_calls[msg.call_id].response);
 		assert (strcmp (p11_rpc_calls[msg.call_id].response, msg.signature) == 0);
 
-	/* Fill in an error respnose */
+                /* Fill in an error respnose */
 	} else {
 		if (!p11_rpc_message_prep (&msg, P11_RPC_CALL_ERROR, P11_RPC_RESPONSE) ||
 		    !p11_rpc_message_write_ulong (&msg, (uint32_t)ret) ||
@@ -2419,8 +2414,8 @@ p11_rpc_server_handle (CK_X_FUNCTION_LIST *self,
  */
 int
 p11_kit_remote_serve_module (CK_FUNCTION_LIST *module,
-                             int in_fd,
-                             int out_fd)
+                             int               in_fd,
+                             int               out_fd)
 {
 	p11_rpc_status status;
 	rpc_server server;
@@ -2438,19 +2433,19 @@ p11_kit_remote_serve_module (CK_FUNCTION_LIST *module,
 	p11_virtual_init (&server.virt, &p11_virtual_base, module, NULL);
 
 	switch (read (in_fd, &server.version, 1)) {
-	case 0:
-		goto out;
-	case 1:
-#if P11_RPC_PROTOCOL_VERSION_MINIMUM > 0
-		if (server.version < P11_RPC_PROTOCOL_VERSION_MINIMUM) {
-			p11_message (_("unsupported version received: %d"), (int)version);
+		case 0:
 			goto out;
-		}
+		case 1:
+#if P11_RPC_PROTOCOL_VERSION_MINIMUM > 0
+			if (server.version < P11_RPC_PROTOCOL_VERSION_MINIMUM) {
+				p11_message (_("unsupported version received: %d"), (int)version);
+				goto out;
+			}
 #endif
-		break;
-	default:
-		p11_message_err (errno, _("couldn't read credential byte"));
-		goto out;
+			break;
+		default:
+			p11_message_err (errno, _("couldn't read credential byte"));
+			goto out;
 	}
 
 	if (server.version > P11_RPC_PROTOCOL_VERSION_MAXIMUM) {
@@ -2458,11 +2453,11 @@ p11_kit_remote_serve_module (CK_FUNCTION_LIST *module,
 	}
 
 	switch (write (out_fd, &server.version, 1)) {
-	case 1:
-		break;
-	default:
-		p11_message_err (errno, _("couldn't write credential byte"));
-		goto out;
+		case 1:
+			break;
+		default:
+			p11_message_err (errno, _("couldn't write credential byte"));
+			goto out;
 	}
 
 	status = P11_RPC_OK;
@@ -2472,20 +2467,20 @@ p11_kit_remote_serve_module (CK_FUNCTION_LIST *module,
 
 		do {
 			status = p11_rpc_transport_read (in_fd, &state, &code,
-			                                 &options, &buffer);
+							 &options, &buffer);
 		} while (status == P11_RPC_AGAIN);
 
 		switch (status) {
-		case P11_RPC_OK:
-			break;
-		case P11_RPC_EOF:
-			ret = 0;
-			continue;
-		case P11_RPC_AGAIN:
-			assert_not_reached ();
-		case P11_RPC_ERROR:
-			p11_message_err (errno, _("failed to read rpc message"));
-			goto out;
+			case P11_RPC_OK:
+				break;
+			case P11_RPC_EOF:
+				ret = 0;
+				continue;
+			case P11_RPC_AGAIN:
+				assert_not_reached ();
+			case P11_RPC_ERROR:
+				p11_message_err (errno, _("failed to read rpc message"));
+				goto out;
 		}
 
 		if (!p11_rpc_server_handle (&server.virt.funcs, &buffer, &buffer)) {
@@ -2497,18 +2492,18 @@ p11_kit_remote_serve_module (CK_FUNCTION_LIST *module,
 		options.len = 0;
 		do {
 			status = p11_rpc_transport_write (out_fd, &state, code,
-			                                  &options, &buffer);
+							  &options, &buffer);
 		} while (status == P11_RPC_AGAIN);
 
 		switch (status) {
-		case P11_RPC_OK:
-			break;
-		case P11_RPC_EOF:
-		case P11_RPC_AGAIN:
-			assert_not_reached ();
-		case P11_RPC_ERROR:
-			p11_message_err (errno, _("failed to write rpc message"));
-			goto out;
+			case P11_RPC_OK:
+				break;
+			case P11_RPC_EOF:
+			case P11_RPC_AGAIN:
+				assert_not_reached ();
+			case P11_RPC_ERROR:
+				p11_message_err (errno, _("failed to write rpc message"));
+				goto out;
 		}
 	}
 
@@ -2536,9 +2531,9 @@ out:
  */
 int
 p11_kit_remote_serve_token (CK_FUNCTION_LIST *module,
-			    CK_TOKEN_INFO *token,
-			    int in_fd,
-			    int out_fd)
+                            CK_TOKEN_INFO    *token,
+                            int               in_fd,
+                            int               out_fd)
 {
 	p11_virtual virt;
 	p11_virtual *filter = NULL;
@@ -2561,7 +2556,7 @@ p11_kit_remote_serve_token (CK_FUNCTION_LIST *module,
 
 	ret = p11_kit_remote_serve_module (filtered, in_fd, out_fd);
 
- out:
+out:
 	if (filtered != NULL)
 		p11_virtual_unwrap (filtered);
 	if (filter != NULL)
@@ -2571,7 +2566,8 @@ p11_kit_remote_serve_token (CK_FUNCTION_LIST *module,
 }
 
 static void
-token_set_write_protected (CK_TOKEN_INFO *token, P11KitUri *uri)
+token_set_write_protected (CK_TOKEN_INFO *token,
+                           P11KitUri     *uri)
 {
 	const char *write_protected =
 		p11_kit_uri_get_vendor_query (uri, "write-protected");
@@ -2603,11 +2599,11 @@ module_unwrap (CK_FUNCTION_LIST *module)
  * Returns: 0 if success, non-zero otherwise.
  */
 int
-p11_kit_remote_serve_tokens (const char **tokens,
-			     size_t n_tokens,
-			     CK_FUNCTION_LIST *provider,
-			     int in_fd,
-			     int out_fd)
+p11_kit_remote_serve_tokens (const char       **tokens,
+                             size_t             n_tokens,
+                             CK_FUNCTION_LIST  *provider,
+                             int                in_fd,
+                             int                out_fd)
 {
 	p11_virtual *lower = NULL;
 	p11_virtual *filter = NULL;
@@ -2687,7 +2683,7 @@ p11_kit_remote_serve_tokens (const char **tokens,
 
 		token = p11_kit_iter_get_token (iter);
 
-		/* Check if the token is the one we want to export */
+                /* Check if the token is the one we want to export */
 		for (i = 0; i < n_tokens; i++)
 			if (p11_kit_uri_match_token_info (uris[i], token))
 				break;
@@ -2697,8 +2693,8 @@ p11_kit_remote_serve_tokens (const char **tokens,
 		module = p11_kit_iter_get_module (iter);
 		assert (module != NULL);
 
-		/* Create a virtual module that provides only the
-		 * specified tokens */
+                /* Create a virtual module that provides only the
+                 * specified tokens */
 		filter = p11_dict_get (filters, module);
 		if (filter == NULL) {
 			lower = calloc (1, sizeof (p11_virtual));
@@ -2745,13 +2741,13 @@ p11_kit_remote_serve_tokens (const char **tokens,
 		}
 	}
 
-	/* NULL terminate the array */
+        /* NULL terminate the array */
 	if (!p11_array_push (filtered, NULL)) {
 		error = ENOMEM;
 		goto out;
 	}
 
-	/* Need to finalize the modules that we initialized for iteration */
+        /* Need to finalize the modules that we initialized for iteration */
 	p11_kit_modules_finalize (modules);
 
 	if (p11_proxy_module_create (&proxy, (CK_FUNCTION_LIST **)filtered->elem)
@@ -2763,7 +2759,7 @@ p11_kit_remote_serve_tokens (const char **tokens,
 
 	ret = p11_kit_remote_serve_module (proxy, in_fd, out_fd);
 
- out:
+out:
 	if (filtered != NULL)
 		p11_array_free (filtered);
 	if (filters != NULL)

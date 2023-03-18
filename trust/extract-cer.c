@@ -44,14 +44,14 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 bool
 p11_extract_x509_file (p11_enumerate *ex,
-                       const char *destination)
+                       const char    *destination)
 {
 	bool found = false;
 	p11_save_file *file;
@@ -67,7 +67,7 @@ p11_extract_x509_file (p11_enumerate *ex,
 		if (!p11_save_write_and_finish (file, ex->cert_der, ex->cert_len))
 			return false;
 
-		/* Wrote something */
+                /* Wrote something */
 		found = true;
 	}
 
@@ -75,7 +75,7 @@ p11_extract_x509_file (p11_enumerate *ex,
 		p11_message (_("failed to find certificates: %s"), p11_kit_strerror (rv));
 		return false;
 
-	/* Remember that an empty DER file is not a valid file, so complain if nothing */
+                /* Remember that an empty DER file is not a valid file, so complain if nothing */
 	} else if (!found) {
 		p11_message (_("no certificate found"));
 		return false;
@@ -86,7 +86,7 @@ p11_extract_x509_file (p11_enumerate *ex,
 
 bool
 p11_extract_x509_directory (p11_enumerate *ex,
-                            const char *destination)
+                            const char    *destination)
 {
 	p11_save_file *file;
 	p11_save_dir *dir;

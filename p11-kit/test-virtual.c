@@ -62,14 +62,14 @@ typedef struct {
 
 static CK_RV
 override_initialize (CK_X_FUNCTION_LIST *self,
-                     CK_VOID_PTR args)
+                     CK_VOID_PTR         args)
 {
 	Override *over = (Override *)self;
 
 	assert_str_eq ("initialize-arg", args);
 	assert_str_eq ("overide-arg", over->check);
 
-	/* An arbitrary error code to check */
+        /* An arbitrary error code to check */
 	return CKR_NEED_TO_CREATE_THREADS;
 }
 
@@ -124,7 +124,7 @@ test_fall_through (void)
 	rv = (module->C_Initialize) ("initialize-arg");
 	assert_num_eq (CKR_NEED_TO_CREATE_THREADS, rv);
 
-	/* All other functions should have just fallen through */
+        /* All other functions should have just fallen through */
 	assert_ptr_eq (mock_module_no_slots.C_Finalize, module->C_Finalize);
 
 	p11_virtual_unwrap (module);
@@ -156,7 +156,7 @@ test_get_function_list (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

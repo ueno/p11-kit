@@ -161,7 +161,7 @@ setup (void *unused)
 	p11_enumerate_init (&test.ex);
 	test.ex.flags |= P11_ENUMERATE_CORRELATE;
 
-	/* Prefill the modules */
+        /* Prefill the modules */
 	test.modules[0] = &test.module;
 	test.modules[1] = NULL;
 	test.ex.modules = test.modules;
@@ -172,7 +172,7 @@ teardown (void *unused)
 {
 	CK_RV rv;
 
-	/* Don't free the modules */
+        /* Don't free the modules */
 	test.ex.modules = NULL;
 
 	p11_enumerate_cleanup (&test.ex);
@@ -248,8 +248,8 @@ static CK_ATTRIBUTE extension_eku_any[] = {
 	{ CKA_ID, "ID1", 3 },
 	{ CKA_OBJECT_ID, (void *)P11_OID_EXTENDED_KEY_USAGE, sizeof (P11_OID_EXTENDED_KEY_USAGE) },
 	{ CKA_PUBLIC_KEY_INFO, (void *)test_cacert3_ca_public_key, sizeof (test_cacert3_ca_public_key) },
-	/* anyExtendedKeyUsage ('2 5 29 37 0') and
-	 * Microsoft Smart Card Logon ('1 3 6 1 4 1 311 20 2 2') */
+        /* anyExtendedKeyUsage ('2 5 29 37 0') and
+         * Microsoft Smart Card Logon ('1 3 6 1 4 1 311 20 2 2') */
 	{ CKA_VALUE, "\x30\x1b\x06\x03\x55\x1d\x25\x04\x14\x30\x12\x06\x04\x55\x1d\x25\x00\x06\x0a\x2b\x06\x01\x04\x01\x82\x37\x14\x02\x02", 29 },
 	{ CKA_INVALID },
 };
@@ -293,7 +293,7 @@ test_info_limit_purposes (void)
 	mock_module_add_object (MOCK_SLOT_ONE_ID, cacert3_trusted);
 	mock_module_add_object (MOCK_SLOT_ONE_ID, extension_eku_server_client);
 
-	/* This should not match the above, with the attached certificate ext */
+        /* This should not match the above, with the attached certificate ext */
 	assert_ptr_eq (NULL, test.ex.limit_to_purposes);
 	p11_enumerate_opt_purpose (&test.ex, "1.1.1");
 	assert_ptr_not_null (test.ex.limit_to_purposes);
@@ -318,7 +318,7 @@ test_info_invalid_purposes (void)
 
 	p11_kit_be_quiet ();
 
-	/* No results due to invalid purpose on certificate */
+        /* No results due to invalid purpose on certificate */
 	rv = p11_kit_iter_next (test.ex.iter);
 	assert_num_eq (CKR_CANCEL, rv);
 
@@ -509,7 +509,7 @@ test_override_by_issuer_serial (void)
 	mock_module_add_object (MOCK_SLOT_ONE_ID, cacert3_trusted);
 	mock_module_add_object (MOCK_SLOT_ONE_ID, cacert3_distrusted);
 
-	test.ex.flags =  P11_ENUMERATE_ANCHORS | P11_ENUMERATE_BLOCKLIST | P11_ENUMERATE_CORRELATE;
+	test.ex.flags = P11_ENUMERATE_ANCHORS | P11_ENUMERATE_BLOCKLIST | P11_ENUMERATE_CORRELATE;
 	p11_kit_iter_add_filter (test.ex.iter, &certificate, 1);
 	p11_enumerate_ready (&test.ex, NULL);
 
@@ -532,17 +532,17 @@ test_override_by_public_key (void)
 	mock_module_add_object (MOCK_SLOT_ONE_ID, cacert3_trusted);
 	mock_module_add_object (MOCK_SLOT_ONE_ID, cacert3_distrusted_by_key);
 
-	test.ex.flags =  P11_ENUMERATE_ANCHORS | P11_ENUMERATE_BLOCKLIST | P11_ENUMERATE_CORRELATE;
+	test.ex.flags = P11_ENUMERATE_ANCHORS | P11_ENUMERATE_BLOCKLIST | P11_ENUMERATE_CORRELATE;
 	p11_kit_iter_add_filter (test.ex.iter, &certificate, 1);
 	p11_enumerate_ready (&test.ex, NULL);
 
-	/* No results returned, because distrust is not a cert */
+        /* No results returned, because distrust is not a cert */
 	rv = p11_kit_iter_next (test.ex.iter);
 	assert_num_eq (CKR_CANCEL, rv);
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

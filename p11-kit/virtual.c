@@ -71,37 +71,36 @@
 #define MAX_ARGS 11
 
 typedef struct {
-	/* This is first so we can cast between CK_FUNCTION_LIST, CK_FUNCTION_LIST_3_0* and Context* */
+        /* This is first so we can cast between CK_FUNCTION_LIST, CK_FUNCTION_LIST_3_0* and Context* */
 	CK_FUNCTION_LIST_3_0 bound;
 
-	/* The PKCS#11 functions to call into */
+        /* The PKCS#11 functions to call into */
 	p11_virtual *virt;
 	p11_destroyer destroyer;
 
 #if defined(FFI_CLOSURES) && FFI_CLOSURES
-	/* A list of our libffi built closures, for cleanup later */
+        /* A list of our libffi built closures, for cleanup later */
 	ffi_closure *ffi_closures[MAX_FUNCTIONS];
 	ffi_cif ffi_cifs[MAX_FUNCTIONS];
 	int ffi_used;
-#endif	/* FFI_CLOSURES */
+#endif  /* FFI_CLOSURES */
 
-	/* The index in fixed_closures, or -1 when libffi closures are used */
+        /* The index in fixed_closures, or -1 when libffi closures are used */
 	int fixed_index;
 } Wrapper;
 
 static CK_FUNCTION_LIST_3_0 *fixed_closures[P11_VIRTUAL_MAX_FIXED];
 static CK_INTERFACE *fixed_interfaces[P11_VIRTUAL_MAX_FIXED];
 
-static Wrapper          *create_fixed_wrapper   (p11_virtual         *virt,
-                                                 size_t               index,
-                                                 p11_destroyer        destroyer);
-static CK_INTERFACE     *create_fixed_interface (CK_FUNCTION_LIST_3_0_PTR functions);
+static Wrapper *create_fixed_wrapper (p11_virtual  *virt,
+				      size_t        index,
+				      p11_destroyer destroyer);
+static CK_INTERFACE *create_fixed_interface (CK_FUNCTION_LIST_3_0_PTR functions);
 static CK_FUNCTION_LIST_3_0 *
-                         p11_virtual_wrap_fixed (p11_virtual         *virt,
-                                                 p11_destroyer        destroyer);
+p11_virtual_wrap_fixed (p11_virtual  *virt,
+			p11_destroyer destroyer);
 static void
-                         p11_virtual_unwrap_fixed
-                                                (CK_FUNCTION_LIST_PTR module);
+p11_virtual_unwrap_fixed (CK_FUNCTION_LIST_PTR module);
 
 static CK_RV
 short_C_GetFunctionStatus (CK_SESSION_HANDLE handle)
@@ -119,9 +118,9 @@ short_C_CancelFunction (CK_SESSION_HANDLE handle)
 
 static void
 binding_C_GetFunctionList (ffi_cif *cif,
-                           CK_RV *ret,
-                           void* args[],
-                           Wrapper *wrapper)
+			   CK_RV   *ret,
+			   void    *args[],
+			   Wrapper *wrapper)
 {
 	CK_FUNCTION_LIST_PTR_PTR list = *(CK_FUNCTION_LIST_PTR_PTR *)args[0];
 
@@ -134,833 +133,833 @@ binding_C_GetFunctionList (ffi_cif *cif,
 }
 
 static void
-binding_C_Initialize (ffi_cif *cif,
-                      CK_RV *ret,
-                      void* args[],
-                      CK_X_FUNCTION_LIST *funcs)
+binding_C_Initialize (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Initialize (funcs,
-	                            *(CK_VOID_PTR *)args[0]);
+				    *(CK_VOID_PTR *)args[0]);
 }
 
 static void
-binding_C_Finalize (ffi_cif *cif,
-                    CK_RV *ret,
-                    void* args[],
-                    CK_X_FUNCTION_LIST *funcs)
+binding_C_Finalize (ffi_cif            *cif,
+		    CK_RV              *ret,
+		    void               *args[],
+		    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Finalize (funcs,
-	                          *(CK_VOID_PTR *)args[0]);
+				  *(CK_VOID_PTR *)args[0]);
 }
 
 static void
-binding_C_GetInfo (ffi_cif *cif,
-                   CK_RV *ret,
-                   void* args[],
-                   CK_X_FUNCTION_LIST *funcs)
+binding_C_GetInfo (ffi_cif            *cif,
+		   CK_RV              *ret,
+		   void               *args[],
+		   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetInfo (funcs,
-	                         *(CK_INFO_PTR *)args[0]);
+				 *(CK_INFO_PTR *)args[0]);
 }
 
 static void
-binding_C_GetSlotList (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GetSlotList (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetSlotList (funcs,
-	                             *(CK_BBOOL *)args[0],
-	                             *(CK_SLOT_ID_PTR *)args[1],
-	                             *(CK_ULONG_PTR *)args[2]);
+				     *(CK_BBOOL *)args[0],
+				     *(CK_SLOT_ID_PTR *)args[1],
+				     *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_GetSlotInfo (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GetSlotInfo (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetSlotInfo (funcs,
-	                             *(CK_SLOT_ID *)args[0],
-	                             *(CK_SLOT_INFO_PTR *)args[1]);
+				     *(CK_SLOT_ID *)args[0],
+				     *(CK_SLOT_INFO_PTR *)args[1]);
 }
 
 static void
-binding_C_GetTokenInfo (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        CK_X_FUNCTION_LIST *funcs)
+binding_C_GetTokenInfo (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetTokenInfo (funcs,
-	                              *(CK_SLOT_ID *)args[0],
-	                              *(CK_TOKEN_INFO_PTR *)args[1]);
+				      *(CK_SLOT_ID *)args[0],
+				      *(CK_TOKEN_INFO_PTR *)args[1]);
 }
 
 static void
-binding_C_WaitForSlotEvent (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_WaitForSlotEvent (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_WaitForSlotEvent (funcs,
-	                                  *(CK_FLAGS *)args[0],
-	                                  *(CK_SLOT_ID_PTR *)args[1],
-	                                  *(CK_VOID_PTR *)args[2]);
+					  *(CK_FLAGS *)args[0],
+					  *(CK_SLOT_ID_PTR *)args[1],
+					  *(CK_VOID_PTR *)args[2]);
 }
 
 static void
-binding_C_GetMechanismList (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_GetMechanismList (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetMechanismList (funcs,
-	                                  *(CK_SLOT_ID *)args[0],
-	                                  *(CK_MECHANISM_TYPE_PTR *)args[1],
-	                                  *(CK_ULONG_PTR *)args[2]);
+					  *(CK_SLOT_ID *)args[0],
+					  *(CK_MECHANISM_TYPE_PTR *)args[1],
+					  *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_GetMechanismInfo (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_GetMechanismInfo (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetMechanismInfo (funcs,
-	                                  *(CK_SLOT_ID *)args[0],
-	                                  *(CK_MECHANISM_TYPE *)args[1],
-	                                  *(CK_MECHANISM_INFO_PTR *)args[2]);
+					  *(CK_SLOT_ID *)args[0],
+					  *(CK_MECHANISM_TYPE *)args[1],
+					  *(CK_MECHANISM_INFO_PTR *)args[2]);
 }
 
 static void
-binding_C_InitToken (ffi_cif *cif,
-                     CK_RV *ret,
-                     void* args[],
-                     CK_X_FUNCTION_LIST *funcs)
+binding_C_InitToken (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_InitToken (funcs,
-	                           *(CK_SLOT_ID *)args[0],
-	                           *(CK_BYTE_PTR *)args[1],
-	                           *(CK_ULONG *)args[2],
-	                           *(CK_BYTE_PTR *)args[3]);
+				   *(CK_SLOT_ID *)args[0],
+				   *(CK_BYTE_PTR *)args[1],
+				   *(CK_ULONG *)args[2],
+				   *(CK_BYTE_PTR *)args[3]);
 }
 
 static void
-binding_C_InitPIN (ffi_cif *cif,
-                   CK_RV *ret,
-                   void* args[],
-                   CK_X_FUNCTION_LIST *funcs)
+binding_C_InitPIN (ffi_cif            *cif,
+		   CK_RV              *ret,
+		   void               *args[],
+		   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_InitPIN (funcs,
-	                         *(CK_SESSION_HANDLE *)args[0],
-	                         *(CK_BYTE_PTR *)args[1],
-	                         *(CK_ULONG *)args[2]);
+				 *(CK_SESSION_HANDLE *)args[0],
+				 *(CK_BYTE_PTR *)args[1],
+				 *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_SetPIN (ffi_cif *cif,
-                  CK_RV *ret,
-                  void* args[],
-                  CK_X_FUNCTION_LIST *funcs)
+binding_C_SetPIN (ffi_cif            *cif,
+		  CK_RV              *ret,
+		  void               *args[],
+		  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SetPIN (funcs,
-	                        *(CK_SESSION_HANDLE *)args[0],
-	                        *(CK_BYTE_PTR *)args[1],
-	                        *(CK_ULONG *)args[2],
-	                        *(CK_BYTE_PTR *)args[3],
-	                        *(CK_ULONG *)args[4]);
+				*(CK_SESSION_HANDLE *)args[0],
+				*(CK_BYTE_PTR *)args[1],
+				*(CK_ULONG *)args[2],
+				*(CK_BYTE_PTR *)args[3],
+				*(CK_ULONG *)args[4]);
 }
 
 static void
-binding_C_OpenSession (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_OpenSession (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_OpenSession (funcs,
-	                             *(CK_SLOT_ID *)args[0],
-	                             *(CK_FLAGS *)args[1],
-	                             *(CK_VOID_PTR *)args[2],
-	                             *(CK_NOTIFY *)args[3],
-	                             *(CK_SESSION_HANDLE_PTR *)args[4]);
+				     *(CK_SLOT_ID *)args[0],
+				     *(CK_FLAGS *)args[1],
+				     *(CK_VOID_PTR *)args[2],
+				     *(CK_NOTIFY *)args[3],
+				     *(CK_SESSION_HANDLE_PTR *)args[4]);
 }
 
 static void
-binding_C_CloseSession (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        CK_X_FUNCTION_LIST *funcs)
+binding_C_CloseSession (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_CloseSession (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0]);
+				      *(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_CloseAllSessions (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_CloseAllSessions (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_CloseAllSessions (funcs,
-	                                  *(CK_SLOT_ID *)args[0]);
+					  *(CK_SLOT_ID *)args[0]);
 }
 
 static void
-binding_C_GetSessionInfo (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GetSessionInfo (ffi_cif            *cif,
+			  CK_RV              *ret,
+			  void               *args[],
+			  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetSessionInfo (funcs,
-	                                *(CK_SESSION_HANDLE *)args[0],
-	                                *(CK_SESSION_INFO_PTR *)args[1]);
+					*(CK_SESSION_HANDLE *)args[0],
+					*(CK_SESSION_INFO_PTR *)args[1]);
 }
 
 static void
-binding_C_GetOperationState (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GetOperationState (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetOperationState (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_BYTE_PTR *)args[1],
-	                                   *(CK_ULONG_PTR *)args[2]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_BYTE_PTR *)args[1],
+					   *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_SetOperationState (ffi_cif *cif,
-                             CK_RV *ret,
-                             void* args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_SetOperationState (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SetOperationState (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_BYTE_PTR *)args[1],
-	                                   *(CK_ULONG *)args[2],
-	                                   *(CK_OBJECT_HANDLE *)args[3],
-	                                   *(CK_OBJECT_HANDLE *)args[4]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_BYTE_PTR *)args[1],
+					   *(CK_ULONG *)args[2],
+					   *(CK_OBJECT_HANDLE *)args[3],
+					   *(CK_OBJECT_HANDLE *)args[4]);
 }
 
 static void
-binding_C_Login (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_Login (ffi_cif            *cif,
+		 CK_RV              *ret,
+		 void               *args[],
+		 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Login (funcs,
-	                       *(CK_SESSION_HANDLE *)args[0],
-	                       *(CK_USER_TYPE *)args[1],
-	                       *(CK_BYTE_PTR *)args[2],
-	                       *(CK_ULONG *)args[3]);
+			       *(CK_SESSION_HANDLE *)args[0],
+			       *(CK_USER_TYPE *)args[1],
+			       *(CK_BYTE_PTR *)args[2],
+			       *(CK_ULONG *)args[3]);
 }
 
 static void
-binding_C_Logout (ffi_cif *cif,
-                  CK_RV *ret,
-                  void* args[],
-                  CK_X_FUNCTION_LIST *funcs)
+binding_C_Logout (ffi_cif            *cif,
+		  CK_RV              *ret,
+		  void               *args[],
+		  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Logout (funcs,
-	                        *(CK_SESSION_HANDLE *)args[0]);
+				*(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_CreateObject (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_CreateObject (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_CreateObject (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0],
-	                              *(CK_ATTRIBUTE_PTR *)args[1],
-	                              *(CK_ULONG *)args[2],
-	                              *(CK_OBJECT_HANDLE_PTR *)args[3]);
+				      *(CK_SESSION_HANDLE *)args[0],
+				      *(CK_ATTRIBUTE_PTR *)args[1],
+				      *(CK_ULONG *)args[2],
+				      *(CK_OBJECT_HANDLE_PTR *)args[3]);
 }
 
 static void
-binding_C_CopyObject (ffi_cif *cif,
-                      CK_RV *ret,
-                      void* args[],
-                      CK_X_FUNCTION_LIST *funcs)
+binding_C_CopyObject (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_CopyObject (funcs,
-	                            *(CK_SESSION_HANDLE *)args[0],
-	                            *(CK_OBJECT_HANDLE *)args[1],
-	                            *(CK_ATTRIBUTE_PTR *)args[2],
-	                            *(CK_ULONG *)args[3],
-	                            *(CK_OBJECT_HANDLE_PTR *)args[4]);
+				    *(CK_SESSION_HANDLE *)args[0],
+				    *(CK_OBJECT_HANDLE *)args[1],
+				    *(CK_ATTRIBUTE_PTR *)args[2],
+				    *(CK_ULONG *)args[3],
+				    *(CK_OBJECT_HANDLE_PTR *)args[4]);
 }
 
 static void
-binding_C_DestroyObject (ffi_cif *cif,
-                         CK_RV *ret,
-                         void* args[],
-                         CK_X_FUNCTION_LIST *funcs)
+binding_C_DestroyObject (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DestroyObject (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_OBJECT_HANDLE *)args[1]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_OBJECT_HANDLE *)args[1]);
 }
 
 static void
-binding_C_GetObjectSize (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GetObjectSize (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetObjectSize (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_OBJECT_HANDLE *)args[1],
-	                               *(CK_ULONG_PTR *)args[2]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_OBJECT_HANDLE *)args[1],
+				       *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_GetAttributeValue (ffi_cif *cif,
-                             CK_RV *ret,
-                             void* args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_GetAttributeValue (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GetAttributeValue (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_OBJECT_HANDLE *)args[1],
-	                                   *(CK_ATTRIBUTE_PTR *)args[2],
-	                                   *(CK_ULONG *)args[3]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_OBJECT_HANDLE *)args[1],
+					   *(CK_ATTRIBUTE_PTR *)args[2],
+					   *(CK_ULONG *)args[3]);
 }
 
 static void
-binding_C_SetAttributeValue (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_SetAttributeValue (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SetAttributeValue (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_OBJECT_HANDLE *)args[1],
-	                                   *(CK_ATTRIBUTE_PTR *)args[2],
-	                                   *(CK_ULONG *)args[3]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_OBJECT_HANDLE *)args[1],
+					   *(CK_ATTRIBUTE_PTR *)args[2],
+					   *(CK_ULONG *)args[3]);
 }
 
 static void
-binding_C_FindObjectsInit (ffi_cif *cif,
-                           CK_RV *ret,
-                           void* args[],
-                           CK_X_FUNCTION_LIST *funcs)
+binding_C_FindObjectsInit (ffi_cif            *cif,
+			   CK_RV              *ret,
+			   void               *args[],
+			   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_FindObjectsInit (funcs,
-	                                 *(CK_SESSION_HANDLE *)args[0],
-	                                 *(CK_ATTRIBUTE_PTR *)args[1],
-	                                 *(CK_ULONG *)args[2]);
+					 *(CK_SESSION_HANDLE *)args[0],
+					 *(CK_ATTRIBUTE_PTR *)args[1],
+					 *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_FindObjects (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_FindObjects (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_FindObjects (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_OBJECT_HANDLE_PTR *)args[1],
-	                             *(CK_ULONG *)args[2],
-	                             *(CK_ULONG_PTR *)args[3]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_OBJECT_HANDLE_PTR *)args[1],
+				     *(CK_ULONG *)args[2],
+				     *(CK_ULONG_PTR *)args[3]);
 }
 
 static void
-binding_C_FindObjectsFinal (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_FindObjectsFinal (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_FindObjectsFinal (funcs,
-	                                  *(CK_SESSION_HANDLE *)args[0]);
+					  *(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_EncryptInit (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptInit (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptInit (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_MECHANISM_PTR *)args[1],
-	                             *(CK_OBJECT_HANDLE *)args[2]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_MECHANISM_PTR *)args[1],
+				     *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_Encrypt (ffi_cif *cif,
-                   CK_RV *ret,
-                   void* args[],
-                   CK_X_FUNCTION_LIST *funcs)
+binding_C_Encrypt (ffi_cif            *cif,
+		   CK_RV              *ret,
+		   void               *args[],
+		   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Encrypt (funcs,
-	                         *(CK_SESSION_HANDLE *)args[0],
-	                         *(CK_BYTE_PTR *)args[1],
-	                         *(CK_ULONG *)args[2],
-	                         *(CK_BYTE_PTR *)args[3],
-	                         *(CK_ULONG_PTR *)args[4]);
+				 *(CK_SESSION_HANDLE *)args[0],
+				 *(CK_BYTE_PTR *)args[1],
+				 *(CK_ULONG *)args[2],
+				 *(CK_BYTE_PTR *)args[3],
+				 *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_EncryptUpdate (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptUpdate (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptUpdate (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_BYTE_PTR *)args[1],
-	                               *(CK_ULONG *)args[2],
-	                               *(CK_BYTE_PTR *)args[3],
-	                               *(CK_ULONG_PTR *)args[4]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_BYTE_PTR *)args[1],
+				       *(CK_ULONG *)args[2],
+				       *(CK_BYTE_PTR *)args[3],
+				       *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_EncryptFinal (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptFinal (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptFinal (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0],
-	                              *(CK_BYTE_PTR *)args[1],
-	                              *(CK_ULONG_PTR *)args[2]);
+				      *(CK_SESSION_HANDLE *)args[0],
+				      *(CK_BYTE_PTR *)args[1],
+				      *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_DecryptInit (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptInit (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptInit (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_MECHANISM_PTR *)args[1],
-	                             *(CK_OBJECT_HANDLE *)args[2]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_MECHANISM_PTR *)args[1],
+				     *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_Decrypt (ffi_cif *cif,
-                   CK_RV *ret,
-                   void* args[],
-                   CK_X_FUNCTION_LIST *funcs)
+binding_C_Decrypt (ffi_cif            *cif,
+		   CK_RV              *ret,
+		   void               *args[],
+		   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Decrypt (funcs,
-	                         *(CK_SESSION_HANDLE *)args[0],
-	                         *(CK_BYTE_PTR *)args[1],
-	                         *(CK_ULONG *)args[2],
-	                         *(CK_BYTE_PTR *)args[3],
-	                         *(CK_ULONG_PTR *)args[4]);
+				 *(CK_SESSION_HANDLE *)args[0],
+				 *(CK_BYTE_PTR *)args[1],
+				 *(CK_ULONG *)args[2],
+				 *(CK_BYTE_PTR *)args[3],
+				 *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DecryptUpdate (ffi_cif *cif,
-                         CK_RV *ret,
-                         void* args[],
-                         CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptUpdate (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptUpdate (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_BYTE_PTR *)args[1],
-	                               *(CK_ULONG *)args[2],
-	                               *(CK_BYTE_PTR *)args[3],
-	                               *(CK_ULONG_PTR *)args[4]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_BYTE_PTR *)args[1],
+				       *(CK_ULONG *)args[2],
+				       *(CK_BYTE_PTR *)args[3],
+				       *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DecryptFinal (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptFinal (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptFinal (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0],
-	                              *(CK_BYTE_PTR *)args[1],
-	                              *(CK_ULONG_PTR *)args[2]);
+				      *(CK_SESSION_HANDLE *)args[0],
+				      *(CK_BYTE_PTR *)args[1],
+				      *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_DigestInit (ffi_cif *cif,
-                      CK_RV *ret,
-                      void* args[],
-                      CK_X_FUNCTION_LIST *funcs)
+binding_C_DigestInit (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DigestInit (funcs,
-	                            *(CK_SESSION_HANDLE *)args[0],
-	                            *(CK_MECHANISM_PTR *)args[1]);
+				    *(CK_SESSION_HANDLE *)args[0],
+				    *(CK_MECHANISM_PTR *)args[1]);
 }
 
 static void
-binding_C_Digest (ffi_cif *cif,
-                  CK_RV *ret,
-                  void* args[],
-                  CK_X_FUNCTION_LIST *funcs)
+binding_C_Digest (ffi_cif            *cif,
+		  CK_RV              *ret,
+		  void               *args[],
+		  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Digest (funcs,
-	                        *(CK_SESSION_HANDLE *)args[0],
-	                        *(CK_BYTE_PTR *)args[1],
-	                        *(CK_ULONG *)args[2],
-	                        *(CK_BYTE_PTR *)args[3],
-	                        *(CK_ULONG_PTR *)args[4]);
+				*(CK_SESSION_HANDLE *)args[0],
+				*(CK_BYTE_PTR *)args[1],
+				*(CK_ULONG *)args[2],
+				*(CK_BYTE_PTR *)args[3],
+				*(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DigestUpdate (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_DigestUpdate (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DigestUpdate (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0],
-	                              *(CK_BYTE_PTR *)args[1],
-	                              *(CK_ULONG *)args[2]);
+				      *(CK_SESSION_HANDLE *)args[0],
+				      *(CK_BYTE_PTR *)args[1],
+				      *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_DigestKey (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_DigestKey (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DigestKey (funcs,
-	                           *(CK_SESSION_HANDLE *)args[0],
-	                           *(CK_OBJECT_HANDLE *)args[1]);
+				   *(CK_SESSION_HANDLE *)args[0],
+				   *(CK_OBJECT_HANDLE *)args[1]);
 }
 
 static void
-binding_C_DigestFinal (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_DigestFinal (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DigestFinal (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_BYTE_PTR *)args[1],
-	                             *(CK_ULONG_PTR *)args[2]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_BYTE_PTR *)args[1],
+				     *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_SignInit (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_SignInit (ffi_cif            *cif,
+		    CK_RV              *ret,
+		    void               *args[],
+		    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignInit (funcs,
-	                          *(CK_SESSION_HANDLE *)args[0],
-	                          *(CK_MECHANISM_PTR *)args[1],
-	                          *(CK_OBJECT_HANDLE *)args[2]);
+				  *(CK_SESSION_HANDLE *)args[0],
+				  *(CK_MECHANISM_PTR *)args[1],
+				  *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_Sign (ffi_cif *cif,
-                CK_RV *ret,
-                void* args[],
-                CK_X_FUNCTION_LIST *funcs)
+binding_C_Sign (ffi_cif            *cif,
+		CK_RV              *ret,
+		void               *args[],
+		CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Sign (funcs,
-	                      *(CK_SESSION_HANDLE *)args[0],
-	                      *(CK_BYTE_PTR *)args[1],
-	                      *(CK_ULONG *)args[2],
-	                      *(CK_BYTE_PTR *)args[3],
-	                      *(CK_ULONG_PTR *)args[4]);
+			      *(CK_SESSION_HANDLE *)args[0],
+			      *(CK_BYTE_PTR *)args[1],
+			      *(CK_ULONG *)args[2],
+			      *(CK_BYTE_PTR *)args[3],
+			      *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_SignUpdate (ffi_cif *cif,
-                      CK_RV *ret,
-                      void* args[],
-                      CK_X_FUNCTION_LIST *funcs)
+binding_C_SignUpdate (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignUpdate (funcs,
-	                            *(CK_SESSION_HANDLE *)args[0],
-	                            *(CK_BYTE_PTR *)args[1],
-	                            *(CK_ULONG *)args[2]);
+				    *(CK_SESSION_HANDLE *)args[0],
+				    *(CK_BYTE_PTR *)args[1],
+				    *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_SignFinal (ffi_cif *cif,
-                     CK_RV *ret,
-                     void* args[],
-                     CK_X_FUNCTION_LIST *funcs)
+binding_C_SignFinal (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignFinal (funcs,
-	                           *(CK_SESSION_HANDLE *)args[0],
-	                           *(CK_BYTE_PTR *)args[1],
-	                           *(CK_ULONG_PTR *)args[2]);
+				   *(CK_SESSION_HANDLE *)args[0],
+				   *(CK_BYTE_PTR *)args[1],
+				   *(CK_ULONG_PTR *)args[2]);
 }
 
 static void
-binding_C_SignRecoverInit (ffi_cif *cif,
-                           CK_RV *ret,
-                           void* args[],
-                           CK_X_FUNCTION_LIST *funcs)
+binding_C_SignRecoverInit (ffi_cif            *cif,
+			   CK_RV              *ret,
+			   void               *args[],
+			   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignRecoverInit (funcs,
-	                                 *(CK_SESSION_HANDLE *)args[0],
-	                                 *(CK_MECHANISM_PTR *)args[1],
-	                                 *(CK_OBJECT_HANDLE *)args[2]);
+					 *(CK_SESSION_HANDLE *)args[0],
+					 *(CK_MECHANISM_PTR *)args[1],
+					 *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_SignRecover (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_SignRecover (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignRecover (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_BYTE_PTR *)args[1],
-	                             *(CK_ULONG *)args[2],
-	                             *(CK_BYTE_PTR *)args[3],
-	                             *(CK_ULONG_PTR *)args[4]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_BYTE_PTR *)args[1],
+				     *(CK_ULONG *)args[2],
+				     *(CK_BYTE_PTR *)args[3],
+				     *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_VerifyInit (ffi_cif *cif,
-                      CK_RV *ret,
-                      void* args[],
-                      CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyInit (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyInit (funcs,
-	                            *(CK_SESSION_HANDLE *)args[0],
-	                            *(CK_MECHANISM_PTR *)args[1],
-	                            *(CK_OBJECT_HANDLE *)args[2]);
+				    *(CK_SESSION_HANDLE *)args[0],
+				    *(CK_MECHANISM_PTR *)args[1],
+				    *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_Verify (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_Verify (ffi_cif            *cif,
+		  CK_RV              *ret,
+		  void               *args[],
+		  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_Verify (funcs,
-	                        *(CK_SESSION_HANDLE *)args[0],
-	                        *(CK_BYTE_PTR *)args[1],
-	                        *(CK_ULONG *)args[2],
-	                        *(CK_BYTE_PTR *)args[3],
-	                        *(CK_ULONG *)args[4]);
+				*(CK_SESSION_HANDLE *)args[0],
+				*(CK_BYTE_PTR *)args[1],
+				*(CK_ULONG *)args[2],
+				*(CK_BYTE_PTR *)args[3],
+				*(CK_ULONG *)args[4]);
 }
 
 static void
-binding_C_VerifyUpdate (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyUpdate (ffi_cif            *cif,
+			CK_RV              *ret,
+			void               *args[],
+			CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyUpdate (funcs,
-	                              *(CK_SESSION_HANDLE *)args[0],
-	                              *(CK_BYTE_PTR *)args[1],
-	                              *(CK_ULONG *)args[2]);
+				      *(CK_SESSION_HANDLE *)args[0],
+				      *(CK_BYTE_PTR *)args[1],
+				      *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_VerifyFinal (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyFinal (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyFinal (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_BYTE_PTR *)args[1],
-	                             *(CK_ULONG *)args[2]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_BYTE_PTR *)args[1],
+				     *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_VerifyRecoverInit (ffi_cif *cif,
-                             CK_RV *ret,
-                             void* args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyRecoverInit (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyRecoverInit (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_MECHANISM_PTR *)args[1],
-	                                   *(CK_OBJECT_HANDLE *)args[2]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_MECHANISM_PTR *)args[1],
+					   *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_VerifyRecover (ffi_cif *cif,
-                         CK_RV *ret,
-                         void* args[],
-                         CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyRecover (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyRecover (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_BYTE_PTR *)args[1],
-	                               *(CK_ULONG *)args[2],
-	                               *(CK_BYTE_PTR *)args[3],
-	                               *(CK_ULONG_PTR *)args[4]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_BYTE_PTR *)args[1],
+				       *(CK_ULONG *)args[2],
+				       *(CK_BYTE_PTR *)args[3],
+				       *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DigestEncryptUpdate (ffi_cif *cif,
-                               CK_RV *ret,
-                               void* args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_DigestEncryptUpdate (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DigestEncryptUpdate (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0],
-	                                     *(CK_BYTE_PTR *)args[1],
-	                                     *(CK_ULONG *)args[2],
-	                                     *(CK_BYTE_PTR *)args[3],
-	                                     *(CK_ULONG_PTR *)args[4]);
+					     *(CK_SESSION_HANDLE *)args[0],
+					     *(CK_BYTE_PTR *)args[1],
+					     *(CK_ULONG *)args[2],
+					     *(CK_BYTE_PTR *)args[3],
+					     *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DecryptDigestUpdate (ffi_cif *cif,
-                               CK_RV *ret,
-                               void* args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptDigestUpdate (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptDigestUpdate (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0],
-	                                     *(CK_BYTE_PTR *)args[1],
-	                                     *(CK_ULONG *)args[2],
-	                                     *(CK_BYTE_PTR *)args[3],
-	                                     *(CK_ULONG_PTR *)args[4]);
+					     *(CK_SESSION_HANDLE *)args[0],
+					     *(CK_BYTE_PTR *)args[1],
+					     *(CK_ULONG *)args[2],
+					     *(CK_BYTE_PTR *)args[3],
+					     *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_SignEncryptUpdate (ffi_cif *cif,
-                             CK_RV *ret,
-                             void* args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_SignEncryptUpdate (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignEncryptUpdate (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_BYTE_PTR *)args[1],
-	                                   *(CK_ULONG *)args[2],
-	                                   *(CK_BYTE_PTR *)args[3],
-	                                   *(CK_ULONG_PTR *)args[4]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_BYTE_PTR *)args[1],
+					   *(CK_ULONG *)args[2],
+					   *(CK_BYTE_PTR *)args[3],
+					   *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_DecryptVerifyUpdate (ffi_cif *cif,
-                               CK_RV *ret,
-                               void* args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptVerifyUpdate (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptVerifyUpdate (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0],
-	                                     *(CK_BYTE_PTR *)args[1],
-	                                     *(CK_ULONG *)args[2],
-	                                     *(CK_BYTE_PTR *)args[3],
-	                                     *(CK_ULONG_PTR *)args[4]);
+					     *(CK_SESSION_HANDLE *)args[0],
+					     *(CK_BYTE_PTR *)args[1],
+					     *(CK_ULONG *)args[2],
+					     *(CK_BYTE_PTR *)args[3],
+					     *(CK_ULONG_PTR *)args[4]);
 }
 
 static void
-binding_C_GenerateKey (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_GenerateKey (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GenerateKey (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_MECHANISM_PTR *)args[1],
-	                             *(CK_ATTRIBUTE_PTR *)args[2],
-	                             *(CK_ULONG *)args[3],
-	                             *(CK_OBJECT_HANDLE_PTR *)args[4]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_MECHANISM_PTR *)args[1],
+				     *(CK_ATTRIBUTE_PTR *)args[2],
+				     *(CK_ULONG *)args[3],
+				     *(CK_OBJECT_HANDLE_PTR *)args[4]);
 }
 
 static void
-binding_C_GenerateKeyPair (ffi_cif *cif,
-                           CK_RV *ret,
-                           void* args[],
-                           CK_X_FUNCTION_LIST *funcs)
+binding_C_GenerateKeyPair (ffi_cif            *cif,
+			   CK_RV              *ret,
+			   void               *args[],
+			   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GenerateKeyPair (funcs,
-	                                 *(CK_SESSION_HANDLE *)args[0],
-	                                 *(CK_MECHANISM_PTR *)args[1],
-	                                 *(CK_ATTRIBUTE_PTR *)args[2],
-	                                 *(CK_ULONG *)args[3],
-	                                 *(CK_ATTRIBUTE_PTR *)args[4],
-	                                 *(CK_ULONG *)args[5],
-	                                 *(CK_OBJECT_HANDLE_PTR *)args[6],
-	                                 *(CK_OBJECT_HANDLE_PTR *)args[7]);
+					 *(CK_SESSION_HANDLE *)args[0],
+					 *(CK_MECHANISM_PTR *)args[1],
+					 *(CK_ATTRIBUTE_PTR *)args[2],
+					 *(CK_ULONG *)args[3],
+					 *(CK_ATTRIBUTE_PTR *)args[4],
+					 *(CK_ULONG *)args[5],
+					 *(CK_OBJECT_HANDLE_PTR *)args[6],
+					 *(CK_OBJECT_HANDLE_PTR *)args[7]);
 }
 
 static void
-binding_C_WrapKey (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_WrapKey (ffi_cif            *cif,
+		   CK_RV              *ret,
+		   void               *args[],
+		   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_WrapKey (funcs,
-	                         *(CK_SESSION_HANDLE *)args[0],
-	                         *(CK_MECHANISM_PTR *)args[1],
-	                         *(CK_OBJECT_HANDLE *)args[2],
-	                         *(CK_OBJECT_HANDLE *)args[3],
-	                         *(CK_BYTE_PTR *)args[4],
-	                         *(CK_ULONG_PTR *)args[5]);
+				 *(CK_SESSION_HANDLE *)args[0],
+				 *(CK_MECHANISM_PTR *)args[1],
+				 *(CK_OBJECT_HANDLE *)args[2],
+				 *(CK_OBJECT_HANDLE *)args[3],
+				 *(CK_BYTE_PTR *)args[4],
+				 *(CK_ULONG_PTR *)args[5]);
 }
 
 static void
-binding_C_UnwrapKey (ffi_cif *cif,
-                     CK_RV *ret,
-                     void* args[],
-                     CK_X_FUNCTION_LIST *funcs)
+binding_C_UnwrapKey (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_UnwrapKey (funcs,
-	                           *(CK_SESSION_HANDLE *)args[0],
-	                           *(CK_MECHANISM_PTR *)args[1],
-	                           *(CK_OBJECT_HANDLE *)args[2],
-	                           *(CK_BYTE_PTR *)args[3],
-	                           *(CK_ULONG *)args[4],
-	                           *(CK_ATTRIBUTE_PTR *)args[5],
-	                           *(CK_ULONG *)args[6],
-	                           *(CK_OBJECT_HANDLE_PTR *)args[7]);
+				   *(CK_SESSION_HANDLE *)args[0],
+				   *(CK_MECHANISM_PTR *)args[1],
+				   *(CK_OBJECT_HANDLE *)args[2],
+				   *(CK_BYTE_PTR *)args[3],
+				   *(CK_ULONG *)args[4],
+				   *(CK_ATTRIBUTE_PTR *)args[5],
+				   *(CK_ULONG *)args[6],
+				   *(CK_OBJECT_HANDLE_PTR *)args[7]);
 }
 
 static void
-binding_C_DeriveKey (ffi_cif *cif,
-                     CK_RV *ret,
-                     void* args[],
-                     CK_X_FUNCTION_LIST *funcs)
+binding_C_DeriveKey (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DeriveKey (funcs,
-	                           *(CK_SESSION_HANDLE *)args[0],
-	                           *(CK_MECHANISM_PTR *)args[1],
-	                           *(CK_OBJECT_HANDLE *)args[2],
-	                           *(CK_ATTRIBUTE_PTR *)args[3],
-	                           *(CK_ULONG *)args[4],
-	                           *(CK_OBJECT_HANDLE_PTR *)args[5]);
+				   *(CK_SESSION_HANDLE *)args[0],
+				   *(CK_MECHANISM_PTR *)args[1],
+				   *(CK_OBJECT_HANDLE *)args[2],
+				   *(CK_ATTRIBUTE_PTR *)args[3],
+				   *(CK_ULONG *)args[4],
+				   *(CK_OBJECT_HANDLE_PTR *)args[5]);
 }
 
 static void
-binding_C_SeedRandom (ffi_cif *cif,
-                       CK_RV *ret,
-                       void* args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_SeedRandom (ffi_cif            *cif,
+		      CK_RV              *ret,
+		      void               *args[],
+		      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SeedRandom (funcs,
-	                            *(CK_SESSION_HANDLE *)args[0],
-	                            *(CK_BYTE_PTR *)args[1],
-	                            *(CK_ULONG *)args[2]);
+				    *(CK_SESSION_HANDLE *)args[0],
+				    *(CK_BYTE_PTR *)args[1],
+				    *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_GenerateRandom (ffi_cif *cif,
-                          CK_RV *ret,
-                          void* args[],
-                          CK_X_FUNCTION_LIST *funcs)
+binding_C_GenerateRandom (ffi_cif            *cif,
+			  CK_RV              *ret,
+			  void               *args[],
+			  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_GenerateRandom (funcs,
-	                                *(CK_SESSION_HANDLE *)args[0],
-	                                *(CK_BYTE_PTR *)args[1],
-	                                *(CK_ULONG *)args[2]);
+					*(CK_SESSION_HANDLE *)args[0],
+					*(CK_BYTE_PTR *)args[1],
+					*(CK_ULONG *)args[2]);
 }
 
 #define NUM_INTERFACES 1
 CK_INTERFACE virtual_interfaces[NUM_INTERFACES] = {
-        {"PKCS 11", NULL, 0}, /* 3.0 */
+	{"PKCS 11", NULL, 0}, /* 3.0 */
 };
 
 static void
 binding_C_GetInterfaceList (ffi_cif *cif,
-                            CK_RV *ret,
-                            void* args[],
-                            Wrapper *wrapper)
+			    CK_RV   *ret,
+			    void    *args[],
+			    Wrapper *wrapper)
 {
 	CK_INTERFACE *interface_list = *(CK_INTERFACE_PTR *)args[0];
 	CK_ULONG *count = *(CK_ULONG_PTR *)args[1];
@@ -976,7 +975,7 @@ binding_C_GetInterfaceList (ffi_cif *cif,
 		*count = NUM_INTERFACES;
 		return;
 	}
-	memcpy (interface_list, virtual_interfaces, NUM_INTERFACES * sizeof(CK_INTERFACE));
+	memcpy (interface_list, virtual_interfaces, NUM_INTERFACES * sizeof (CK_INTERFACE));
 	virtual_interfaces[0].pFunctionList = &wrapper->bound;
 	*count = NUM_INTERFACES;
 	*ret = CKR_OK;
@@ -984,9 +983,9 @@ binding_C_GetInterfaceList (ffi_cif *cif,
 
 static void
 binding_C_GetInterface (ffi_cif *cif,
-                        CK_RV *ret,
-                        void* args[],
-                        Wrapper *wrapper)
+			CK_RV   *ret,
+			void    *args[],
+			Wrapper *wrapper)
 {
 	CK_UTF8CHAR *interface_name = *(CK_UTF8CHAR_PTR *)args[0];
 	CK_VERSION *version = *(CK_VERSION_PTR *)args[1];
@@ -1002,7 +1001,7 @@ binding_C_GetInterface (ffi_cif *cif,
 
 	if (strcmp ((char *)interface_name, virtual_interfaces[0].pInterfaceName) != 0 ||
 	    (version != NULL && (version->major != wrapper->bound.version.major ||
-	                         version->minor != wrapper->bound.version.minor)) ||
+				 version->minor != wrapper->bound.version.minor)) ||
 	    ((flags & virtual_interfaces[0].flags) != flags)) {
 		*ret = CKR_ARGUMENTS_BAD;
 	}
@@ -1012,310 +1011,310 @@ binding_C_GetInterface (ffi_cif *cif,
 }
 
 static void
-binding_C_LoginUser (ffi_cif *cif,
-                     CK_RV *ret,
-                     void *args[],
-                     CK_X_FUNCTION_LIST *funcs)
+binding_C_LoginUser (ffi_cif            *cif,
+		     CK_RV              *ret,
+		     void               *args[],
+		     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_LoginUser (funcs,
-	                           *(CK_SESSION_HANDLE *)args[0],
-	                           *(CK_USER_TYPE *)args[1],
-	                           *(CK_UTF8CHAR_PTR *)args[2],
-	                           *(CK_ULONG *)args[3],
-	                           *(CK_UTF8CHAR_PTR *)args[4],
-	                           *(CK_ULONG *)args[5]);
+				   *(CK_SESSION_HANDLE *)args[0],
+				   *(CK_USER_TYPE *)args[1],
+				   *(CK_UTF8CHAR_PTR *)args[2],
+				   *(CK_ULONG *)args[3],
+				   *(CK_UTF8CHAR_PTR *)args[4],
+				   *(CK_ULONG *)args[5]);
 }
 
 static void
-binding_C_SessionCancel (ffi_cif *cif,
-                         CK_RV *ret,
-                         void *args[],
-                         CK_X_FUNCTION_LIST *funcs)
+binding_C_SessionCancel (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SessionCancel (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_FLAGS *)args[1]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_FLAGS *)args[1]);
 }
 
 static void
-binding_C_MessageEncryptInit (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageEncryptInit (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageEncryptInit (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0],
-	                                    *(CK_MECHANISM_PTR *)args[1],
-	                                    *(CK_OBJECT_HANDLE *)args[2]);
+					    *(CK_SESSION_HANDLE *)args[0],
+					    *(CK_MECHANISM_PTR *)args[1],
+					    *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_EncryptMessage (ffi_cif *cif,
-                          CK_RV *ret,
-                          void *args[],
-                          CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptMessage (ffi_cif            *cif,
+			  CK_RV              *ret,
+			  void               *args[],
+			  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptMessage (funcs,
-	                                *(CK_SESSION_HANDLE *)args[0],
-	                                *(CK_VOID_PTR *)args[1],
-	                                *(CK_ULONG *)args[2],
-	                                *(CK_BYTE_PTR *)args[3],
-	                                *(CK_ULONG *)args[4],
-	                                *(CK_BYTE_PTR *)args[5],
-	                                *(CK_ULONG *)args[6],
-	                                *(CK_BYTE_PTR *)args[7],
-	                                *(CK_ULONG_PTR *)args[8]);
+					*(CK_SESSION_HANDLE *)args[0],
+					*(CK_VOID_PTR *)args[1],
+					*(CK_ULONG *)args[2],
+					*(CK_BYTE_PTR *)args[3],
+					*(CK_ULONG *)args[4],
+					*(CK_BYTE_PTR *)args[5],
+					*(CK_ULONG *)args[6],
+					*(CK_BYTE_PTR *)args[7],
+					*(CK_ULONG_PTR *)args[8]);
 }
 
 static void
-binding_C_EncryptMessageBegin (ffi_cif *cif,
-                               CK_RV *ret,
-                               void *args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptMessageBegin (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptMessageBegin (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0],
-	                                     *(CK_VOID_PTR *)args[1],
-	                                     *(CK_ULONG *)args[2],
-	                                     *(CK_BYTE_PTR *)args[3],
-	                                     *(CK_ULONG *)args[4]);
+					     *(CK_SESSION_HANDLE *)args[0],
+					     *(CK_VOID_PTR *)args[1],
+					     *(CK_ULONG *)args[2],
+					     *(CK_BYTE_PTR *)args[3],
+					     *(CK_ULONG *)args[4]);
 }
 
 static void
-binding_C_EncryptMessageNext (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_EncryptMessageNext (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_EncryptMessageNext (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0],
-	                                    *(CK_VOID_PTR *)args[1],
-	                                    *(CK_ULONG *)args[2],
-	                                    *(CK_BYTE_PTR *)args[3],
-	                                    *(CK_ULONG *)args[4],
-	                                    *(CK_BYTE_PTR *)args[5],
-	                                    *(CK_ULONG_PTR *)args[6],
-	                                    *(CK_FLAGS *)args[7]);
+					    *(CK_SESSION_HANDLE *)args[0],
+					    *(CK_VOID_PTR *)args[1],
+					    *(CK_ULONG *)args[2],
+					    *(CK_BYTE_PTR *)args[3],
+					    *(CK_ULONG *)args[4],
+					    *(CK_BYTE_PTR *)args[5],
+					    *(CK_ULONG_PTR *)args[6],
+					    *(CK_FLAGS *)args[7]);
 }
 
 static void
-binding_C_MessageEncryptFinal (ffi_cif *cif,
-                               CK_RV *ret,
-                               void *args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageEncryptFinal (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageEncryptFinal (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0]);
+					     *(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_MessageDecryptInit (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageDecryptInit (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageDecryptInit (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0],
-	                                    *(CK_MECHANISM_PTR *)args[1],
-	                                    *(CK_OBJECT_HANDLE *)args[2]);
+					    *(CK_SESSION_HANDLE *)args[0],
+					    *(CK_MECHANISM_PTR *)args[1],
+					    *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_DecryptMessage (ffi_cif *cif,
-                          CK_RV *ret,
-                          void *args[],
-                          CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptMessage (ffi_cif            *cif,
+			  CK_RV              *ret,
+			  void               *args[],
+			  CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptMessage (funcs,
-	                                *(CK_SESSION_HANDLE *)args[0],
-	                                *(CK_VOID_PTR *)args[1],
-	                                *(CK_ULONG *)args[2],
-	                                *(CK_BYTE_PTR *)args[3],
-	                                *(CK_ULONG *)args[4],
-	                                *(CK_BYTE_PTR *)args[5],
-	                                *(CK_ULONG *)args[6],
-	                                *(CK_BYTE_PTR *)args[7],
-	                                *(CK_ULONG_PTR *)args[8]);
+					*(CK_SESSION_HANDLE *)args[0],
+					*(CK_VOID_PTR *)args[1],
+					*(CK_ULONG *)args[2],
+					*(CK_BYTE_PTR *)args[3],
+					*(CK_ULONG *)args[4],
+					*(CK_BYTE_PTR *)args[5],
+					*(CK_ULONG *)args[6],
+					*(CK_BYTE_PTR *)args[7],
+					*(CK_ULONG_PTR *)args[8]);
 }
 
 static void
-binding_C_DecryptMessageBegin (ffi_cif *cif,
-                               CK_RV *ret,
-                               void *args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptMessageBegin (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptMessageBegin (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0],
-	                                     *(CK_VOID_PTR *)args[1],
-	                                     *(CK_ULONG *)args[2],
-	                                     *(CK_BYTE_PTR *)args[3],
-	                                     *(CK_ULONG *)args[4]);
+					     *(CK_SESSION_HANDLE *)args[0],
+					     *(CK_VOID_PTR *)args[1],
+					     *(CK_ULONG *)args[2],
+					     *(CK_BYTE_PTR *)args[3],
+					     *(CK_ULONG *)args[4]);
 }
 
 static void
-binding_C_DecryptMessageNext (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_DecryptMessageNext (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_DecryptMessageNext (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0],
-	                                    *(CK_VOID_PTR *)args[1],
-	                                    *(CK_ULONG *)args[2],
-	                                    *(CK_BYTE_PTR *)args[3],
-	                                    *(CK_ULONG *)args[4],
-	                                    *(CK_BYTE_PTR *)args[5],
-	                                    *(CK_ULONG_PTR *)args[6],
-	                                    *(CK_FLAGS *)args[7]);
+					    *(CK_SESSION_HANDLE *)args[0],
+					    *(CK_VOID_PTR *)args[1],
+					    *(CK_ULONG *)args[2],
+					    *(CK_BYTE_PTR *)args[3],
+					    *(CK_ULONG *)args[4],
+					    *(CK_BYTE_PTR *)args[5],
+					    *(CK_ULONG_PTR *)args[6],
+					    *(CK_FLAGS *)args[7]);
 }
 
 static void
-binding_C_MessageDecryptFinal (ffi_cif *cif,
-                               CK_RV *ret,
-                               void *args[],
-                               CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageDecryptFinal (ffi_cif            *cif,
+			       CK_RV              *ret,
+			       void               *args[],
+			       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageDecryptFinal (funcs,
-	                                     *(CK_SESSION_HANDLE *)args[0]);
+					     *(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_MessageSignInit (ffi_cif *cif,
-                           CK_RV *ret,
-                           void *args[],
-                           CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageSignInit (ffi_cif            *cif,
+			   CK_RV              *ret,
+			   void               *args[],
+			   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageSignInit (funcs,
-	                                 *(CK_SESSION_HANDLE *)args[0],
-	                                 *(CK_MECHANISM_PTR *)args[1],
-	                                 *(CK_OBJECT_HANDLE *)args[2]);
+					 *(CK_SESSION_HANDLE *)args[0],
+					 *(CK_MECHANISM_PTR *)args[1],
+					 *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_SignMessage (ffi_cif *cif,
-                       CK_RV *ret,
-                       void *args[],
-                       CK_X_FUNCTION_LIST *funcs)
+binding_C_SignMessage (ffi_cif            *cif,
+		       CK_RV              *ret,
+		       void               *args[],
+		       CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignMessage (funcs,
-	                             *(CK_SESSION_HANDLE *)args[0],
-	                             *(CK_VOID_PTR *)args[1],
-	                             *(CK_ULONG *)args[2],
-	                             *(CK_BYTE_PTR *)args[3],
-	                             *(CK_ULONG *)args[4],
-	                             *(CK_BYTE_PTR *)args[5],
-	                             *(CK_ULONG_PTR *)args[6]);
+				     *(CK_SESSION_HANDLE *)args[0],
+				     *(CK_VOID_PTR *)args[1],
+				     *(CK_ULONG *)args[2],
+				     *(CK_BYTE_PTR *)args[3],
+				     *(CK_ULONG *)args[4],
+				     *(CK_BYTE_PTR *)args[5],
+				     *(CK_ULONG_PTR *)args[6]);
 }
 
 static void
-binding_C_SignMessageBegin (ffi_cif *cif,
-                            CK_RV *ret,
-                            void *args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_SignMessageBegin (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignMessageBegin (funcs,
-	                                  *(CK_SESSION_HANDLE *)args[0],
-	                                  *(CK_VOID_PTR *)args[1],
-	                                  *(CK_ULONG *)args[2]);
+					  *(CK_SESSION_HANDLE *)args[0],
+					  *(CK_VOID_PTR *)args[1],
+					  *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_SignMessageNext (ffi_cif *cif,
-                           CK_RV *ret,
-                           void *args[],
-                           CK_X_FUNCTION_LIST *funcs)
+binding_C_SignMessageNext (ffi_cif            *cif,
+			   CK_RV              *ret,
+			   void               *args[],
+			   CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_SignMessageNext (funcs,
-	                                 *(CK_SESSION_HANDLE *)args[0],
-	                                 *(CK_VOID_PTR *)args[1],
-	                                 *(CK_ULONG *)args[2],
-	                                 *(CK_BYTE_PTR *)args[3],
-	                                 *(CK_ULONG *)args[4],
-	                                 *(CK_BYTE_PTR *)args[5],
-	                                 *(CK_ULONG_PTR *)args[6]);
+					 *(CK_SESSION_HANDLE *)args[0],
+					 *(CK_VOID_PTR *)args[1],
+					 *(CK_ULONG *)args[2],
+					 *(CK_BYTE_PTR *)args[3],
+					 *(CK_ULONG *)args[4],
+					 *(CK_BYTE_PTR *)args[5],
+					 *(CK_ULONG_PTR *)args[6]);
 }
 
 static void
-binding_C_MessageSignFinal (ffi_cif *cif,
-                            CK_RV *ret,
-                            void *args[],
-                            CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageSignFinal (ffi_cif            *cif,
+			    CK_RV              *ret,
+			    void               *args[],
+			    CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageSignFinal (funcs,
-	                                  *(CK_SESSION_HANDLE *)args[0]);
+					  *(CK_SESSION_HANDLE *)args[0]);
 }
 
 static void
-binding_C_MessageVerifyInit (ffi_cif *cif,
-                             CK_RV *ret,
-                             void *args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageVerifyInit (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageVerifyInit (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_MECHANISM_PTR *)args[1],
-	                                   *(CK_OBJECT_HANDLE *)args[2]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_MECHANISM_PTR *)args[1],
+					   *(CK_OBJECT_HANDLE *)args[2]);
 }
 
 static void
-binding_C_VerifyMessage (ffi_cif *cif,
-                         CK_RV *ret,
-                         void *args[],
-                         CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyMessage (ffi_cif            *cif,
+			 CK_RV              *ret,
+			 void               *args[],
+			 CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyMessage (funcs,
-	                               *(CK_SESSION_HANDLE *)args[0],
-	                               *(CK_VOID_PTR *)args[1],
-	                               *(CK_ULONG *)args[2],
-	                               *(CK_BYTE_PTR *)args[3],
-	                               *(CK_ULONG *)args[4],
-	                               *(CK_BYTE_PTR *)args[5],
-	                               *(CK_ULONG *)args[6]);
+				       *(CK_SESSION_HANDLE *)args[0],
+				       *(CK_VOID_PTR *)args[1],
+				       *(CK_ULONG *)args[2],
+				       *(CK_BYTE_PTR *)args[3],
+				       *(CK_ULONG *)args[4],
+				       *(CK_BYTE_PTR *)args[5],
+				       *(CK_ULONG *)args[6]);
 }
 
 static void
-binding_C_VerifyMessageBegin (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyMessageBegin (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyMessageBegin (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0],
-	                                    *(CK_VOID_PTR *)args[1],
-	                                    *(CK_ULONG *)args[2]);
+					    *(CK_SESSION_HANDLE *)args[0],
+					    *(CK_VOID_PTR *)args[1],
+					    *(CK_ULONG *)args[2]);
 }
 
 static void
-binding_C_VerifyMessageNext (ffi_cif *cif,
-                             CK_RV *ret,
-                             void *args[],
-                             CK_X_FUNCTION_LIST *funcs)
+binding_C_VerifyMessageNext (ffi_cif            *cif,
+			     CK_RV              *ret,
+			     void               *args[],
+			     CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_VerifyMessageNext (funcs,
-	                                   *(CK_SESSION_HANDLE *)args[0],
-	                                   *(CK_VOID_PTR *)args[1],
-	                                   *(CK_ULONG *)args[2],
-	                                   *(CK_BYTE_PTR *)args[3],
-	                                   *(CK_ULONG *)args[4],
-	                                   *(CK_BYTE_PTR *)args[5],
-	                                   *(CK_ULONG *)args[6]);
+					   *(CK_SESSION_HANDLE *)args[0],
+					   *(CK_VOID_PTR *)args[1],
+					   *(CK_ULONG *)args[2],
+					   *(CK_BYTE_PTR *)args[3],
+					   *(CK_ULONG *)args[4],
+					   *(CK_BYTE_PTR *)args[5],
+					   *(CK_ULONG *)args[6]);
 }
 
 static void
-binding_C_MessageVerifyFinal (ffi_cif *cif,
-                              CK_RV *ret,
-                              void *args[],
-                              CK_X_FUNCTION_LIST *funcs)
+binding_C_MessageVerifyFinal (ffi_cif            *cif,
+			      CK_RV              *ret,
+			      void               *args[],
+			      CK_X_FUNCTION_LIST *funcs)
 {
 	*ret = funcs->C_MessageVerifyFinal (funcs,
-	                                    *(CK_SESSION_HANDLE *)args[0]);
+					    *(CK_SESSION_HANDLE *)args[0]);
 }
 
 #endif /* FFI_CLOSURES */
 
 static CK_RV
 stack_C_Initialize (CK_X_FUNCTION_LIST *self,
-                    CK_VOID_PTR init_args)
+                    CK_VOID_PTR         init_args)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1324,7 +1323,7 @@ stack_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Finalize (CK_X_FUNCTION_LIST *self,
-                  CK_VOID_PTR reserved)
+                  CK_VOID_PTR         reserved)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1333,7 +1332,7 @@ stack_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetInfo (CK_X_FUNCTION_LIST *self,
-                 CK_INFO_PTR info)
+                 CK_INFO_PTR         info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1342,9 +1341,9 @@ stack_C_GetInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetSlotList (CK_X_FUNCTION_LIST *self,
-                     CK_BBOOL token_present,
-                     CK_SLOT_ID_PTR slot_list,
-                     CK_ULONG_PTR count)
+                     CK_BBOOL            token_present,
+                     CK_SLOT_ID_PTR      slot_list,
+                     CK_ULONG_PTR        count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1353,8 +1352,8 @@ stack_C_GetSlotList (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
-                     CK_SLOT_ID slot_id,
-                     CK_SLOT_INFO_PTR info)
+                     CK_SLOT_ID          slot_id,
+                     CK_SLOT_INFO_PTR    info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1363,8 +1362,8 @@ stack_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
-                      CK_SLOT_ID slot_id,
-                      CK_TOKEN_INFO_PTR info)
+                      CK_SLOT_ID          slot_id,
+                      CK_TOKEN_INFO_PTR   info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1372,10 +1371,10 @@ stack_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
-                          CK_SLOT_ID slot_id,
-                          CK_MECHANISM_TYPE_PTR mechanism_list,
-                          CK_ULONG_PTR count)
+stack_C_GetMechanismList (CK_X_FUNCTION_LIST    *self,
+                          CK_SLOT_ID             slot_id,
+                          CK_MECHANISM_TYPE_PTR  mechanism_list,
+                          CK_ULONG_PTR           count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1383,10 +1382,10 @@ stack_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
-                          CK_SLOT_ID slot_id,
-                          CK_MECHANISM_TYPE type,
-                          CK_MECHANISM_INFO_PTR info)
+stack_C_GetMechanismInfo (CK_X_FUNCTION_LIST    *self,
+                          CK_SLOT_ID             slot_id,
+                          CK_MECHANISM_TYPE      type,
+                          CK_MECHANISM_INFO_PTR  info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1395,10 +1394,10 @@ stack_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_InitToken (CK_X_FUNCTION_LIST *self,
-                   CK_SLOT_ID slot_id,
-                   CK_UTF8CHAR_PTR pin,
-                   CK_ULONG pin_len,
-                   CK_UTF8CHAR_PTR label)
+                   CK_SLOT_ID          slot_id,
+                   CK_UTF8CHAR_PTR     pin,
+                   CK_ULONG            pin_len,
+                   CK_UTF8CHAR_PTR     label)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1406,12 +1405,12 @@ stack_C_InitToken (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_OpenSession (CK_X_FUNCTION_LIST *self,
-                     CK_SLOT_ID slot_id,
-                     CK_FLAGS flags,
-                     CK_VOID_PTR application,
-                     CK_NOTIFY notify,
-                     CK_SESSION_HANDLE_PTR session)
+stack_C_OpenSession (CK_X_FUNCTION_LIST    *self,
+                     CK_SLOT_ID             slot_id,
+                     CK_FLAGS               flags,
+                     CK_VOID_PTR            application,
+                     CK_NOTIFY              notify,
+                     CK_SESSION_HANDLE_PTR  session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1420,7 +1419,7 @@ stack_C_OpenSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_CloseSession (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session)
+                      CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1429,7 +1428,7 @@ stack_C_CloseSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
-                          CK_SLOT_ID slot_id)
+                          CK_SLOT_ID          slot_id)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1437,9 +1436,9 @@ stack_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_GetSessionInfo (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_SESSION_INFO_PTR info)
+stack_C_GetSessionInfo (CK_X_FUNCTION_LIST  *self,
+                        CK_SESSION_HANDLE    session,
+                        CK_SESSION_INFO_PTR  info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1448,9 +1447,9 @@ stack_C_GetSessionInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_InitPIN (CK_X_FUNCTION_LIST *self,
-                 CK_SESSION_HANDLE session,
-                 CK_UTF8CHAR_PTR pin,
-                 CK_ULONG pin_len)
+                 CK_SESSION_HANDLE   session,
+                 CK_UTF8CHAR_PTR     pin,
+                 CK_ULONG            pin_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1459,11 +1458,11 @@ stack_C_InitPIN (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SetPIN (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_UTF8CHAR_PTR old_pin,
-                CK_ULONG old_len,
-                CK_UTF8CHAR_PTR new_pin,
-                CK_ULONG new_len)
+                CK_SESSION_HANDLE   session,
+                CK_UTF8CHAR_PTR     old_pin,
+                CK_ULONG            old_len,
+                CK_UTF8CHAR_PTR     new_pin,
+                CK_ULONG            new_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1472,9 +1471,9 @@ stack_C_SetPIN (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetOperationState (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_BYTE_PTR operation_state,
-                           CK_ULONG_PTR operation_state_len)
+                           CK_SESSION_HANDLE   session,
+                           CK_BYTE_PTR         operation_state,
+                           CK_ULONG_PTR        operation_state_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1483,24 +1482,24 @@ stack_C_GetOperationState (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SetOperationState (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_BYTE_PTR operation_state,
-                           CK_ULONG operation_state_len,
-                           CK_OBJECT_HANDLE encryption_key,
-                           CK_OBJECT_HANDLE authentication_key)
+                           CK_SESSION_HANDLE   session,
+                           CK_BYTE_PTR         operation_state,
+                           CK_ULONG            operation_state_len,
+                           CK_OBJECT_HANDLE    encryption_key,
+                           CK_OBJECT_HANDLE    authentication_key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SetOperationState (funcs, session, operation_state, operation_state_len,
-	                                   encryption_key, authentication_key);
+					   encryption_key, authentication_key);
 }
 
 static CK_RV
 stack_C_Login (CK_X_FUNCTION_LIST *self,
-               CK_SESSION_HANDLE session,
-               CK_USER_TYPE user_type,
-               CK_UTF8CHAR_PTR pin,
-               CK_ULONG pin_len)
+               CK_SESSION_HANDLE   session,
+               CK_USER_TYPE        user_type,
+               CK_UTF8CHAR_PTR     pin,
+               CK_ULONG            pin_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1509,7 +1508,7 @@ stack_C_Login (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Logout (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session)
+                CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1517,11 +1516,11 @@ stack_C_Logout (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_CreateObject (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_ATTRIBUTE_PTR template,
-                      CK_ULONG count,
-                      CK_OBJECT_HANDLE_PTR object)
+stack_C_CreateObject (CK_X_FUNCTION_LIST   *self,
+                      CK_SESSION_HANDLE     session,
+                      CK_ATTRIBUTE_PTR      template,
+                      CK_ULONG              count,
+                      CK_OBJECT_HANDLE_PTR  object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1529,12 +1528,12 @@ stack_C_CreateObject (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_CopyObject (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_OBJECT_HANDLE object,
-                    CK_ATTRIBUTE_PTR template,
-                    CK_ULONG count,
-                    CK_OBJECT_HANDLE_PTR new_object)
+stack_C_CopyObject (CK_X_FUNCTION_LIST   *self,
+                    CK_SESSION_HANDLE     session,
+                    CK_OBJECT_HANDLE      object,
+                    CK_ATTRIBUTE_PTR      template,
+                    CK_ULONG              count,
+                    CK_OBJECT_HANDLE_PTR  new_object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1544,8 +1543,8 @@ stack_C_CopyObject (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DestroyObject (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_OBJECT_HANDLE object)
+                       CK_SESSION_HANDLE   session,
+                       CK_OBJECT_HANDLE    object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1554,9 +1553,9 @@ stack_C_DestroyObject (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetObjectSize (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_OBJECT_HANDLE object,
-                       CK_ULONG_PTR size)
+                       CK_SESSION_HANDLE   session,
+                       CK_OBJECT_HANDLE    object,
+                       CK_ULONG_PTR        size)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1565,10 +1564,10 @@ stack_C_GetObjectSize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_OBJECT_HANDLE object,
-                           CK_ATTRIBUTE_PTR template,
-                           CK_ULONG count)
+                           CK_SESSION_HANDLE   session,
+                           CK_OBJECT_HANDLE    object,
+                           CK_ATTRIBUTE_PTR    template,
+                           CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1577,10 +1576,10 @@ stack_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_OBJECT_HANDLE object,
-                           CK_ATTRIBUTE_PTR template,
-                           CK_ULONG count)
+                           CK_SESSION_HANDLE   session,
+                           CK_OBJECT_HANDLE    object,
+                           CK_ATTRIBUTE_PTR    template,
+                           CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1589,9 +1588,9 @@ stack_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_FindObjectsInit (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_ATTRIBUTE_PTR template,
-                         CK_ULONG count)
+                         CK_SESSION_HANDLE   session,
+                         CK_ATTRIBUTE_PTR    template,
+                         CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1599,11 +1598,11 @@ stack_C_FindObjectsInit (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_FindObjects (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_OBJECT_HANDLE_PTR object,
-                       CK_ULONG max_object_count,
-                       CK_ULONG_PTR object_count)
+stack_C_FindObjects (CK_X_FUNCTION_LIST   *self,
+                     CK_SESSION_HANDLE     session,
+                     CK_OBJECT_HANDLE_PTR  object,
+                     CK_ULONG              max_object_count,
+                     CK_ULONG_PTR          object_count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1612,7 +1611,7 @@ stack_C_FindObjects (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_FindObjectsFinal (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session)
+                          CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1621,9 +1620,9 @@ stack_C_FindObjectsFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_EncryptInit (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_MECHANISM_PTR mechanism,
-                       CK_OBJECT_HANDLE key)
+                     CK_SESSION_HANDLE   session,
+                     CK_MECHANISM_PTR    mechanism,
+                     CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1632,49 +1631,49 @@ stack_C_EncryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Encrypt (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_BYTE_PTR input,
-                   CK_ULONG input_len,
-                   CK_BYTE_PTR encrypted_data,
-                   CK_ULONG_PTR encrypted_data_len)
+                 CK_SESSION_HANDLE   session,
+                 CK_BYTE_PTR         input,
+                 CK_ULONG            input_len,
+                 CK_BYTE_PTR         encrypted_data,
+                 CK_ULONG_PTR        encrypted_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Encrypt (funcs, session, input, input_len,
-	                         encrypted_data, encrypted_data_len);
+				 encrypted_data, encrypted_data_len);
 }
 
 static CK_RV
 stack_C_EncryptUpdate (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_BYTE_PTR part,
-                       CK_ULONG part_len,
-                       CK_BYTE_PTR encrypted_part,
-                       CK_ULONG_PTR encrypted_part_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_BYTE_PTR         part,
+                       CK_ULONG            part_len,
+                       CK_BYTE_PTR         encrypted_part,
+                       CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptUpdate (funcs, session, part, part_len,
-	                               encrypted_part, encrypted_part_len);
+				       encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 stack_C_EncryptFinal (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR last_encrypted_part,
-                      CK_ULONG_PTR last_encrypted_part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         last_encrypted_part,
+                      CK_ULONG_PTR        last_encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptFinal (funcs, session, last_encrypted_part,
-	                              last_encrypted_part_len);
+				      last_encrypted_part_len);
 }
 
 static CK_RV
 stack_C_DecryptInit (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_MECHANISM_PTR mechanism,
-                     CK_OBJECT_HANDLE key)
+                     CK_SESSION_HANDLE   session,
+                     CK_MECHANISM_PTR    mechanism,
+                     CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1683,37 +1682,37 @@ stack_C_DecryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Decrypt (CK_X_FUNCTION_LIST *self,
-                 CK_SESSION_HANDLE session,
-                 CK_BYTE_PTR encrypted_data,
-                 CK_ULONG encrypted_data_len,
-                 CK_BYTE_PTR output,
-                 CK_ULONG_PTR output_len)
+                 CK_SESSION_HANDLE   session,
+                 CK_BYTE_PTR         encrypted_data,
+                 CK_ULONG            encrypted_data_len,
+                 CK_BYTE_PTR         output,
+                 CK_ULONG_PTR        output_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Decrypt (funcs, session, encrypted_data, encrypted_data_len,
-	                         output, output_len);
+				 output, output_len);
 }
 
 static CK_RV
 stack_C_DecryptUpdate (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_BYTE_PTR encrypted_part,
-                       CK_ULONG encrypted_part_len,
-                       CK_BYTE_PTR part,
-                       CK_ULONG_PTR part_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_BYTE_PTR         encrypted_part,
+                       CK_ULONG            encrypted_part_len,
+                       CK_BYTE_PTR         part,
+                       CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptUpdate (funcs, session, encrypted_part, encrypted_part_len,
-	                               part, part_len);
+				       part, part_len);
 }
 
 static CK_RV
 stack_C_DecryptFinal (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR last_part,
-                      CK_ULONG_PTR last_part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         last_part,
+                      CK_ULONG_PTR        last_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1722,8 +1721,8 @@ stack_C_DecryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DigestInit (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_MECHANISM_PTR mechanism)
+                    CK_SESSION_HANDLE   session,
+                    CK_MECHANISM_PTR    mechanism)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1732,11 +1731,11 @@ stack_C_DigestInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Digest (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_BYTE_PTR input,
-                CK_ULONG input_len,
-                CK_BYTE_PTR digest,
-                CK_ULONG_PTR digest_len)
+                CK_SESSION_HANDLE   session,
+                CK_BYTE_PTR         input,
+                CK_ULONG            input_len,
+                CK_BYTE_PTR         digest,
+                CK_ULONG_PTR        digest_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1745,9 +1744,9 @@ stack_C_Digest (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DigestUpdate (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR part,
-                      CK_ULONG part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         part,
+                      CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1756,8 +1755,8 @@ stack_C_DigestUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DigestKey (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_OBJECT_HANDLE key)
+                   CK_SESSION_HANDLE   session,
+                   CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1766,9 +1765,9 @@ stack_C_DigestKey (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DigestFinal (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR digest,
-                     CK_ULONG_PTR digest_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         digest,
+                     CK_ULONG_PTR        digest_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1777,9 +1776,9 @@ stack_C_DigestFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignInit (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_MECHANISM_PTR mechanism,
-                  CK_OBJECT_HANDLE key)
+                  CK_SESSION_HANDLE   session,
+                  CK_MECHANISM_PTR    mechanism,
+                  CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1788,23 +1787,23 @@ stack_C_SignInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Sign (CK_X_FUNCTION_LIST *self,
-              CK_SESSION_HANDLE session,
-              CK_BYTE_PTR input,
-              CK_ULONG input_len,
-              CK_BYTE_PTR signature,
-              CK_ULONG_PTR signature_len)
+              CK_SESSION_HANDLE   session,
+              CK_BYTE_PTR         input,
+              CK_ULONG            input_len,
+              CK_BYTE_PTR         signature,
+              CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Sign (funcs, session, input, input_len,
-	                      signature, signature_len);
+			      signature, signature_len);
 }
 
 static CK_RV
 stack_C_SignUpdate (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_BYTE_PTR part,
-                    CK_ULONG part_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_BYTE_PTR         part,
+                    CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1813,9 +1812,9 @@ stack_C_SignUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignFinal (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_BYTE_PTR signature,
-                   CK_ULONG_PTR signature_len)
+                   CK_SESSION_HANDLE   session,
+                   CK_BYTE_PTR         signature,
+                   CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1824,9 +1823,9 @@ stack_C_SignFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_MECHANISM_PTR mechanism,
-                         CK_OBJECT_HANDLE key)
+                         CK_SESSION_HANDLE   session,
+                         CK_MECHANISM_PTR    mechanism,
+                         CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1835,23 +1834,23 @@ stack_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignRecover (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR input,
-                     CK_ULONG input_len,
-                     CK_BYTE_PTR signature,
-                     CK_ULONG_PTR signature_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         input,
+                     CK_ULONG            input_len,
+                     CK_BYTE_PTR         signature,
+                     CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SignRecover (funcs, session, input, input_len,
-	                             signature, signature_len);
+				     signature, signature_len);
 }
 
 static CK_RV
 stack_C_VerifyInit (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_MECHANISM_PTR mechanism,
-                    CK_OBJECT_HANDLE key)
+                    CK_SESSION_HANDLE   session,
+                    CK_MECHANISM_PTR    mechanism,
+                    CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1860,23 +1859,23 @@ stack_C_VerifyInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_Verify (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_BYTE_PTR input,
-                CK_ULONG input_len,
-                CK_BYTE_PTR signature,
-                CK_ULONG signature_len)
+                CK_SESSION_HANDLE   session,
+                CK_BYTE_PTR         input,
+                CK_ULONG            input_len,
+                CK_BYTE_PTR         signature,
+                CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Verify (funcs, session, input, input_len,
-	                        signature, signature_len);
+				signature, signature_len);
 }
 
 static CK_RV
 stack_C_VerifyUpdate (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR part,
-                      CK_ULONG part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         part,
+                      CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1885,9 +1884,9 @@ stack_C_VerifyUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_VerifyFinal (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR signature,
-                     CK_ULONG signature_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         signature,
+                     CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1896,9 +1895,9 @@ stack_C_VerifyFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_MECHANISM_PTR mechanism,
-                           CK_OBJECT_HANDLE key)
+                           CK_SESSION_HANDLE   session,
+                           CK_MECHANISM_PTR    mechanism,
+                           CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1907,81 +1906,81 @@ stack_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_VerifyRecover (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_BYTE_PTR signature,
-                       CK_ULONG signature_len,
-                       CK_BYTE_PTR input,
-                       CK_ULONG_PTR input_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_BYTE_PTR         signature,
+                       CK_ULONG            signature_len,
+                       CK_BYTE_PTR         input,
+                       CK_ULONG_PTR        input_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_VerifyRecover (funcs, session, signature, signature_len,
-	                               input, input_len);
+				       input, input_len);
 }
 
 static CK_RV
 stack_C_DigestEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session,
-                             CK_BYTE_PTR part,
-                             CK_ULONG part_len,
-                             CK_BYTE_PTR encrypted_part,
-                             CK_ULONG_PTR encrypted_part_len)
+                             CK_SESSION_HANDLE   session,
+                             CK_BYTE_PTR         part,
+                             CK_ULONG            part_len,
+                             CK_BYTE_PTR         encrypted_part,
+                             CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DigestEncryptUpdate (funcs, session, part, part_len,
-	                                     encrypted_part, encrypted_part_len);
+					     encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 stack_C_DecryptDigestUpdate (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session,
-                             CK_BYTE_PTR encrypted_part,
-                             CK_ULONG encrypted_part_len,
-                             CK_BYTE_PTR part,
-                             CK_ULONG_PTR part_len)
+                             CK_SESSION_HANDLE   session,
+                             CK_BYTE_PTR         encrypted_part,
+                             CK_ULONG            encrypted_part_len,
+                             CK_BYTE_PTR         part,
+                             CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptDigestUpdate (funcs, session, encrypted_part, encrypted_part_len,
-	                                          part, part_len);
+					     part, part_len);
 }
 
 static CK_RV
 stack_C_SignEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_BYTE_PTR part,
-                           CK_ULONG part_len,
-                           CK_BYTE_PTR encrypted_part,
-                           CK_ULONG_PTR encrypted_part_len)
+                           CK_SESSION_HANDLE   session,
+                           CK_BYTE_PTR         part,
+                           CK_ULONG            part_len,
+                           CK_BYTE_PTR         encrypted_part,
+                           CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SignEncryptUpdate (funcs, session, part, part_len,
-	                                   encrypted_part, encrypted_part_len);
+					   encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 stack_C_DecryptVerifyUpdate (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session,
-                             CK_BYTE_PTR encrypted_part,
-                             CK_ULONG encrypted_part_len,
-                             CK_BYTE_PTR part,
-                             CK_ULONG_PTR part_len)
+                             CK_SESSION_HANDLE   session,
+                             CK_BYTE_PTR         encrypted_part,
+                             CK_ULONG            encrypted_part_len,
+                             CK_BYTE_PTR         part,
+                             CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptVerifyUpdate (funcs, session, encrypted_part, encrypted_part_len,
-	                                     part, part_len);
+					     part, part_len);
 }
 
 static CK_RV
-stack_C_GenerateKey (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_MECHANISM_PTR mechanism,
-                     CK_ATTRIBUTE_PTR template,
-                     CK_ULONG count,
-                     CK_OBJECT_HANDLE_PTR key)
+stack_C_GenerateKey (CK_X_FUNCTION_LIST   *self,
+                     CK_SESSION_HANDLE     session,
+                     CK_MECHANISM_PTR      mechanism,
+                     CK_ATTRIBUTE_PTR      template,
+                     CK_ULONG              count,
+                     CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -1989,63 +1988,63 @@ stack_C_GenerateKey (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-stack_C_GenerateKeyPair (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_MECHANISM_PTR mechanism,
-                         CK_ATTRIBUTE_PTR public_key_template,
-                         CK_ULONG public_key_count,
-                         CK_ATTRIBUTE_PTR private_key_template,
-                         CK_ULONG private_key_count,
-                         CK_OBJECT_HANDLE_PTR public_key,
-                         CK_OBJECT_HANDLE_PTR private_key)
+stack_C_GenerateKeyPair (CK_X_FUNCTION_LIST   *self,
+                         CK_SESSION_HANDLE     session,
+                         CK_MECHANISM_PTR      mechanism,
+                         CK_ATTRIBUTE_PTR      public_key_template,
+                         CK_ULONG              public_key_count,
+                         CK_ATTRIBUTE_PTR      private_key_template,
+                         CK_ULONG              private_key_count,
+                         CK_OBJECT_HANDLE_PTR  public_key,
+                         CK_OBJECT_HANDLE_PTR  private_key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_GenerateKeyPair (funcs, session, mechanism, public_key_template,
-	                                 public_key_count, private_key_template,
-	                                 private_key_count, public_key, private_key);
+					 public_key_count, private_key_template,
+					 private_key_count, public_key, private_key);
 }
 
 static CK_RV
 stack_C_WrapKey (CK_X_FUNCTION_LIST *self,
-                 CK_SESSION_HANDLE session,
-                 CK_MECHANISM_PTR mechanism,
-                 CK_OBJECT_HANDLE wrapping_key,
-                 CK_OBJECT_HANDLE key,
-                 CK_BYTE_PTR wrapped_key,
-                 CK_ULONG_PTR wrapped_key_len)
+                 CK_SESSION_HANDLE   session,
+                 CK_MECHANISM_PTR    mechanism,
+                 CK_OBJECT_HANDLE    wrapping_key,
+                 CK_OBJECT_HANDLE    key,
+                 CK_BYTE_PTR         wrapped_key,
+                 CK_ULONG_PTR        wrapped_key_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_WrapKey (funcs, session, mechanism, wrapping_key, key,
-	                         wrapped_key, wrapped_key_len);
+				 wrapped_key, wrapped_key_len);
 }
 
 static CK_RV
-stack_C_UnwrapKey (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_OBJECT_HANDLE unwrapping_key,
-                   CK_BYTE_PTR wrapped_key,
-                   CK_ULONG wrapped_key_len,
-                   CK_ATTRIBUTE_PTR template,
-                   CK_ULONG count,
-                   CK_OBJECT_HANDLE_PTR key)
+stack_C_UnwrapKey (CK_X_FUNCTION_LIST   *self,
+                   CK_SESSION_HANDLE     session,
+                   CK_MECHANISM_PTR      mechanism,
+                   CK_OBJECT_HANDLE      unwrapping_key,
+                   CK_BYTE_PTR           wrapped_key,
+                   CK_ULONG              wrapped_key_len,
+                   CK_ATTRIBUTE_PTR      template,
+                   CK_ULONG              count,
+                   CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_UnwrapKey (funcs, session, mechanism, unwrapping_key, wrapped_key,
-	                           wrapped_key_len, template, count, key);
+				   wrapped_key_len, template, count, key);
 }
 
 static CK_RV
-stack_C_DeriveKey (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_OBJECT_HANDLE base_key,
-                   CK_ATTRIBUTE_PTR template,
-                   CK_ULONG count,
-                   CK_OBJECT_HANDLE_PTR key)
+stack_C_DeriveKey (CK_X_FUNCTION_LIST   *self,
+                   CK_SESSION_HANDLE     session,
+                   CK_MECHANISM_PTR      mechanism,
+                   CK_OBJECT_HANDLE      base_key,
+                   CK_ATTRIBUTE_PTR      template,
+                   CK_ULONG              count,
+                   CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2054,9 +2053,9 @@ stack_C_DeriveKey (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SeedRandom (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_BYTE_PTR seed,
-                    CK_ULONG seed_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_BYTE_PTR         seed,
+                    CK_ULONG            seed_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2065,9 +2064,9 @@ stack_C_SeedRandom (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_GenerateRandom (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_BYTE_PTR random_data,
-                        CK_ULONG random_len)
+                        CK_SESSION_HANDLE   session,
+                        CK_BYTE_PTR         random_data,
+                        CK_ULONG            random_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2076,9 +2075,9 @@ stack_C_GenerateRandom (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
-                          CK_FLAGS flags,
-                          CK_SLOT_ID_PTR slot_id,
-                          CK_VOID_PTR reserved)
+                          CK_FLAGS            flags,
+                          CK_SLOT_ID_PTR      slot_id,
+                          CK_VOID_PTR         reserved)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2087,12 +2086,12 @@ stack_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_LoginUser (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_USER_TYPE user_type,
-                   CK_UTF8CHAR_PTR pin,
-                   CK_ULONG pin_len,
-                   CK_UTF8CHAR_PTR username,
-                   CK_ULONG username_len)
+                   CK_SESSION_HANDLE   session,
+                   CK_USER_TYPE        user_type,
+                   CK_UTF8CHAR_PTR     pin,
+                   CK_ULONG            pin_len,
+                   CK_UTF8CHAR_PTR     username,
+                   CK_ULONG            username_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2101,8 +2100,8 @@ stack_C_LoginUser (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SessionCancel (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_FLAGS flags)
+                       CK_SESSION_HANDLE   session,
+                       CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2111,9 +2110,9 @@ stack_C_SessionCancel (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_MECHANISM_PTR mechanism,
-                            CK_OBJECT_HANDLE key)
+                            CK_SESSION_HANDLE   session,
+                            CK_MECHANISM_PTR    mechanism,
+                            CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2122,29 +2121,29 @@ stack_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_EncryptMessage (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_VOID_PTR parameter,
-                        CK_ULONG parameter_len,
-                        CK_BYTE_PTR associated_data,
-                        CK_ULONG associated_data_len,
-                        CK_BYTE_PTR plaintext,
-                        CK_ULONG plaintext_len,
-                        CK_BYTE_PTR ciphertext,
-                        CK_ULONG_PTR ciphertext_len)
+                        CK_SESSION_HANDLE   session,
+                        CK_VOID_PTR         parameter,
+                        CK_ULONG            parameter_len,
+                        CK_BYTE_PTR         associated_data,
+                        CK_ULONG            associated_data_len,
+                        CK_BYTE_PTR         plaintext,
+                        CK_ULONG            plaintext_len,
+                        CK_BYTE_PTR         ciphertext,
+                        CK_ULONG_PTR        ciphertext_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptMessage (funcs, session, parameter, parameter_len, associated_data, associated_data_len,
-                                       plaintext, plaintext_len, ciphertext, ciphertext_len);
+					plaintext, plaintext_len, ciphertext, ciphertext_len);
 }
 
 static CK_RV
 stack_C_EncryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session,
-                             CK_VOID_PTR parameter,
-                             CK_ULONG parameter_len,
-                             CK_BYTE_PTR associated_data,
-                             CK_ULONG associated_data_len)
+                             CK_SESSION_HANDLE   session,
+                             CK_VOID_PTR         parameter,
+                             CK_ULONG            parameter_len,
+                             CK_BYTE_PTR         associated_data,
+                             CK_ULONG            associated_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2153,24 +2152,24 @@ stack_C_EncryptMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_EncryptMessageNext (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_VOID_PTR parameter,
-                            CK_ULONG parameter_len,
-                            CK_BYTE_PTR plaintext_part,
-                            CK_ULONG plaintext_part_len,
-                            CK_BYTE_PTR ciphertext_part,
-                            CK_ULONG_PTR ciphertext_part_len,
-                            CK_FLAGS flags)
+                            CK_SESSION_HANDLE   session,
+                            CK_VOID_PTR         parameter,
+                            CK_ULONG            parameter_len,
+                            CK_BYTE_PTR         plaintext_part,
+                            CK_ULONG            plaintext_part_len,
+                            CK_BYTE_PTR         ciphertext_part,
+                            CK_ULONG_PTR        ciphertext_part_len,
+                            CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptMessageNext (funcs, session, parameter, parameter_len, plaintext_part, plaintext_part_len,
-                                           ciphertext_part, ciphertext_part_len, flags);
+					    ciphertext_part, ciphertext_part_len, flags);
 }
 
 static CK_RV
 stack_C_MessageEncryptFinal (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session)
+                             CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2179,9 +2178,9 @@ stack_C_MessageEncryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_MECHANISM_PTR mechanism,
-                            CK_OBJECT_HANDLE key)
+                            CK_SESSION_HANDLE   session,
+                            CK_MECHANISM_PTR    mechanism,
+                            CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2190,29 +2189,29 @@ stack_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DecryptMessage (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_VOID_PTR parameter,
-                        CK_ULONG parameter_len,
-                        CK_BYTE_PTR associated_data,
-                        CK_ULONG associated_data_len,
-                        CK_BYTE_PTR ciphertext,
-                        CK_ULONG ciphertext_len,
-                        CK_BYTE_PTR plaintext,
-                        CK_ULONG_PTR plaintext_len)
+                        CK_SESSION_HANDLE   session,
+                        CK_VOID_PTR         parameter,
+                        CK_ULONG            parameter_len,
+                        CK_BYTE_PTR         associated_data,
+                        CK_ULONG            associated_data_len,
+                        CK_BYTE_PTR         ciphertext,
+                        CK_ULONG            ciphertext_len,
+                        CK_BYTE_PTR         plaintext,
+                        CK_ULONG_PTR        plaintext_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptMessage (funcs, session, parameter, parameter_len, associated_data, associated_data_len,
-                                       ciphertext, ciphertext_len, plaintext, plaintext_len);
+					ciphertext, ciphertext_len, plaintext, plaintext_len);
 }
 
 static CK_RV
 stack_C_DecryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session,
-                             CK_VOID_PTR parameter,
-                             CK_ULONG parameter_len,
-                             CK_BYTE_PTR associated_data,
-                             CK_ULONG associated_data_len)
+                             CK_SESSION_HANDLE   session,
+                             CK_VOID_PTR         parameter,
+                             CK_ULONG            parameter_len,
+                             CK_BYTE_PTR         associated_data,
+                             CK_ULONG            associated_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2221,24 +2220,24 @@ stack_C_DecryptMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_DecryptMessageNext (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_VOID_PTR parameter,
-                            CK_ULONG parameter_len,
-                            CK_BYTE_PTR ciphertext_part,
-                            CK_ULONG ciphertext_part_len,
-                            CK_BYTE_PTR plaintext_part,
-                            CK_ULONG_PTR plaintext_part_len,
-                            CK_FLAGS flags)
+                            CK_SESSION_HANDLE   session,
+                            CK_VOID_PTR         parameter,
+                            CK_ULONG            parameter_len,
+                            CK_BYTE_PTR         ciphertext_part,
+                            CK_ULONG            ciphertext_part_len,
+                            CK_BYTE_PTR         plaintext_part,
+                            CK_ULONG_PTR        plaintext_part_len,
+                            CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptMessageNext (funcs, session, parameter, parameter_len, ciphertext_part, ciphertext_part_len,
-                                           plaintext_part, plaintext_part_len, flags);
+					    plaintext_part, plaintext_part_len, flags);
 }
 
 static CK_RV
 stack_C_MessageDecryptFinal (CK_X_FUNCTION_LIST *self,
-                             CK_SESSION_HANDLE session)
+                             CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2247,9 +2246,9 @@ stack_C_MessageDecryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_MECHANISM_PTR mechanism,
-                         CK_OBJECT_HANDLE key)
+                         CK_SESSION_HANDLE   session,
+                         CK_MECHANISM_PTR    mechanism,
+                         CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2258,13 +2257,13 @@ stack_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignMessage (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_VOID_PTR parameter,
-                     CK_ULONG parameter_len,
-                     CK_BYTE_PTR data,
-                     CK_ULONG data_len,
-                     CK_BYTE_PTR signature,
-                     CK_ULONG_PTR signature_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_VOID_PTR         parameter,
+                     CK_ULONG            parameter_len,
+                     CK_BYTE_PTR         data,
+                     CK_ULONG            data_len,
+                     CK_BYTE_PTR         signature,
+                     CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2273,9 +2272,9 @@ stack_C_SignMessage (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignMessageBegin (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_VOID_PTR parameter,
-                          CK_ULONG parameter_len)
+                          CK_SESSION_HANDLE   session,
+                          CK_VOID_PTR         parameter,
+                          CK_ULONG            parameter_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2284,13 +2283,13 @@ stack_C_SignMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_SignMessageNext (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_VOID_PTR parameter,
-                         CK_ULONG parameter_len,
-                         CK_BYTE_PTR data,
-                         CK_ULONG data_len,
-                         CK_BYTE_PTR signature,
-                         CK_ULONG_PTR signature_len)
+                         CK_SESSION_HANDLE   session,
+                         CK_VOID_PTR         parameter,
+                         CK_ULONG            parameter_len,
+                         CK_BYTE_PTR         data,
+                         CK_ULONG            data_len,
+                         CK_BYTE_PTR         signature,
+                         CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2299,7 +2298,7 @@ stack_C_SignMessageNext (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_MessageSignFinal (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session)
+                          CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2308,9 +2307,9 @@ stack_C_MessageSignFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_MECHANISM_PTR mechanism,
-                           CK_OBJECT_HANDLE key)
+                           CK_SESSION_HANDLE   session,
+                           CK_MECHANISM_PTR    mechanism,
+                           CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2319,25 +2318,25 @@ stack_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_VerifyMessage (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_VOID_PTR parameter,
-                       CK_ULONG parameter_len,
-                       CK_BYTE_PTR data,
-                       CK_ULONG data_len,
-                       CK_BYTE_PTR signature,
-                       CK_ULONG signature_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_VOID_PTR         parameter,
+                       CK_ULONG            parameter_len,
+                       CK_BYTE_PTR         data,
+                       CK_ULONG            data_len,
+                       CK_BYTE_PTR         signature,
+                       CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_VerifyMessage (funcs, session, parameter, parameter_len, data, data_len,
-	                               signature, signature_len);
+				       signature, signature_len);
 }
 
 static CK_RV
 stack_C_VerifyMessageBegin (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_VOID_PTR parameter,
-                            CK_ULONG parameter_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_VOID_PTR         parameter,
+                            CK_ULONG            parameter_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2346,23 +2345,23 @@ stack_C_VerifyMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 stack_C_VerifyMessageNext (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_VOID_PTR parameter,
-                           CK_ULONG parameter_len,
-                           CK_BYTE_PTR data,
-                           CK_ULONG data_len,
-                           CK_BYTE_PTR signature,
-                           CK_ULONG signature_len)
+                           CK_SESSION_HANDLE   session,
+                           CK_VOID_PTR         parameter,
+                           CK_ULONG            parameter_len,
+                           CK_BYTE_PTR         data,
+                           CK_ULONG            data_len,
+                           CK_BYTE_PTR         signature,
+                           CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_VerifyMessageNext (funcs, session, parameter, parameter_len, data, data_len,
-                                           signature, signature_len);
+					   signature, signature_len);
 }
 
 static CK_RV
 stack_C_MessageVerifyFinal (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session)
+                            CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_X_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2371,7 +2370,7 @@ stack_C_MessageVerifyFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Initialize (CK_X_FUNCTION_LIST *self,
-                   CK_VOID_PTR init_args)
+                   CK_VOID_PTR         init_args)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2380,7 +2379,7 @@ base_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Finalize (CK_X_FUNCTION_LIST *self,
-                 CK_VOID_PTR reserved)
+                 CK_VOID_PTR         reserved)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2389,7 +2388,7 @@ base_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetInfo (CK_X_FUNCTION_LIST *self,
-                CK_INFO_PTR info)
+                CK_INFO_PTR         info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2398,9 +2397,9 @@ base_C_GetInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetSlotList (CK_X_FUNCTION_LIST *self,
-                    CK_BBOOL token_present,
-                    CK_SLOT_ID_PTR slot_list,
-                    CK_ULONG_PTR count)
+                    CK_BBOOL            token_present,
+                    CK_SLOT_ID_PTR      slot_list,
+                    CK_ULONG_PTR        count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2409,8 +2408,8 @@ base_C_GetSlotList (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
-                    CK_SLOT_ID slot_id,
-                    CK_SLOT_INFO_PTR info)
+                    CK_SLOT_ID          slot_id,
+                    CK_SLOT_INFO_PTR    info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2419,8 +2418,8 @@ base_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
-                     CK_SLOT_ID slot_id,
-                     CK_TOKEN_INFO_PTR info)
+                     CK_SLOT_ID          slot_id,
+                     CK_TOKEN_INFO_PTR   info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2428,10 +2427,10 @@ base_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
-                         CK_SLOT_ID slot_id,
-                         CK_MECHANISM_TYPE_PTR mechanism_list,
-                         CK_ULONG_PTR count)
+base_C_GetMechanismList (CK_X_FUNCTION_LIST    *self,
+                         CK_SLOT_ID             slot_id,
+                         CK_MECHANISM_TYPE_PTR  mechanism_list,
+                         CK_ULONG_PTR           count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2439,10 +2438,10 @@ base_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
-                         CK_SLOT_ID slot_id,
-                         CK_MECHANISM_TYPE type,
-                         CK_MECHANISM_INFO_PTR info)
+base_C_GetMechanismInfo (CK_X_FUNCTION_LIST    *self,
+                         CK_SLOT_ID             slot_id,
+                         CK_MECHANISM_TYPE      type,
+                         CK_MECHANISM_INFO_PTR  info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2451,10 +2450,10 @@ base_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_InitToken (CK_X_FUNCTION_LIST *self,
-                  CK_SLOT_ID slot_id,
-                  CK_UTF8CHAR_PTR pin,
-                  CK_ULONG pin_len,
-                  CK_UTF8CHAR_PTR label)
+                  CK_SLOT_ID          slot_id,
+                  CK_UTF8CHAR_PTR     pin,
+                  CK_ULONG            pin_len,
+                  CK_UTF8CHAR_PTR     label)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2462,12 +2461,12 @@ base_C_InitToken (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_OpenSession (CK_X_FUNCTION_LIST *self,
-                    CK_SLOT_ID slot_id,
-                    CK_FLAGS flags,
-                    CK_VOID_PTR application,
-                    CK_NOTIFY notify,
-                    CK_SESSION_HANDLE_PTR session)
+base_C_OpenSession (CK_X_FUNCTION_LIST    *self,
+                    CK_SLOT_ID             slot_id,
+                    CK_FLAGS               flags,
+                    CK_VOID_PTR            application,
+                    CK_NOTIFY              notify,
+                    CK_SESSION_HANDLE_PTR  session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2476,7 +2475,7 @@ base_C_OpenSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_CloseSession (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session)
+                     CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2485,7 +2484,7 @@ base_C_CloseSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
-                         CK_SLOT_ID slot_id)
+                         CK_SLOT_ID          slot_id)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2493,9 +2492,9 @@ base_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_GetSessionInfo (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_SESSION_INFO_PTR info)
+base_C_GetSessionInfo (CK_X_FUNCTION_LIST  *self,
+                       CK_SESSION_HANDLE    session,
+                       CK_SESSION_INFO_PTR  info)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2504,9 +2503,9 @@ base_C_GetSessionInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_InitPIN (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_UTF8CHAR_PTR pin,
-                CK_ULONG pin_len)
+                CK_SESSION_HANDLE   session,
+                CK_UTF8CHAR_PTR     pin,
+                CK_ULONG            pin_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2515,11 +2514,11 @@ base_C_InitPIN (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SetPIN (CK_X_FUNCTION_LIST *self,
-               CK_SESSION_HANDLE session,
-               CK_UTF8CHAR_PTR old_pin,
-               CK_ULONG old_len,
-               CK_UTF8CHAR_PTR new_pin,
-               CK_ULONG new_len)
+               CK_SESSION_HANDLE   session,
+               CK_UTF8CHAR_PTR     old_pin,
+               CK_ULONG            old_len,
+               CK_UTF8CHAR_PTR     new_pin,
+               CK_ULONG            new_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2528,9 +2527,9 @@ base_C_SetPIN (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetOperationState (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_BYTE_PTR operation_state,
-                          CK_ULONG_PTR operation_state_len)
+                          CK_SESSION_HANDLE   session,
+                          CK_BYTE_PTR         operation_state,
+                          CK_ULONG_PTR        operation_state_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2539,24 +2538,24 @@ base_C_GetOperationState (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SetOperationState (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_BYTE_PTR operation_state,
-                          CK_ULONG operation_state_len,
-                          CK_OBJECT_HANDLE encryption_key,
-                          CK_OBJECT_HANDLE authentication_key)
+                          CK_SESSION_HANDLE   session,
+                          CK_BYTE_PTR         operation_state,
+                          CK_ULONG            operation_state_len,
+                          CK_OBJECT_HANDLE    encryption_key,
+                          CK_OBJECT_HANDLE    authentication_key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SetOperationState (session, operation_state, operation_state_len,
-	                                   encryption_key, authentication_key);
+					   encryption_key, authentication_key);
 }
 
 static CK_RV
 base_C_Login (CK_X_FUNCTION_LIST *self,
-              CK_SESSION_HANDLE session,
-              CK_USER_TYPE user_type,
-              CK_UTF8CHAR_PTR pin,
-              CK_ULONG pin_len)
+              CK_SESSION_HANDLE   session,
+              CK_USER_TYPE        user_type,
+              CK_UTF8CHAR_PTR     pin,
+              CK_ULONG            pin_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2565,7 +2564,7 @@ base_C_Login (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Logout (CK_X_FUNCTION_LIST *self,
-               CK_SESSION_HANDLE session)
+               CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2573,11 +2572,11 @@ base_C_Logout (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_CreateObject (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_ATTRIBUTE_PTR template,
-                     CK_ULONG count,
-                     CK_OBJECT_HANDLE_PTR object)
+base_C_CreateObject (CK_X_FUNCTION_LIST   *self,
+                     CK_SESSION_HANDLE     session,
+                     CK_ATTRIBUTE_PTR      template,
+                     CK_ULONG              count,
+                     CK_OBJECT_HANDLE_PTR  object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2585,12 +2584,12 @@ base_C_CreateObject (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_CopyObject (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_OBJECT_HANDLE object,
-                   CK_ATTRIBUTE_PTR template,
-                   CK_ULONG count,
-                   CK_OBJECT_HANDLE_PTR new_object)
+base_C_CopyObject (CK_X_FUNCTION_LIST   *self,
+                   CK_SESSION_HANDLE     session,
+                   CK_OBJECT_HANDLE      object,
+                   CK_ATTRIBUTE_PTR      template,
+                   CK_ULONG              count,
+                   CK_OBJECT_HANDLE_PTR  new_object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2600,8 +2599,8 @@ base_C_CopyObject (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DestroyObject (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_OBJECT_HANDLE object)
+                      CK_SESSION_HANDLE   session,
+                      CK_OBJECT_HANDLE    object)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2610,9 +2609,9 @@ base_C_DestroyObject (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetObjectSize (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_OBJECT_HANDLE object,
-                      CK_ULONG_PTR size)
+                      CK_SESSION_HANDLE   session,
+                      CK_OBJECT_HANDLE    object,
+                      CK_ULONG_PTR        size)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2621,10 +2620,10 @@ base_C_GetObjectSize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_OBJECT_HANDLE object,
-                          CK_ATTRIBUTE_PTR template,
-                          CK_ULONG count)
+                          CK_SESSION_HANDLE   session,
+                          CK_OBJECT_HANDLE    object,
+                          CK_ATTRIBUTE_PTR    template,
+                          CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2633,10 +2632,10 @@ base_C_GetAttributeValue (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_OBJECT_HANDLE object,
-                          CK_ATTRIBUTE_PTR template,
-                          CK_ULONG count)
+                          CK_SESSION_HANDLE   session,
+                          CK_OBJECT_HANDLE    object,
+                          CK_ATTRIBUTE_PTR    template,
+                          CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2645,9 +2644,9 @@ base_C_SetAttributeValue (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_FindObjectsInit (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_ATTRIBUTE_PTR template,
-                        CK_ULONG count)
+                        CK_SESSION_HANDLE   session,
+                        CK_ATTRIBUTE_PTR    template,
+                        CK_ULONG            count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2655,11 +2654,11 @@ base_C_FindObjectsInit (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_FindObjects (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_OBJECT_HANDLE_PTR object,
-                    CK_ULONG max_object_count,
-                    CK_ULONG_PTR object_count)
+base_C_FindObjects (CK_X_FUNCTION_LIST   *self,
+                    CK_SESSION_HANDLE     session,
+                    CK_OBJECT_HANDLE_PTR  object,
+                    CK_ULONG              max_object_count,
+                    CK_ULONG_PTR          object_count)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2668,7 +2667,7 @@ base_C_FindObjects (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_FindObjectsFinal (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session)
+                         CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2677,9 +2676,9 @@ base_C_FindObjectsFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_EncryptInit (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_MECHANISM_PTR mechanism,
-                    CK_OBJECT_HANDLE key)
+                    CK_SESSION_HANDLE   session,
+                    CK_MECHANISM_PTR    mechanism,
+                    CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2688,49 +2687,49 @@ base_C_EncryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Encrypt (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_BYTE_PTR input,
-                CK_ULONG input_len,
-                CK_BYTE_PTR encrypted_data,
-                CK_ULONG_PTR encrypted_data_len)
+                CK_SESSION_HANDLE   session,
+                CK_BYTE_PTR         input,
+                CK_ULONG            input_len,
+                CK_BYTE_PTR         encrypted_data,
+                CK_ULONG_PTR        encrypted_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Encrypt (session, input, input_len,
-	                              encrypted_data, encrypted_data_len);
+				 encrypted_data, encrypted_data_len);
 }
 
 static CK_RV
 base_C_EncryptUpdate (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR part,
-                      CK_ULONG part_len,
-                      CK_BYTE_PTR encrypted_part,
-                      CK_ULONG_PTR encrypted_part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         part,
+                      CK_ULONG            part_len,
+                      CK_BYTE_PTR         encrypted_part,
+                      CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptUpdate (session, part, part_len,
-	                               encrypted_part, encrypted_part_len);
+				       encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 base_C_EncryptFinal (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR last_encrypted_part,
-                     CK_ULONG_PTR last_encrypted_part_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         last_encrypted_part,
+                     CK_ULONG_PTR        last_encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_EncryptFinal (session, last_encrypted_part,
-	                              last_encrypted_part_len);
+				      last_encrypted_part_len);
 }
 
 static CK_RV
 base_C_DecryptInit (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_MECHANISM_PTR mechanism,
-                    CK_OBJECT_HANDLE key)
+                    CK_SESSION_HANDLE   session,
+                    CK_MECHANISM_PTR    mechanism,
+                    CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2739,37 +2738,37 @@ base_C_DecryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Decrypt (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_BYTE_PTR encrypted_data,
-                CK_ULONG encrypted_data_len,
-                CK_BYTE_PTR output,
-                CK_ULONG_PTR output_len)
+                CK_SESSION_HANDLE   session,
+                CK_BYTE_PTR         encrypted_data,
+                CK_ULONG            encrypted_data_len,
+                CK_BYTE_PTR         output,
+                CK_ULONG_PTR        output_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Decrypt (session, encrypted_data, encrypted_data_len,
-	                         output, output_len);
+				 output, output_len);
 }
 
 static CK_RV
 base_C_DecryptUpdate (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR encrypted_part,
-                      CK_ULONG encrypted_part_len,
-                      CK_BYTE_PTR part,
-                      CK_ULONG_PTR part_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         encrypted_part,
+                      CK_ULONG            encrypted_part_len,
+                      CK_BYTE_PTR         part,
+                      CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptUpdate (session, encrypted_part, encrypted_part_len,
-	                               part, part_len);
+				       part, part_len);
 }
 
 static CK_RV
 base_C_DecryptFinal (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR last_part,
-                     CK_ULONG_PTR last_part_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         last_part,
+                     CK_ULONG_PTR        last_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2778,8 +2777,8 @@ base_C_DecryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DigestInit (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_MECHANISM_PTR mechanism)
+                   CK_SESSION_HANDLE   session,
+                   CK_MECHANISM_PTR    mechanism)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2788,11 +2787,11 @@ base_C_DigestInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Digest (CK_X_FUNCTION_LIST *self,
-               CK_SESSION_HANDLE session,
-               CK_BYTE_PTR input,
-               CK_ULONG input_len,
-               CK_BYTE_PTR digest,
-               CK_ULONG_PTR digest_len)
+               CK_SESSION_HANDLE   session,
+               CK_BYTE_PTR         input,
+               CK_ULONG            input_len,
+               CK_BYTE_PTR         digest,
+               CK_ULONG_PTR        digest_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2801,9 +2800,9 @@ base_C_Digest (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DigestUpdate (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR part,
-                     CK_ULONG part_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         part,
+                     CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2812,8 +2811,8 @@ base_C_DigestUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DigestKey (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_OBJECT_HANDLE key)
+                  CK_SESSION_HANDLE   session,
+                  CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2822,9 +2821,9 @@ base_C_DigestKey (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DigestFinal (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_BYTE_PTR digest,
-                    CK_ULONG_PTR digest_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_BYTE_PTR         digest,
+                    CK_ULONG_PTR        digest_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2833,9 +2832,9 @@ base_C_DigestFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignInit (CK_X_FUNCTION_LIST *self,
-                 CK_SESSION_HANDLE session,
-                 CK_MECHANISM_PTR mechanism,
-                 CK_OBJECT_HANDLE key)
+                 CK_SESSION_HANDLE   session,
+                 CK_MECHANISM_PTR    mechanism,
+                 CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2844,23 +2843,23 @@ base_C_SignInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Sign (CK_X_FUNCTION_LIST *self,
-             CK_SESSION_HANDLE session,
-             CK_BYTE_PTR input,
-             CK_ULONG input_len,
-             CK_BYTE_PTR signature,
-             CK_ULONG_PTR signature_len)
+             CK_SESSION_HANDLE   session,
+             CK_BYTE_PTR         input,
+             CK_ULONG            input_len,
+             CK_BYTE_PTR         signature,
+             CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Sign (session, input, input_len,
-	                      signature, signature_len);
+			      signature, signature_len);
 }
 
 static CK_RV
 base_C_SignUpdate (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_BYTE_PTR part,
-                   CK_ULONG part_len)
+                   CK_SESSION_HANDLE   session,
+                   CK_BYTE_PTR         part,
+                   CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2869,9 +2868,9 @@ base_C_SignUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignFinal (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_BYTE_PTR signature,
-                  CK_ULONG_PTR signature_len)
+                  CK_SESSION_HANDLE   session,
+                  CK_BYTE_PTR         signature,
+                  CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2880,9 +2879,9 @@ base_C_SignFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_MECHANISM_PTR mechanism,
-                        CK_OBJECT_HANDLE key)
+                        CK_SESSION_HANDLE   session,
+                        CK_MECHANISM_PTR    mechanism,
+                        CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2891,23 +2890,23 @@ base_C_SignRecoverInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignRecover (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_BYTE_PTR input,
-                    CK_ULONG input_len,
-                    CK_BYTE_PTR signature,
-                    CK_ULONG_PTR signature_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_BYTE_PTR         input,
+                    CK_ULONG            input_len,
+                    CK_BYTE_PTR         signature,
+                    CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SignRecover (session, input, input_len,
-	                             signature, signature_len);
+				     signature, signature_len);
 }
 
 static CK_RV
 base_C_VerifyInit (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_MECHANISM_PTR mechanism,
-                   CK_OBJECT_HANDLE key)
+                   CK_SESSION_HANDLE   session,
+                   CK_MECHANISM_PTR    mechanism,
+                   CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2916,23 +2915,23 @@ base_C_VerifyInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_Verify (CK_X_FUNCTION_LIST *self,
-               CK_SESSION_HANDLE session,
-               CK_BYTE_PTR input,
-               CK_ULONG input_len,
-               CK_BYTE_PTR signature,
-               CK_ULONG signature_len)
+               CK_SESSION_HANDLE   session,
+               CK_BYTE_PTR         input,
+               CK_ULONG            input_len,
+               CK_BYTE_PTR         signature,
+               CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_Verify (session, input, input_len,
-	                        signature, signature_len);
+				signature, signature_len);
 }
 
 static CK_RV
 base_C_VerifyUpdate (CK_X_FUNCTION_LIST *self,
-                     CK_SESSION_HANDLE session,
-                     CK_BYTE_PTR part,
-                     CK_ULONG part_len)
+                     CK_SESSION_HANDLE   session,
+                     CK_BYTE_PTR         part,
+                     CK_ULONG            part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2941,9 +2940,9 @@ base_C_VerifyUpdate (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_VerifyFinal (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_BYTE_PTR signature,
-                    CK_ULONG signature_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_BYTE_PTR         signature,
+                    CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2952,9 +2951,9 @@ base_C_VerifyFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_MECHANISM_PTR mechanism,
-                          CK_OBJECT_HANDLE key)
+                          CK_SESSION_HANDLE   session,
+                          CK_MECHANISM_PTR    mechanism,
+                          CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -2963,81 +2962,81 @@ base_C_VerifyRecoverInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_VerifyRecover (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_BYTE_PTR signature,
-                      CK_ULONG signature_len,
-                      CK_BYTE_PTR input,
-                      CK_ULONG_PTR input_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_BYTE_PTR         signature,
+                      CK_ULONG            signature_len,
+                      CK_BYTE_PTR         input,
+                      CK_ULONG_PTR        input_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_VerifyRecover (session, signature, signature_len,
-	                               input, input_len);
+				       input, input_len);
 }
 
 static CK_RV
 base_C_DigestEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_BYTE_PTR part,
-                            CK_ULONG part_len,
-                            CK_BYTE_PTR encrypted_part,
-                            CK_ULONG_PTR encrypted_part_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_BYTE_PTR         part,
+                            CK_ULONG            part_len,
+                            CK_BYTE_PTR         encrypted_part,
+                            CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DigestEncryptUpdate (session, part, part_len,
-	                                     encrypted_part, encrypted_part_len);
+					     encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 base_C_DecryptDigestUpdate (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_BYTE_PTR encrypted_part,
-                            CK_ULONG encrypted_part_len,
-                            CK_BYTE_PTR part,
-                            CK_ULONG_PTR part_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_BYTE_PTR         encrypted_part,
+                            CK_ULONG            encrypted_part_len,
+                            CK_BYTE_PTR         part,
+                            CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptDigestUpdate (session, encrypted_part, encrypted_part_len,
-	                                     part, part_len);
+					     part, part_len);
 }
 
 static CK_RV
 base_C_SignEncryptUpdate (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_BYTE_PTR part,
-                          CK_ULONG part_len,
-                          CK_BYTE_PTR encrypted_part,
-                          CK_ULONG_PTR encrypted_part_len)
+                          CK_SESSION_HANDLE   session,
+                          CK_BYTE_PTR         part,
+                          CK_ULONG            part_len,
+                          CK_BYTE_PTR         encrypted_part,
+                          CK_ULONG_PTR        encrypted_part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_SignEncryptUpdate (session, part, part_len,
-	                                   encrypted_part, encrypted_part_len);
+					   encrypted_part, encrypted_part_len);
 }
 
 static CK_RV
 base_C_DecryptVerifyUpdate (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_BYTE_PTR encrypted_part,
-                            CK_ULONG encrypted_part_len,
-                            CK_BYTE_PTR part,
-                            CK_ULONG_PTR part_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_BYTE_PTR         encrypted_part,
+                            CK_ULONG            encrypted_part_len,
+                            CK_BYTE_PTR         part,
+                            CK_ULONG_PTR        part_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_DecryptVerifyUpdate (session, encrypted_part, encrypted_part_len,
-	                                     part, part_len);
+					     part, part_len);
 }
 
 static CK_RV
-base_C_GenerateKey (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_MECHANISM_PTR mechanism,
-                    CK_ATTRIBUTE_PTR template,
-                    CK_ULONG count,
-                    CK_OBJECT_HANDLE_PTR key)
+base_C_GenerateKey (CK_X_FUNCTION_LIST   *self,
+                    CK_SESSION_HANDLE     session,
+                    CK_MECHANISM_PTR      mechanism,
+                    CK_ATTRIBUTE_PTR      template,
+                    CK_ULONG              count,
+                    CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -3045,63 +3044,63 @@ base_C_GenerateKey (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-base_C_GenerateKeyPair (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_MECHANISM_PTR mechanism,
-                        CK_ATTRIBUTE_PTR public_key_template,
-                        CK_ULONG public_key_count,
-                        CK_ATTRIBUTE_PTR private_key_template,
-                        CK_ULONG private_key_count,
-                        CK_OBJECT_HANDLE_PTR public_key,
-                        CK_OBJECT_HANDLE_PTR private_key)
+base_C_GenerateKeyPair (CK_X_FUNCTION_LIST   *self,
+                        CK_SESSION_HANDLE     session,
+                        CK_MECHANISM_PTR      mechanism,
+                        CK_ATTRIBUTE_PTR      public_key_template,
+                        CK_ULONG              public_key_count,
+                        CK_ATTRIBUTE_PTR      private_key_template,
+                        CK_ULONG              private_key_count,
+                        CK_OBJECT_HANDLE_PTR  public_key,
+                        CK_OBJECT_HANDLE_PTR  private_key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_GenerateKeyPair (session, mechanism, public_key_template,
-	                                 public_key_count, private_key_template,
-	                                 private_key_count, public_key, private_key);
+					 public_key_count, private_key_template,
+					 private_key_count, public_key, private_key);
 }
 
 static CK_RV
 base_C_WrapKey (CK_X_FUNCTION_LIST *self,
-                CK_SESSION_HANDLE session,
-                CK_MECHANISM_PTR mechanism,
-                CK_OBJECT_HANDLE wrapping_key,
-                CK_OBJECT_HANDLE key,
-                CK_BYTE_PTR wrapped_key,
-                CK_ULONG_PTR wrapped_key_len)
+                CK_SESSION_HANDLE   session,
+                CK_MECHANISM_PTR    mechanism,
+                CK_OBJECT_HANDLE    wrapping_key,
+                CK_OBJECT_HANDLE    key,
+                CK_BYTE_PTR         wrapped_key,
+                CK_ULONG_PTR        wrapped_key_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_WrapKey (session, mechanism, wrapping_key, key,
-	                         wrapped_key, wrapped_key_len);
+				 wrapped_key, wrapped_key_len);
 }
 
 static CK_RV
-base_C_UnwrapKey (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_MECHANISM_PTR mechanism,
-                  CK_OBJECT_HANDLE unwrapping_key,
-                  CK_BYTE_PTR wrapped_key,
-                  CK_ULONG wrapped_key_len,
-                  CK_ATTRIBUTE_PTR template,
-                  CK_ULONG count,
-                  CK_OBJECT_HANDLE_PTR key)
+base_C_UnwrapKey (CK_X_FUNCTION_LIST   *self,
+                  CK_SESSION_HANDLE     session,
+                  CK_MECHANISM_PTR      mechanism,
+                  CK_OBJECT_HANDLE      unwrapping_key,
+                  CK_BYTE_PTR           wrapped_key,
+                  CK_ULONG              wrapped_key_len,
+                  CK_ATTRIBUTE_PTR      template,
+                  CK_ULONG              count,
+                  CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
 	return funcs->C_UnwrapKey (session, mechanism, unwrapping_key, wrapped_key,
-	                           wrapped_key_len, template, count, key);
+				   wrapped_key_len, template, count, key);
 }
 
 static CK_RV
-base_C_DeriveKey (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_MECHANISM_PTR mechanism,
-                  CK_OBJECT_HANDLE base_key,
-                  CK_ATTRIBUTE_PTR template,
-                  CK_ULONG count,
-                  CK_OBJECT_HANDLE_PTR key)
+base_C_DeriveKey (CK_X_FUNCTION_LIST   *self,
+                  CK_SESSION_HANDLE     session,
+                  CK_MECHANISM_PTR      mechanism,
+                  CK_OBJECT_HANDLE      base_key,
+                  CK_ATTRIBUTE_PTR      template,
+                  CK_ULONG              count,
+                  CK_OBJECT_HANDLE_PTR  key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -3110,9 +3109,9 @@ base_C_DeriveKey (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SeedRandom (CK_X_FUNCTION_LIST *self,
-                   CK_SESSION_HANDLE session,
-                   CK_BYTE_PTR seed,
-                   CK_ULONG seed_len)
+                   CK_SESSION_HANDLE   session,
+                   CK_BYTE_PTR         seed,
+                   CK_ULONG            seed_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -3121,9 +3120,9 @@ base_C_SeedRandom (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_GenerateRandom (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_BYTE_PTR random_data,
-                       CK_ULONG random_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_BYTE_PTR         random_data,
+                       CK_ULONG            random_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -3132,9 +3131,9 @@ base_C_GenerateRandom (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
-                         CK_FLAGS flags,
-                         CK_SLOT_ID_PTR slot_id,
-                         CK_VOID_PTR reserved)
+                         CK_FLAGS            flags,
+                         CK_SLOT_ID_PTR      slot_id,
+                         CK_VOID_PTR         reserved)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST *funcs = virt->lower_module;
@@ -3143,12 +3142,12 @@ base_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_LoginUser (CK_X_FUNCTION_LIST *self,
-                  CK_SESSION_HANDLE session,
-                  CK_USER_TYPE user_type,
-                  CK_UTF8CHAR_PTR pin,
-                  CK_ULONG pin_len,
-                  CK_UTF8CHAR_PTR username,
-                  CK_ULONG username_len)
+                  CK_SESSION_HANDLE   session,
+                  CK_USER_TYPE        user_type,
+                  CK_UTF8CHAR_PTR     pin,
+                  CK_ULONG            pin_len,
+                  CK_UTF8CHAR_PTR     username,
+                  CK_ULONG            username_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3159,8 +3158,8 @@ base_C_LoginUser (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SessionCancel (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_FLAGS flags)
+                      CK_SESSION_HANDLE   session,
+                      CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3171,9 +3170,9 @@ base_C_SessionCancel (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_MECHANISM_PTR mechanism,
-                           CK_OBJECT_HANDLE key)
+                           CK_SESSION_HANDLE   session,
+                           CK_MECHANISM_PTR    mechanism,
+                           CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3184,15 +3183,15 @@ base_C_MessageEncryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_EncryptMessage (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_VOID_PTR parameter,
-                       CK_ULONG parameter_len,
-                       CK_BYTE_PTR associated_data,
-                       CK_ULONG associated_data_len,
-                       CK_BYTE_PTR plaintext,
-                       CK_ULONG plaintext_len,
-                       CK_BYTE_PTR ciphertext,
-                       CK_ULONG_PTR ciphertext_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_VOID_PTR         parameter,
+                       CK_ULONG            parameter_len,
+                       CK_BYTE_PTR         associated_data,
+                       CK_ULONG            associated_data_len,
+                       CK_BYTE_PTR         plaintext,
+                       CK_ULONG            plaintext_len,
+                       CK_BYTE_PTR         ciphertext,
+                       CK_ULONG_PTR        ciphertext_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3200,47 +3199,47 @@ base_C_EncryptMessage (CK_X_FUNCTION_LIST *self,
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_EncryptMessage (session, parameter, parameter_len, associated_data, associated_data_len,
-	                                plaintext, plaintext_len, ciphertext, ciphertext_len);
+					plaintext, plaintext_len, ciphertext, ciphertext_len);
 }
 
 static CK_RV
 base_C_EncryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_VOID_PTR parameter,
-                            CK_ULONG parameter_len,
-                            CK_BYTE_PTR associated_data,
-                            CK_ULONG associated_data_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_VOID_PTR         parameter,
+                            CK_ULONG            parameter_len,
+                            CK_BYTE_PTR         associated_data,
+                            CK_ULONG            associated_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_EncryptMessageBegin (session, parameter, parameter_len,
-	                                     associated_data, associated_data_len);
+					     associated_data, associated_data_len);
 }
 
 static CK_RV
 base_C_EncryptMessageNext (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_VOID_PTR parameter,
-                           CK_ULONG parameter_len,
-                           CK_BYTE_PTR plaintext_part,
-                           CK_ULONG plaintext_part_len,
-                           CK_BYTE_PTR ciphertext_part,
-                           CK_ULONG_PTR ciphertext_part_len,
-                           CK_FLAGS flags)
+                           CK_SESSION_HANDLE   session,
+                           CK_VOID_PTR         parameter,
+                           CK_ULONG            parameter_len,
+                           CK_BYTE_PTR         plaintext_part,
+                           CK_ULONG            plaintext_part_len,
+                           CK_BYTE_PTR         ciphertext_part,
+                           CK_ULONG_PTR        ciphertext_part_len,
+                           CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_EncryptMessageNext (session, parameter, parameter_len, plaintext_part, plaintext_part_len,
-	                                    ciphertext_part, ciphertext_part_len, flags);
+					    ciphertext_part, ciphertext_part_len, flags);
 }
 
 static CK_RV
 base_C_MessageEncryptFinal (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session)
+                            CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3251,9 +3250,9 @@ base_C_MessageEncryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_MECHANISM_PTR mechanism,
-                           CK_OBJECT_HANDLE key)
+                           CK_SESSION_HANDLE   session,
+                           CK_MECHANISM_PTR    mechanism,
+                           CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3264,62 +3263,62 @@ base_C_MessageDecryptInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_DecryptMessage (CK_X_FUNCTION_LIST *self,
-                       CK_SESSION_HANDLE session,
-                       CK_VOID_PTR parameter,
-                       CK_ULONG parameter_len,
-                       CK_BYTE_PTR associated_data,
-                       CK_ULONG associated_data_len,
-                       CK_BYTE_PTR ciphertext,
-                       CK_ULONG ciphertext_len,
-                       CK_BYTE_PTR plaintext,
-                       CK_ULONG_PTR plaintext_len)
+                       CK_SESSION_HANDLE   session,
+                       CK_VOID_PTR         parameter,
+                       CK_ULONG            parameter_len,
+                       CK_BYTE_PTR         associated_data,
+                       CK_ULONG            associated_data_len,
+                       CK_BYTE_PTR         ciphertext,
+                       CK_ULONG            ciphertext_len,
+                       CK_BYTE_PTR         plaintext,
+                       CK_ULONG_PTR        plaintext_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_DecryptMessage (session, parameter, parameter_len, associated_data, associated_data_len,
-	                                ciphertext, ciphertext_len, plaintext, plaintext_len);
+					ciphertext, ciphertext_len, plaintext, plaintext_len);
 }
 
 static CK_RV
 base_C_DecryptMessageBegin (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session,
-                            CK_VOID_PTR parameter,
-                            CK_ULONG parameter_len,
-                            CK_BYTE_PTR associated_data,
-                            CK_ULONG associated_data_len)
+                            CK_SESSION_HANDLE   session,
+                            CK_VOID_PTR         parameter,
+                            CK_ULONG            parameter_len,
+                            CK_BYTE_PTR         associated_data,
+                            CK_ULONG            associated_data_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_DecryptMessageBegin (session, parameter, parameter_len,
-	                                     associated_data, associated_data_len);
+					     associated_data, associated_data_len);
 }
 
 static CK_RV
 base_C_DecryptMessageNext (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_VOID_PTR parameter,
-                           CK_ULONG parameter_len,
-                           CK_BYTE_PTR ciphertext_part,
-                           CK_ULONG ciphertext_part_len,
-                           CK_BYTE_PTR plaintext_part,
-                           CK_ULONG_PTR plaintext_part_len,
-                           CK_FLAGS flags)
+                           CK_SESSION_HANDLE   session,
+                           CK_VOID_PTR         parameter,
+                           CK_ULONG            parameter_len,
+                           CK_BYTE_PTR         ciphertext_part,
+                           CK_ULONG            ciphertext_part_len,
+                           CK_BYTE_PTR         plaintext_part,
+                           CK_ULONG_PTR        plaintext_part_len,
+                           CK_FLAGS            flags)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_DecryptMessageNext (session, parameter, parameter_len, ciphertext_part, ciphertext_part_len,
-	                                    plaintext_part, plaintext_part_len, flags);
+					    plaintext_part, plaintext_part_len, flags);
 }
 
 static CK_RV
 base_C_MessageDecryptFinal (CK_X_FUNCTION_LIST *self,
-                            CK_SESSION_HANDLE session)
+                            CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3330,9 +3329,9 @@ base_C_MessageDecryptFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_MECHANISM_PTR mechanism,
-                        CK_OBJECT_HANDLE key)
+                        CK_SESSION_HANDLE   session,
+                        CK_MECHANISM_PTR    mechanism,
+                        CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3343,27 +3342,27 @@ base_C_MessageSignInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignMessage (CK_X_FUNCTION_LIST *self,
-                    CK_SESSION_HANDLE session,
-                    CK_VOID_PTR parameter,
-                    CK_ULONG parameter_len,
-                    CK_BYTE_PTR data,
-                    CK_ULONG data_len,
-                    CK_BYTE_PTR signature,
-                    CK_ULONG_PTR signature_len)
+                    CK_SESSION_HANDLE   session,
+                    CK_VOID_PTR         parameter,
+                    CK_ULONG            parameter_len,
+                    CK_BYTE_PTR         data,
+                    CK_ULONG            data_len,
+                    CK_BYTE_PTR         signature,
+                    CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_SignMessage (session, parameter, parameter_len, data, data_len,
-	                             signature, signature_len);
+				     signature, signature_len);
 }
 
 static CK_RV
 base_C_SignMessageBegin (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session,
-                         CK_VOID_PTR parameter,
-                         CK_ULONG parameter_len)
+                         CK_SESSION_HANDLE   session,
+                         CK_VOID_PTR         parameter,
+                         CK_ULONG            parameter_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3374,25 +3373,25 @@ base_C_SignMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_SignMessageNext (CK_X_FUNCTION_LIST *self,
-                        CK_SESSION_HANDLE session,
-                        CK_VOID_PTR parameter,
-                        CK_ULONG parameter_len,
-                        CK_BYTE_PTR data,
-                        CK_ULONG data_len,
-                        CK_BYTE_PTR signature,
-                        CK_ULONG_PTR signature_len)
+                        CK_SESSION_HANDLE   session,
+                        CK_VOID_PTR         parameter,
+                        CK_ULONG            parameter_len,
+                        CK_BYTE_PTR         data,
+                        CK_ULONG            data_len,
+                        CK_BYTE_PTR         signature,
+                        CK_ULONG_PTR        signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_SignMessageNext (session, parameter, parameter_len, data, data_len,
-	                                 signature, signature_len);
+					 signature, signature_len);
 }
 
 static CK_RV
 base_C_MessageSignFinal (CK_X_FUNCTION_LIST *self,
-                         CK_SESSION_HANDLE session)
+                         CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3401,9 +3400,9 @@ base_C_MessageSignFinal (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_MECHANISM_PTR mechanism,
-                          CK_OBJECT_HANDLE key)
+                          CK_SESSION_HANDLE   session,
+                          CK_MECHANISM_PTR    mechanism,
+                          CK_OBJECT_HANDLE    key)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3414,27 +3413,27 @@ base_C_MessageVerifyInit (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_VerifyMessage (CK_X_FUNCTION_LIST *self,
-                      CK_SESSION_HANDLE session,
-                      CK_VOID_PTR parameter,
-                      CK_ULONG parameter_len,
-                      CK_BYTE_PTR data,
-                      CK_ULONG data_len,
-                      CK_BYTE_PTR signature,
-                      CK_ULONG signature_len)
+                      CK_SESSION_HANDLE   session,
+                      CK_VOID_PTR         parameter,
+                      CK_ULONG            parameter_len,
+                      CK_BYTE_PTR         data,
+                      CK_ULONG            data_len,
+                      CK_BYTE_PTR         signature,
+                      CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_VerifyMessage (session, parameter, parameter_len, data, data_len,
-	                               signature, signature_len);
+				       signature, signature_len);
 }
 
 static CK_RV
 base_C_VerifyMessageBegin (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session,
-                           CK_VOID_PTR parameter,
-                           CK_ULONG parameter_len)
+                           CK_SESSION_HANDLE   session,
+                           CK_VOID_PTR         parameter,
+                           CK_ULONG            parameter_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3445,25 +3444,25 @@ base_C_VerifyMessageBegin (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 base_C_VerifyMessageNext (CK_X_FUNCTION_LIST *self,
-                          CK_SESSION_HANDLE session,
-                          CK_VOID_PTR parameter,
-                          CK_ULONG parameter_len,
-                          CK_BYTE_PTR data,
-                          CK_ULONG data_len,
-                          CK_BYTE_PTR signature,
-                          CK_ULONG signature_len)
+                          CK_SESSION_HANDLE   session,
+                          CK_VOID_PTR         parameter,
+                          CK_ULONG            parameter_len,
+                          CK_BYTE_PTR         data,
+                          CK_ULONG            data_len,
+                          CK_BYTE_PTR         signature,
+                          CK_ULONG            signature_len)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
 	if (funcs->version.major < 3)
 		return CKR_FUNCTION_NOT_SUPPORTED;
 	return funcs->C_VerifyMessageNext (session, parameter, parameter_len, data, data_len,
-	                                   signature, signature_len);
+					   signature, signature_len);
 }
 
 static CK_RV
 base_C_MessageVerifyFinal (CK_X_FUNCTION_LIST *self,
-                           CK_SESSION_HANDLE session)
+                           CK_SESSION_HANDLE   session)
 {
 	p11_virtual *virt = (p11_virtual *)self;
 	CK_FUNCTION_LIST_3_0 *funcs = virt->lower_module;
@@ -3473,10 +3472,10 @@ base_C_MessageVerifyFinal (CK_X_FUNCTION_LIST *self,
 }
 
 void
-p11_virtual_init (p11_virtual *virt,
+p11_virtual_init (p11_virtual        *virt,
                   CK_X_FUNCTION_LIST *funcs,
-                  void *lower_module,
-                  p11_destroyer lower_destroy)
+                  void               *lower_module,
+                  p11_destroyer       lower_destroy)
 {
 	memcpy (virt, funcs, sizeof (CK_X_FUNCTION_LIST));
 	virt->lower_module = lower_module;
@@ -3500,143 +3499,143 @@ typedef struct {
 } FunctionInfo;
 
 #define STRUCT_OFFSET(struct_type, member) \
-	((size_t) ((unsigned char *) &((struct_type *) 0)->member))
+	((size_t)((unsigned char *)&((struct_type *)0)->member))
 #define STRUCT_MEMBER_P(struct_p, struct_offset) \
-	((void *) ((unsigned char *) (struct_p) + (long) (struct_offset)))
+	((void *)((unsigned char *)(struct_p) + (long)(struct_offset)))
 #define STRUCT_MEMBER(member_type, struct_p, struct_offset) \
-	(*(member_type*) STRUCT_MEMBER_P ((struct_p), (struct_offset)))
+	(*(member_type *)STRUCT_MEMBER_P ((struct_p), (struct_offset)))
 
 #define FUNCTION(name) \
 	#name, \
-	stack_C_##name, STRUCT_OFFSET (CK_X_FUNCTION_LIST, C_##name), \
-	base_C_##name, STRUCT_OFFSET (CK_FUNCTION_LIST_3_0, C_##name), {0, 0}
+	stack_C_ ## name, STRUCT_OFFSET (CK_X_FUNCTION_LIST, C_ ## name), \
+	base_C_ ## name, STRUCT_OFFSET (CK_FUNCTION_LIST_3_0, C_ ## name), {0, 0}
 
 #define FUNCTION3(name) \
 	#name, \
-	stack_C_##name, STRUCT_OFFSET (CK_X_FUNCTION_LIST, C_##name), \
-	base_C_##name, STRUCT_OFFSET (CK_FUNCTION_LIST_3_0, C_##name), {3, 0}
+	stack_C_ ## name, STRUCT_OFFSET (CK_X_FUNCTION_LIST, C_ ## name), \
+	base_C_ ## name, STRUCT_OFFSET (CK_FUNCTION_LIST_3_0, C_ ## name), {3, 0}
 
 static const FunctionInfo function_info[] = {
-        { FUNCTION (Initialize) },
-        { FUNCTION (Finalize) },
-        { FUNCTION (GetInfo) },
-        { FUNCTION (GetSlotList) },
-        { FUNCTION (GetSlotInfo) },
-        { FUNCTION (GetTokenInfo) },
-        { FUNCTION (GetMechanismList) },
-        { FUNCTION (GetMechanismInfo) },
-        { FUNCTION (InitToken) },
-        { FUNCTION (InitPIN) },
-        { FUNCTION (SetPIN) },
-        { FUNCTION (OpenSession) },
-        { FUNCTION (CloseSession) },
-        { FUNCTION (CloseAllSessions) },
-        { FUNCTION (GetSessionInfo) },
-        { FUNCTION (GetOperationState) },
-        { FUNCTION (SetOperationState) },
-        { FUNCTION (Login) },
-        { FUNCTION (Logout) },
-        { FUNCTION (CreateObject) },
-        { FUNCTION (CopyObject) },
-        { FUNCTION (DestroyObject) },
-        { FUNCTION (GetObjectSize) },
-        { FUNCTION (GetAttributeValue) },
-        { FUNCTION (SetAttributeValue) },
-        { FUNCTION (FindObjectsInit) },
-        { FUNCTION (FindObjects) },
-        { FUNCTION (FindObjectsFinal) },
-        { FUNCTION (EncryptInit) },
-        { FUNCTION (Encrypt) },
-        { FUNCTION (EncryptUpdate) },
-        { FUNCTION (EncryptFinal) },
-        { FUNCTION (DecryptInit) },
-        { FUNCTION (Decrypt) },
-        { FUNCTION (DecryptUpdate) },
-        { FUNCTION (DecryptFinal) },
-        { FUNCTION (DigestInit) },
-        { FUNCTION (Digest) },
-        { FUNCTION (DigestUpdate) },
-        { FUNCTION (DigestKey) },
-        { FUNCTION (DigestFinal) },
-        { FUNCTION (SignInit) },
-        { FUNCTION (Sign) },
-        { FUNCTION (SignUpdate) },
-        { FUNCTION (SignFinal) },
-        { FUNCTION (SignRecoverInit) },
-        { FUNCTION (SignRecover) },
-        { FUNCTION (VerifyInit) },
-        { FUNCTION (Verify) },
-        { FUNCTION (VerifyUpdate) },
-        { FUNCTION (VerifyFinal) },
-        { FUNCTION (VerifyRecoverInit) },
-        { FUNCTION (VerifyRecover) },
-        { FUNCTION (DigestEncryptUpdate) },
-        { FUNCTION (DecryptDigestUpdate) },
-        { FUNCTION (SignEncryptUpdate) },
-        { FUNCTION (DecryptVerifyUpdate) },
-        { FUNCTION (GenerateKey) },
-        { FUNCTION (GenerateKeyPair) },
-        { FUNCTION (WrapKey) },
-        { FUNCTION (UnwrapKey) },
-        { FUNCTION (DeriveKey) },
-        { FUNCTION (SeedRandom) },
-        { FUNCTION (GenerateRandom) },
-        { FUNCTION (WaitForSlotEvent) },
+	{ FUNCTION (Initialize) },
+	{ FUNCTION (Finalize) },
+	{ FUNCTION (GetInfo) },
+	{ FUNCTION (GetSlotList) },
+	{ FUNCTION (GetSlotInfo) },
+	{ FUNCTION (GetTokenInfo) },
+	{ FUNCTION (GetMechanismList) },
+	{ FUNCTION (GetMechanismInfo) },
+	{ FUNCTION (InitToken) },
+	{ FUNCTION (InitPIN) },
+	{ FUNCTION (SetPIN) },
+	{ FUNCTION (OpenSession) },
+	{ FUNCTION (CloseSession) },
+	{ FUNCTION (CloseAllSessions) },
+	{ FUNCTION (GetSessionInfo) },
+	{ FUNCTION (GetOperationState) },
+	{ FUNCTION (SetOperationState) },
+	{ FUNCTION (Login) },
+	{ FUNCTION (Logout) },
+	{ FUNCTION (CreateObject) },
+	{ FUNCTION (CopyObject) },
+	{ FUNCTION (DestroyObject) },
+	{ FUNCTION (GetObjectSize) },
+	{ FUNCTION (GetAttributeValue) },
+	{ FUNCTION (SetAttributeValue) },
+	{ FUNCTION (FindObjectsInit) },
+	{ FUNCTION (FindObjects) },
+	{ FUNCTION (FindObjectsFinal) },
+	{ FUNCTION (EncryptInit) },
+	{ FUNCTION (Encrypt) },
+	{ FUNCTION (EncryptUpdate) },
+	{ FUNCTION (EncryptFinal) },
+	{ FUNCTION (DecryptInit) },
+	{ FUNCTION (Decrypt) },
+	{ FUNCTION (DecryptUpdate) },
+	{ FUNCTION (DecryptFinal) },
+	{ FUNCTION (DigestInit) },
+	{ FUNCTION (Digest) },
+	{ FUNCTION (DigestUpdate) },
+	{ FUNCTION (DigestKey) },
+	{ FUNCTION (DigestFinal) },
+	{ FUNCTION (SignInit) },
+	{ FUNCTION (Sign) },
+	{ FUNCTION (SignUpdate) },
+	{ FUNCTION (SignFinal) },
+	{ FUNCTION (SignRecoverInit) },
+	{ FUNCTION (SignRecover) },
+	{ FUNCTION (VerifyInit) },
+	{ FUNCTION (Verify) },
+	{ FUNCTION (VerifyUpdate) },
+	{ FUNCTION (VerifyFinal) },
+	{ FUNCTION (VerifyRecoverInit) },
+	{ FUNCTION (VerifyRecover) },
+	{ FUNCTION (DigestEncryptUpdate) },
+	{ FUNCTION (DecryptDigestUpdate) },
+	{ FUNCTION (SignEncryptUpdate) },
+	{ FUNCTION (DecryptVerifyUpdate) },
+	{ FUNCTION (GenerateKey) },
+	{ FUNCTION (GenerateKeyPair) },
+	{ FUNCTION (WrapKey) },
+	{ FUNCTION (UnwrapKey) },
+	{ FUNCTION (DeriveKey) },
+	{ FUNCTION (SeedRandom) },
+	{ FUNCTION (GenerateRandom) },
+	{ FUNCTION (WaitForSlotEvent) },
         /* PKCS #11 3.0 */
-        { FUNCTION3 (LoginUser) },
-        { FUNCTION3 (SessionCancel) },
-        { FUNCTION3 (MessageEncryptInit) },
-        { FUNCTION3 (EncryptMessage) },
-        { FUNCTION3 (EncryptMessageBegin) },
-        { FUNCTION3 (EncryptMessageNext) },
-        { FUNCTION3 (MessageEncryptFinal) },
-        { FUNCTION3 (MessageDecryptInit) },
-        { FUNCTION3 (DecryptMessage) },
-        { FUNCTION3 (DecryptMessageBegin) },
-        { FUNCTION3 (DecryptMessageNext) },
-        { FUNCTION3 (MessageDecryptFinal) },
-        { FUNCTION3 (MessageSignInit) },
-        { FUNCTION3 (SignMessage) },
-        { FUNCTION3 (SignMessageBegin) },
-        { FUNCTION3 (SignMessageNext) },
-        { FUNCTION3 (MessageSignFinal) },
-        { FUNCTION3 (MessageVerifyInit) },
-        { FUNCTION3 (VerifyMessage) },
-        { FUNCTION3 (VerifyMessageBegin) },
-        { FUNCTION3 (VerifyMessageNext) },
-        { FUNCTION3 (MessageVerifyFinal) },
-        { 0, }
+	{ FUNCTION3 (LoginUser) },
+	{ FUNCTION3 (SessionCancel) },
+	{ FUNCTION3 (MessageEncryptInit) },
+	{ FUNCTION3 (EncryptMessage) },
+	{ FUNCTION3 (EncryptMessageBegin) },
+	{ FUNCTION3 (EncryptMessageNext) },
+	{ FUNCTION3 (MessageEncryptFinal) },
+	{ FUNCTION3 (MessageDecryptInit) },
+	{ FUNCTION3 (DecryptMessage) },
+	{ FUNCTION3 (DecryptMessageBegin) },
+	{ FUNCTION3 (DecryptMessageNext) },
+	{ FUNCTION3 (MessageDecryptFinal) },
+	{ FUNCTION3 (MessageSignInit) },
+	{ FUNCTION3 (SignMessage) },
+	{ FUNCTION3 (SignMessageBegin) },
+	{ FUNCTION3 (SignMessageNext) },
+	{ FUNCTION3 (MessageSignFinal) },
+	{ FUNCTION3 (MessageVerifyInit) },
+	{ FUNCTION3 (VerifyMessage) },
+	{ FUNCTION3 (VerifyMessageBegin) },
+	{ FUNCTION3 (VerifyMessageNext) },
+	{ FUNCTION3 (MessageVerifyFinal) },
+	{ 0, }
 };
 
 static bool
-lookup_fall_through (p11_virtual *virt,
-                     const FunctionInfo *info,
-                     void **bound_func)
+lookup_fall_through (p11_virtual         *virt,
+                     const FunctionInfo  *info,
+                     void               **bound_func)
 {
 	void *func;
 
-	/*
-	 * So the basic concept here is if we have only fall-through functions
-	 * all the way down the stack, then we can just get the actual module
-	 * function, so that calls go right through.
-	 */
+        /*
+         * So the basic concept here is if we have only fall-through functions
+         * all the way down the stack, then we can just get the actual module
+         * function, so that calls go right through.
+         */
 
 	func = STRUCT_MEMBER (void *, virt, info->virtual_offset);
 
-	/*
-	 * This is a fall-through function and the stack goes down further, so
-	 * ask the next level down for the
-	 */
+        /*
+         * This is a fall-through function and the stack goes down further, so
+         * ask the next level down for the
+         */
 	if (func == info->stack_fallback) {
 		return lookup_fall_through (virt->lower_module, info, bound_func);
 
-	/*
-	 * This is a fall-through function at the bottom level of the stack
-	 * so return the function from the module.
-	 */
+                /*
+                 * This is a fall-through function at the bottom level of the stack
+                 * so return the function from the module.
+                 */
 	} else if (func == info->base_fallback) {
-		/* We can not point to 3.0 functions if the underlying module does not have them.
-		 * Let the base_C_* functions handle this case */
+                /* We can not point to 3.0 functions if the underlying module does not have them.
+                 * Let the base_C_* functions handle this case */
 		CK_X_FUNCTION_LIST *lower = virt->lower_module;
 		if ((info->min_version.major > 0 || info->min_version.minor > 0) &&
 		    (lower->version.major < info->min_version.major ||
@@ -3654,108 +3653,108 @@ lookup_fall_through (p11_virtual *virt,
 #if defined(FFI_CLOSURES) && FFI_CLOSURES
 typedef struct {
 	void *function;
-	ffi_type *types[MAX_ARGS+1];
+	ffi_type *types[MAX_ARGS + 1];
 } BindingInfo;
 
 static const BindingInfo binding_info[] = {
-        { binding_C_Initialize, { &ffi_type_pointer, NULL } },
-        { binding_C_Finalize, { &ffi_type_pointer, NULL } },
-        { binding_C_GetInfo, { &ffi_type_pointer, NULL } },
-        { binding_C_GetSlotList, { &ffi_type_uchar, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_GetSlotInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_GetTokenInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_GetMechanismList, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_GetMechanismInfo, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_InitToken, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_InitPIN, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SetPIN, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_OpenSession, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_CloseSession, { &ffi_type_ulong, NULL } },
-        { binding_C_CloseAllSessions, { &ffi_type_ulong, NULL } },
-        { binding_C_GetSessionInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_GetOperationState, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SetOperationState, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_ulong, &ffi_type_ulong, NULL } },
-        { binding_C_Login, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_Logout, { &ffi_type_ulong, NULL } },
-        { binding_C_CreateObject, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_CopyObject, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_DestroyObject, { &ffi_type_ulong, &ffi_type_ulong, NULL } },
-        { binding_C_GetObjectSize, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_GetAttributeValue, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SetAttributeValue, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_FindObjectsInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_FindObjects, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_FindObjectsFinal, { &ffi_type_ulong, NULL } },
-        { binding_C_EncryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_Encrypt, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_EncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_EncryptFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_Decrypt, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DigestInit, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_Digest, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DigestUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_DigestKey, { &ffi_type_ulong, &ffi_type_ulong, NULL } },
-        { binding_C_DigestFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SignInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_Sign, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SignUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SignFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SignRecoverInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SignRecover, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_VerifyInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_Verify, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyRecoverInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyRecover, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DigestEncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptDigestUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SignEncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptVerifyUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_GenerateKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_GenerateKeyPair, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_WrapKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_UnwrapKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_DeriveKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
-        { binding_C_SeedRandom, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_GenerateRandom, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_WaitForSlotEvent, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_Initialize, { &ffi_type_pointer, NULL } },
+	{ binding_C_Finalize, { &ffi_type_pointer, NULL } },
+	{ binding_C_GetInfo, { &ffi_type_pointer, NULL } },
+	{ binding_C_GetSlotList, { &ffi_type_uchar, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_GetSlotInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_GetTokenInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_GetMechanismList, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_GetMechanismInfo, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_InitToken, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_InitPIN, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SetPIN, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_OpenSession, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_CloseSession, { &ffi_type_ulong, NULL } },
+	{ binding_C_CloseAllSessions, { &ffi_type_ulong, NULL } },
+	{ binding_C_GetSessionInfo, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_GetOperationState, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SetOperationState, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_ulong, &ffi_type_ulong, NULL } },
+	{ binding_C_Login, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_Logout, { &ffi_type_ulong, NULL } },
+	{ binding_C_CreateObject, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_CopyObject, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_DestroyObject, { &ffi_type_ulong, &ffi_type_ulong, NULL } },
+	{ binding_C_GetObjectSize, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_GetAttributeValue, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SetAttributeValue, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_FindObjectsInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_FindObjects, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_FindObjectsFinal, { &ffi_type_ulong, NULL } },
+	{ binding_C_EncryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_Encrypt, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_EncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_EncryptFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_Decrypt, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DigestInit, { &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_Digest, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DigestUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_DigestKey, { &ffi_type_ulong, &ffi_type_ulong, NULL } },
+	{ binding_C_DigestFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SignInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_Sign, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SignUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SignFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SignRecoverInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SignRecover, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_VerifyInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_Verify, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyFinal, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyRecoverInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyRecover, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DigestEncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptDigestUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SignEncryptUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptVerifyUpdate, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_GenerateKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_GenerateKeyPair, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_WrapKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_UnwrapKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_DeriveKey, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, NULL } },
+	{ binding_C_SeedRandom, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_GenerateRandom, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_WaitForSlotEvent, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
         /* PKCS #11 3.0 */
-        { binding_C_LoginUser, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SessionCancel, { &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_MessageEncryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_EncryptMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_EncryptMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_EncryptMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_MessageEncryptFinal, { &ffi_type_pointer, NULL } },
-        { binding_C_MessageDecryptInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_DecryptMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_DecryptMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_DecryptMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_MessageDecryptFinal, { &ffi_type_pointer, NULL } },
-        { binding_C_MessageSignInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SignMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_SignMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_SignMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
-        { binding_C_MessageSignFinal, { &ffi_type_pointer, NULL } },
-        { binding_C_MessageVerifyInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_VerifyMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
-        { binding_C_MessageVerifyFinal, { &ffi_type_pointer, NULL } },
-        { 0, }
+	{ binding_C_LoginUser, { &ffi_type_ulong, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SessionCancel, { &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_MessageEncryptInit, { &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_EncryptMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_EncryptMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_EncryptMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_MessageEncryptFinal, { &ffi_type_pointer, NULL } },
+	{ binding_C_MessageDecryptInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_DecryptMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_DecryptMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_DecryptMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_MessageDecryptFinal, { &ffi_type_pointer, NULL } },
+	{ binding_C_MessageSignInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SignMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_SignMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_SignMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_pointer, NULL } },
+	{ binding_C_MessageSignFinal, { &ffi_type_pointer, NULL } },
+	{ binding_C_MessageVerifyInit, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyMessage, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyMessageBegin, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_VerifyMessageNext, { &ffi_type_pointer, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, &ffi_type_pointer, &ffi_type_ulong, NULL } },
+	{ binding_C_MessageVerifyFinal, { &ffi_type_pointer, NULL } },
+	{ 0, }
 };
 
 
 static bool
-bind_ffi_closure (Wrapper *wrapper,
-                  void *binding_data,
-                  void *binding_func,
+bind_ffi_closure (Wrapper   *wrapper,
+                  void      *binding_data,
+                  void      *binding_func,
                   ffi_type **args,
-                  void **bound_func)
+                  void     **bound_func)
 {
 	ffi_closure *clo;
 	ffi_cif *cif;
@@ -3766,19 +3765,19 @@ bind_ffi_closure (Wrapper *wrapper,
 	assert (wrapper->ffi_used < MAX_FUNCTIONS);
 	cif = wrapper->ffi_cifs + wrapper->ffi_used;
 
-	/* The number of arguments */
+        /* The number of arguments */
 	for (i = 0, nargs = 0; args[i] != NULL; i++)
 		nargs++;
 
 	assert (nargs <= MAX_ARGS);
 
-	/*
-	 * The failures here are unexpected conditions. There's a chance they
-	 * might occur on other esoteric platforms, so we take a little
-	 * extra care to print relevant debugging info, and return a status,
-	 * so that we can get back useful debug info on platforms that we
-	 * don't have access to.
-	 */
+        /*
+         * The failures here are unexpected conditions. There's a chance they
+         * might occur on other esoteric platforms, so we take a little
+         * extra care to print relevant debugging info, and return a status,
+         * so that we can get back useful debug info on platforms that we
+         * don't have access to.
+         */
 
 	ret = ffi_prep_cif (cif, FFI_DEFAULT_ABI, nargs, &ffi_type_ulong, args);
 	if (ret != FFI_OK) {
@@ -3814,54 +3813,54 @@ init_wrapper_funcs (Wrapper *wrapper)
 	void **bound;
 	int i;
 
-	/* Pointer to where our calls go */
+        /* Pointer to where our calls go */
 	over = &wrapper->virt->funcs;
 
 	for (i = 0; function_info[i].name != NULL; i++) {
 		info = function_info + i;
 
-		/* Address to where we're placing the bound function */
+                /* Address to where we're placing the bound function */
 		bound = &STRUCT_MEMBER (void *, &wrapper->bound, info->module_offset);
 
-		/*
-		 * See if we can just shoot straight through to the module function
-		 * without wrapping at all. If all the stacked virtual modules just
-		 * fall through, then this returns the original module function.
-		 */
+                /*
+                 * See if we can just shoot straight through to the module function
+                 * without wrapping at all. If all the stacked virtual modules just
+                 * fall through, then this returns the original module function.
+                 */
 		if (!lookup_fall_through (wrapper->virt, info, bound)) {
 			const BindingInfo *binding = binding_info + i;
 			if (!bind_ffi_closure (wrapper, over,
-			                       binding->function,
-			                       (ffi_type **)binding->types, bound))
+					       binding->function,
+					       (ffi_type **)binding->types, bound))
 				return false;
 		}
 	}
 
-	/* Always bind the C_GetFunctionList function itself */
+        /* Always bind the C_GetFunctionList function itself */
 	if (!bind_ffi_closure (wrapper, wrapper,
-	                       binding_C_GetFunctionList,
-	                       (ffi_type **)get_function_list_args,
-	                       (void **)&wrapper->bound.C_GetFunctionList))
+			       binding_C_GetFunctionList,
+			       (ffi_type **)get_function_list_args,
+			       (void **)&wrapper->bound.C_GetFunctionList))
 		return false;
-	/* The same for Interfaces */
+        /* The same for Interfaces */
 	if (!bind_ffi_closure (wrapper, wrapper,
-	                       binding_C_GetInterfaceList,
-	                       (ffi_type **)get_interface_list_args,
-	                       (void **)&wrapper->bound.C_GetInterfaceList))
+			       binding_C_GetInterfaceList,
+			       (ffi_type **)get_interface_list_args,
+			       (void **)&wrapper->bound.C_GetInterfaceList))
 		return false;
 	if (!bind_ffi_closure (wrapper, wrapper,
-	                       binding_C_GetInterface,
-	                       (ffi_type **)get_interface_args,
-	                       (void **)&wrapper->bound.C_GetInterface))
+			       binding_C_GetInterface,
+			       (ffi_type **)get_interface_args,
+			       (void **)&wrapper->bound.C_GetInterface))
 		return false;
 
-	/*
-	 * These functions are used as a marker to indicate whether this is
-	 * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
-	 * functions are defined to always have the same standard implementation
-	 * in PKCS#11 2.x so we don't need to call through to the base for
-	 * these guys.
-	 */
+        /*
+         * These functions are used as a marker to indicate whether this is
+         * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
+         * functions are defined to always have the same standard implementation
+         * in PKCS#11 2.x so we don't need to call through to the base for
+         * these guys.
+         */
 	wrapper->bound.C_CancelFunction = short_C_CancelFunction;
 	wrapper->bound.C_GetFunctionStatus = short_C_GetFunctionStatus;
 
@@ -3880,8 +3879,8 @@ uninit_wrapper_funcs (Wrapper *wrapper)
 #endif
 
 CK_FUNCTION_LIST *
-p11_virtual_wrap (p11_virtual *virt,
-                  p11_destroyer destroyer)
+p11_virtual_wrap (p11_virtual   *virt,
+                  p11_destroyer  destroyer)
 {
 	Wrapper *wrapper;
 	CK_FUNCTION_LIST *result;
@@ -3915,8 +3914,8 @@ p11_virtual_wrap (p11_virtual *virt,
 #else /* !FFI_CLOSURES */
 
 CK_FUNCTION_LIST *
-p11_virtual_wrap (p11_virtual *virt,
-                  p11_destroyer destroyer)
+p11_virtual_wrap (p11_virtual   *virt,
+                  p11_destroyer  destroyer)
 {
 	CK_FUNCTION_LIST *result;
 
@@ -3930,13 +3929,13 @@ p11_virtual_wrap (p11_virtual *virt,
 bool
 p11_virtual_is_wrapper (CK_FUNCTION_LIST_PTR module)
 {
-	/*
-	 * We use these functions as a marker to indicate whether this is
-	 * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
-	 * functions are defined to always have the same standard implementation
-	 * in PKCS#11 2.x so we don't need to call through to the base for
-	 * these guys.
-	 */
+        /*
+         * We use these functions as a marker to indicate whether this is
+         * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
+         * functions are defined to always have the same standard implementation
+         * in PKCS#11 2.x so we don't need to call through to the base for
+         * these guys.
+         */
 	return (module->C_GetFunctionStatus == short_C_GetFunctionStatus &&
 		module->C_CancelFunction == short_C_CancelFunction);
 }
@@ -3948,17 +3947,17 @@ p11_virtual_unwrap (CK_FUNCTION_LIST_PTR module)
 
 	return_if_fail (p11_virtual_is_wrapper (module));
 
-	/* The bound CK_FUNCTION_LIST_3_0 sits at the front of Wrapper */
+        /* The bound CK_FUNCTION_LIST_3_0 sits at the front of Wrapper */
 	wrapper = (Wrapper *)module;
 
 	if (wrapper->fixed_index >= 0)
 		p11_virtual_unwrap_fixed (module);
 
-	/*
-	 * Make sure that the CK_FUNCTION_LIST_3_0_PTR is invalid, and that
-	 * p11_virtual_is_wrapper() recognizes this. This is in case the
-	 * destroyer callback tries to do something fancy.
-	 */
+        /*
+         * Make sure that the CK_FUNCTION_LIST_3_0_PTR is invalid, and that
+         * p11_virtual_is_wrapper() recognizes this. This is in case the
+         * destroyer callback tries to do something fancy.
+         */
 	memset (&wrapper->bound, 0xFE, sizeof (wrapper->bound));
 
 	if (wrapper->destroyer)
@@ -4037,7 +4036,7 @@ CK_X_FUNCTION_LIST p11_virtual_stack = {
 	stack_C_SeedRandom,
 	stack_C_GenerateRandom,
 	stack_C_WaitForSlotEvent,
-	/* PKCS #11 3.0 */
+        /* PKCS #11 3.0 */
 	stack_C_LoginUser,
 	stack_C_SessionCancel,
 	stack_C_MessageEncryptInit,
@@ -4129,7 +4128,7 @@ CK_X_FUNCTION_LIST p11_virtual_base = {
 	base_C_SeedRandom,
 	base_C_GenerateRandom,
 	base_C_WaitForSlotEvent,
-	/* PKCS #11 3.0 */
+        /* PKCS #11 3.0 */
 	base_C_LoginUser,
 	base_C_SessionCancel,
 	base_C_MessageEncryptInit,
@@ -4157,8 +4156,8 @@ CK_X_FUNCTION_LIST p11_virtual_base = {
 #include "p11-kit/virtual-fixed-generated.h"
 
 static CK_FUNCTION_LIST_3_0 *
-p11_virtual_wrap_fixed (p11_virtual *virt,
-			p11_destroyer destroyer)
+p11_virtual_wrap_fixed (p11_virtual   *virt,
+                        p11_destroyer  destroyer)
 {
 	CK_FUNCTION_LIST_3_0 *result = NULL;
 	size_t i;
@@ -4203,72 +4202,73 @@ p11_virtual_unwrap_fixed (CK_FUNCTION_LIST_PTR module)
 }
 
 static void
-init_wrapper_funcs_fixed (Wrapper *wrapper, CK_FUNCTION_LIST_3_0 *fixed)
+init_wrapper_funcs_fixed (Wrapper              *wrapper,
+                          CK_FUNCTION_LIST_3_0 *fixed)
 {
-       const FunctionInfo *info;
-       void **bound_to, **bound_from;
-       int i;
+	const FunctionInfo *info;
+	void **bound_to, **bound_from;
+	int i;
 
-       for (i = 0; function_info[i].name != NULL; i++) {
-               info = function_info + i;
+	for (i = 0; function_info[i].name != NULL; i++) {
+		info = function_info + i;
 
-               /* Address to where we're placing the bound function */
-               bound_to = &STRUCT_MEMBER (void *, &wrapper->bound, info->module_offset);
-               bound_from = &STRUCT_MEMBER (void *, fixed, info->module_offset);
+                /* Address to where we're placing the bound function */
+		bound_to = &STRUCT_MEMBER (void *, &wrapper->bound, info->module_offset);
+		bound_from = &STRUCT_MEMBER (void *, fixed, info->module_offset);
 
-               /*
-                * See if we can just shoot straight through to the module function
-                * without wrapping at all. If all the stacked virtual modules just
-                * fall through, then this returns the original module function.
-                */
-               if (!lookup_fall_through (wrapper->virt, info, bound_to))
-                       *bound_to = *bound_from;
-       }
+                /*
+                 * See if we can just shoot straight through to the module function
+                 * without wrapping at all. If all the stacked virtual modules just
+                 * fall through, then this returns the original module function.
+                 */
+		if (!lookup_fall_through (wrapper->virt, info, bound_to))
+			*bound_to = *bound_from;
+	}
 
-       /* Always bind the C_GetFunctionList function itself */
-       wrapper->bound.C_GetFunctionList = fixed->C_GetFunctionList;
+        /* Always bind the C_GetFunctionList function itself */
+	wrapper->bound.C_GetFunctionList = fixed->C_GetFunctionList;
 
-       /* Same for the interfaces */
-       wrapper->bound.C_GetInterfaceList = fixed->C_GetInterfaceList;
-       wrapper->bound.C_GetInterface = fixed->C_GetInterface;
+        /* Same for the interfaces */
+	wrapper->bound.C_GetInterfaceList = fixed->C_GetInterfaceList;
+	wrapper->bound.C_GetInterface = fixed->C_GetInterface;
 
-       /*
-        * These functions are used as a marker to indicate whether this is
-        * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
-        * functions are defined to always have the same standard implementation
-        * in PKCS#11 2.x so we don't need to call through to the base for
-        * these guys.
-        */
-       wrapper->bound.C_CancelFunction = short_C_CancelFunction;
-       wrapper->bound.C_GetFunctionStatus = short_C_GetFunctionStatus;
+        /*
+         * These functions are used as a marker to indicate whether this is
+         * one of our CK_FUNCTION_LIST_PTR sets of functions or not. These
+         * functions are defined to always have the same standard implementation
+         * in PKCS#11 2.x so we don't need to call through to the base for
+         * these guys.
+         */
+	wrapper->bound.C_CancelFunction = short_C_CancelFunction;
+	wrapper->bound.C_GetFunctionStatus = short_C_GetFunctionStatus;
 }
 
 static Wrapper *
-create_fixed_wrapper (p11_virtual *virt,
-		      size_t index,
-		      p11_destroyer destroyer)
+create_fixed_wrapper (p11_virtual   *virt,
+                      size_t         index,
+                      p11_destroyer  destroyer)
 {
-       Wrapper *wrapper;
+	Wrapper *wrapper;
 
-       return_val_if_fail (virt != NULL, NULL);
+	return_val_if_fail (virt != NULL, NULL);
 
-       wrapper = calloc (1, sizeof (Wrapper));
-       return_val_if_fail (wrapper != NULL, NULL);
+	wrapper = calloc (1, sizeof (Wrapper));
+	return_val_if_fail (wrapper != NULL, NULL);
 
-       wrapper->virt = virt;
-       wrapper->destroyer = destroyer;
-       wrapper->bound.version.major = CRYPTOKI_VERSION_MAJOR;
-       wrapper->bound.version.minor = CRYPTOKI_VERSION_MINOR;
-       wrapper->fixed_index = index;
+	wrapper->virt = virt;
+	wrapper->destroyer = destroyer;
+	wrapper->bound.version.major = CRYPTOKI_VERSION_MAJOR;
+	wrapper->bound.version.minor = CRYPTOKI_VERSION_MINOR;
+	wrapper->fixed_index = index;
 
-       init_wrapper_funcs_fixed (wrapper, &p11_virtual_fixed[index]);
+	init_wrapper_funcs_fixed (wrapper, &p11_virtual_fixed[index]);
 
-       assert ((void *)wrapper == (void *)&wrapper->bound);
-       assert (p11_virtual_is_wrapper ((CK_FUNCTION_LIST_PTR)&wrapper->bound));
-       assert (wrapper->bound.C_GetFunctionList != NULL);
-       assert (wrapper->bound.C_GetInterfaceList != NULL);
-       assert (wrapper->bound.C_GetInterface != NULL);
-       return wrapper;
+	assert ((void *)wrapper == (void *)&wrapper->bound);
+	assert (p11_virtual_is_wrapper ((CK_FUNCTION_LIST_PTR)&wrapper->bound));
+	assert (wrapper->bound.C_GetFunctionList != NULL);
+	assert (wrapper->bound.C_GetInterfaceList != NULL);
+	assert (wrapper->bound.C_GetInterface != NULL);
+	return wrapper;
 }
 
 static CK_INTERFACE *

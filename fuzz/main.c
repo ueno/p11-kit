@@ -31,14 +31,16 @@
 
 #include "fuzz.h"
 
-int main(int argc, char **argv)
+int
+main (int    argc,
+      char **argv)
 {
 	int ret;
-	unsigned char buf[64*1024];
+	unsigned char buf[64 * 1024];
 
-	ret = fread(buf, 1, sizeof(buf), stdin);
+	ret = fread (buf, 1, sizeof (buf), stdin);
 	if (ret <= 0)
 		return 0;
 
-	return LLVMFuzzerTestOneInput(buf, ret);
+	return LLVMFuzzerTestOneInput (buf, ret);
 }

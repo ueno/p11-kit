@@ -41,13 +41,13 @@
 #include <string.h>
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	int ret;
 	const char *val;
 
-fprintf (stderr, "calling secure_getenv(%s) getenv(%s) = %s\n", argv[1], argv[1], getenv(argv[1]));
+	fprintf (stderr, "calling secure_getenv(%s) getenv(%s) = %s\n", argv[1], argv[1], getenv (argv[1]));
 	val = secure_getenv (argv[1]);
 	if (val == NULL) {
 		printf ("%s=NULL\n", argv[1]);

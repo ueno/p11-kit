@@ -77,9 +77,9 @@ next_entry (p11_dictiter *iter)
 
 
 bool
-p11_dict_next (p11_dictiter *iter,
-               void **key,
-               void **value)
+p11_dict_next (p11_dictiter  *iter,
+               void         **key,
+               void         **value)
 {
 	dictbucket *bucket = next_entry (iter);
 	if (bucket == NULL)
@@ -92,7 +92,7 @@ p11_dict_next (p11_dictiter *iter,
 }
 
 void
-p11_dict_iterate (p11_dict *dict,
+p11_dict_iterate (p11_dict     *dict,
                   p11_dictiter *iter)
 {
 	iter->dict = dict;
@@ -101,17 +101,17 @@ p11_dict_iterate (p11_dict *dict,
 }
 
 static dictbucket **
-lookup_or_create_bucket (p11_dict *dict,
+lookup_or_create_bucket (p11_dict   *dict,
                          const void *key,
-                         bool create)
+                         bool        create)
 {
 	dictbucket **bucketp;
 	unsigned int hash;
 
-	/* Perform the hashing */
+        /* Perform the hashing */
 	hash = dict->hash_func (key);
 
-	/* scan linked list */
+        /* scan linked list */
 	for (bucketp = &dict->buckets[hash % dict->num_buckets];
 	     *bucketp != NULL; bucketp = &(*bucketp)->next) {
 		if((*bucketp)->hashed == hash && dict->equal_func ((*bucketp)->key, key))
@@ -121,11 +121,11 @@ lookup_or_create_bucket (p11_dict *dict,
 	if ((*bucketp) != NULL || !create)
 		return bucketp;
 
-	/* add a new entry for non-NULL val */
+        /* add a new entry for non-NULL val */
 	(*bucketp) = calloc (1, sizeof (dictbucket));
 
 	if (*bucketp != NULL) {
-		(*bucketp)->key = (void*)key;
+		(*bucketp)->key = (void *)key;
 		(*bucketp)->hashed = hash;
 		dict->num_items++;
 	}
@@ -134,22 +134,22 @@ lookup_or_create_bucket (p11_dict *dict,
 }
 
 void *
-p11_dict_get (p11_dict *dict,
+p11_dict_get (p11_dict   *dict,
               const void *key)
 {
 	dictbucket **bucketp;
 
 	bucketp = lookup_or_create_bucket (dict, key, false);
 	if (bucketp && *bucketp)
-		return (void*)((*bucketp)->value);
+		return (void *)((*bucketp)->value);
 	else
 		return NULL;
 }
 
 bool
 p11_dict_set (p11_dict *dict,
-              void *key,
-              void *val)
+              void     *key,
+              void     *val)
 {
 	dictbucket **bucketp;
 	p11_dictiter iter;
@@ -159,25 +159,24 @@ p11_dict_set (p11_dict *dict,
 
 	bucketp = lookup_or_create_bucket (dict, key, true);
 	if(bucketp && *bucketp) {
-
-		/* Destroy the previous key */
+                /* Destroy the previous key */
 		if ((*bucketp)->key && (*bucketp)->key != key && dict->key_destroy_func)
 			dict->key_destroy_func ((*bucketp)->key);
 
-		/* Destroy the previous value */
+                /* Destroy the previous value */
 		if ((*bucketp)->value && (*bucketp)->value != val && dict->value_destroy_func)
 			dict->value_destroy_func ((*bucketp)->value);
 
-		/* replace entry */
+                /* replace entry */
 		(*bucketp)->key = key;
 		(*bucketp)->value = val;
 
-		/* check that the collision rate isn't too high */
+                /* check that the collision rate isn't too high */
 		if (dict->num_items > dict->num_buckets) {
 			num_buckets = dict->num_buckets * 2 + 1;
 			new_buckets = (dictbucket **)calloc (num_buckets, sizeof (dictbucket *));
 
-			/* Ignore failures, maybe we can expand later */
+                        /* Ignore failures, maybe we can expand later */
 			if(new_buckets) {
 				p11_dict_iterate (dict, &iter);
 				while ((bucket = next_entry (&iter)) != NULL) {
@@ -199,10 +198,10 @@ p11_dict_set (p11_dict *dict,
 }
 
 bool
-p11_dict_steal (p11_dict *dict,
-                const void *key,
-                void **stolen_key,
-                void **stolen_value)
+p11_dict_steal (p11_dict    *dict,
+                const void  *key,
+                void       **stolen_key,
+                void       **stolen_value)
 {
 	dictbucket **bucketp;
 
@@ -220,11 +219,10 @@ p11_dict_steal (p11_dict *dict,
 	}
 
 	return false;
-
 }
 
 bool
-p11_dict_remove (p11_dict *dict,
+p11_dict_remove (p11_dict   *dict,
                  const void *key)
 {
 	void *old_key;
@@ -246,7 +244,7 @@ p11_dict_clear (p11_dict *dict)
 	dictbucket *bucket, *next;
 	unsigned int i;
 
-	/* Free all entries in the array */
+        /* Free all entries in the array */
 	for (i = 0; i < dict->num_buckets; ++i) {
 		bucket = dict->buckets[i];
 		while (bucket != NULL) {
@@ -267,8 +265,8 @@ p11_dict_clear (p11_dict *dict)
 p11_dict *
 p11_dict_new (p11_dict_hasher hash_func,
               p11_dict_equals equal_func,
-              p11_destroyer key_destroy_func,
-              p11_destroyer value_destroy_func)
+              p11_destroyer   key_destroy_func,
+              p11_destroyer   value_destroy_func)
 {
 	p11_dict *dict;
 
@@ -347,7 +345,7 @@ unsigned int
 p11_dict_ulongptr_hash (const void *to_ulong)
 {
 	assert (to_ulong);
-	return (unsigned int)*((unsigned long*)to_ulong);
+	return (unsigned int)*((unsigned long *)to_ulong);
 }
 
 bool
@@ -356,23 +354,23 @@ p11_dict_ulongptr_equal (const void *ulong_one,
 {
 	assert (ulong_one);
 	assert (ulong_two);
-	return *((unsigned long*)ulong_one) == *((unsigned long*)ulong_two);
+	return *((unsigned long *)ulong_one) == *((unsigned long *)ulong_two);
 }
 
 unsigned int
 p11_dict_intptr_hash (const void *to_int)
 {
 	assert (to_int);
-	return (unsigned int)*((int*)to_int);
+	return (unsigned int)*((int *)to_int);
 }
 
 bool
 p11_dict_intptr_equal (const void *int_one,
-                        const void *int_two)
+                       const void *int_two)
 {
 	assert (int_one);
 	assert (int_two);
-	return *((int*)int_one) == *((int*)int_two);
+	return *((int *)int_one) == *((int *)int_two);
 }
 
 unsigned int

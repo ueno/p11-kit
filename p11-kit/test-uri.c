@@ -51,9 +51,9 @@ is_module_empty (P11KitUri *uri)
 {
 	CK_INFO_PTR info = p11_kit_uri_get_module_info (uri);
 	return (info->libraryDescription[0] == 0 &&
-	        info->manufacturerID[0] == 0 &&
-	        info->libraryVersion.major == (CK_BYTE)-1 &&
-	        info->libraryVersion.minor == (CK_BYTE)-1);
+		info->manufacturerID[0] == 0 &&
+		info->libraryVersion.major == (CK_BYTE)-1 &&
+		info->libraryVersion.minor == (CK_BYTE)-1);
 }
 
 static int
@@ -61,7 +61,7 @@ is_slot_empty (P11KitUri *uri)
 {
 	CK_SLOT_INFO_PTR slot = p11_kit_uri_get_slot_info (uri);
 	return (slot->slotDescription[0] == 0 &&
-	        slot->manufacturerID[0] == 0);
+		slot->manufacturerID[0] == 0);
 }
 
 static int
@@ -69,17 +69,17 @@ is_token_empty (P11KitUri *uri)
 {
 	CK_TOKEN_INFO_PTR token = p11_kit_uri_get_token_info (uri);
 	return (token->serialNumber[0] == 0 &&
-	        token->manufacturerID[0] == 0 &&
-	        token->label[0] == 0 &&
-	        token->model[0] == 0);
+		token->manufacturerID[0] == 0 &&
+		token->label[0] == 0 &&
+		token->model[0] == 0);
 }
 
 static int
 are_attributes_empty (P11KitUri *uri)
 {
 	return (p11_kit_uri_get_attribute (uri, CKA_LABEL) == NULL &&
-	        p11_kit_uri_get_attribute (uri, CKA_ID) == NULL &&
-	        p11_kit_uri_get_attribute (uri, CKA_CLASS) == NULL);
+		p11_kit_uri_get_attribute (uri, CKA_ID) == NULL &&
+		p11_kit_uri_get_attribute (uri, CKA_CLASS) == NULL);
 }
 
 static void
@@ -232,7 +232,7 @@ test_uri_parse_with_empty_label (void)
 
 	p11_kit_uri_free (uri);
 
-	/* really empty */
+        /* really empty */
 
 	uri = p11_kit_uri_new ();
 	assert_ptr_not_null (uri);
@@ -264,7 +264,7 @@ test_uri_parse_with_empty_id (void)
 
 	p11_kit_uri_free (uri);
 
-	/* really empty */
+        /* really empty */
 
 	uri = p11_kit_uri_new ();
 	assert_ptr_not_null (uri);
@@ -291,7 +291,7 @@ test_uri_parse_with_id (void)
 	ret = p11_kit_uri_parse ("pkcs11:id=%54%45%53%54%00", P11_KIT_URI_FOR_OBJECT, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
-	/* Note that there's a NULL in the attribute (end) */
+        /* Note that there's a NULL in the attribute (end) */
 	attr = p11_kit_uri_get_attribute (uri, CKA_ID);
 	assert_ptr_not_null (attr);
 	assert (attr->ulValueLen == 5);
@@ -332,7 +332,9 @@ test_uri_parse_with_bad_hex_encoding (void)
 }
 
 static bool
-is_space_string (CK_UTF8CHAR_PTR string, CK_ULONG size, const char *check)
+is_space_string (CK_UTF8CHAR_PTR  string,
+                 CK_ULONG         size,
+                 const char      *check)
 {
 	size_t i, len = strlen (check);
 	if (len > size)
@@ -356,7 +358,7 @@ test_uri_parse_with_token (void)
 	assert_ptr_not_null (uri);
 
 	ret = p11_kit_uri_parse ("pkcs11:token=Token%20Label;serial=3333;model=Deluxe;manufacturer=Me",
-	                         P11_KIT_URI_FOR_TOKEN, uri);
+				 P11_KIT_URI_FOR_TOKEN, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
 	token = p11_kit_uri_get_token_info (uri);
@@ -409,7 +411,7 @@ test_uri_parse_with_spaces (void)
 	assert_ptr_not_null (uri);
 
 	ret = p11_kit_uri_parse ("pkc\ns11: lib rary-desc\rrip  \n  tion =The%20Library;\n\n\nlibrary-manufacturer=\rMe",
-	                         P11_KIT_URI_FOR_MODULE, uri);
+				 P11_KIT_URI_FOR_MODULE, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
 	info = p11_kit_uri_get_module_info (uri);
@@ -432,7 +434,7 @@ test_uri_parse_with_library (void)
 	assert_ptr_not_null (uri);
 
 	ret = p11_kit_uri_parse ("pkcs11:library-description=The%20Library;library-manufacturer=Me",
-	                         P11_KIT_URI_FOR_MODULE, uri);
+				 P11_KIT_URI_FOR_MODULE, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
 	info = p11_kit_uri_get_module_info (uri);
@@ -469,7 +471,7 @@ test_uri_parse_with_slot (void)
 	assert_ptr_not_null (uri);
 
 	ret = p11_kit_uri_parse ("pkcs11:slot-description=Slot%20Description;slot-manufacturer=Me",
-	                         P11_KIT_URI_FOR_SLOT, uri);
+				 P11_KIT_URI_FOR_SLOT, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
 	slot = p11_kit_uri_get_slot_info (uri);
@@ -498,7 +500,9 @@ test_uri_build_empty (void)
 }
 
 static void
-set_space_string (CK_BYTE_PTR buffer, CK_ULONG length, const char *string)
+set_space_string (CK_BYTE_PTR  buffer,
+                  CK_ULONG     length,
+                  const char  *string)
 {
 	size_t len = strlen (string);
 	assert (len <= length);
@@ -831,7 +835,7 @@ test_uri_parse_too_long_is_unrecognized (void)
 	assert_ptr_not_null (uri);
 
 	ret = p11_kit_uri_parse ("pkcs11:model=a-value-that-is-too-long-for-the-field-that-it-goes-with",
-	                         P11_KIT_URI_FOR_ANY, uri);
+				 P11_KIT_URI_FOR_ANY, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
 	ret = p11_kit_uri_any_unrecognized (uri);
@@ -1205,12 +1209,12 @@ test_uri_get_set_attribute (void)
 	ret = p11_kit_uri_set_attribute (uri, &attr);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
-	/* We can set other attributes */
+        /* We can set other attributes */
 	attr.type = CKA_COLOR;
 	ret = p11_kit_uri_set_attribute (uri, &attr);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
-	/* And get them too */
+        /* And get them too */
 	ptr = p11_kit_uri_get_attribute (uri, CKA_COLOR);
 	assert_ptr_not_null (ptr);
 
@@ -1562,8 +1566,8 @@ test_uri_vendor_query (void)
 	ret = p11_kit_uri_set_vendor_query (uri, "my-query-three", NULL);
 	assert_num_eq (0, ret);
 
-	/* Check if duplicate vendor query attributes are accepted and
-	 * sorted alphabetically.  */
+        /* Check if duplicate vendor query attributes are accepted and
+         * sorted alphabetically.  */
 	ret = p11_kit_uri_parse ("pkcs11:?bbb=zzz&aaa=xxx&aaa=yyy", P11_KIT_URI_FOR_ANY, uri);
 	assert_num_eq (P11_KIT_URI_OK, ret);
 
@@ -1635,7 +1639,7 @@ test_uri_message (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_uri_parse, "/uri/test_uri_parse");

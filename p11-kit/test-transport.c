@@ -125,11 +125,11 @@ setup_mock_module (CK_SESSION_HANDLE *session)
 
 	if (session) {
 		rv = (module->C_OpenSession) (MOCK_SLOT_ONE_ID, CKF_RW_SESSION | CKF_SERIAL_SESSION,
-		                              NULL, NULL, session);
+					      NULL, NULL, session);
 		assert (rv == CKR_OK);
 	}
 
-	/* Release all the other modules */
+        /* Release all the other modules */
 	for (i = 0; modules[i] != NULL; i++) {
 		if (modules[i] != module)
 			p11_kit_module_release (modules[i]);
@@ -218,15 +218,15 @@ setup_remote_unix (void *unused)
 
 	pid = fork ();
 	switch (pid) {
-	case -1:
-		assert_not_reached ();
-		break;
-	case 0:
-		launch_server ();
-		exit (0);
-		break;
-	default:
-		test.pid = pid;
+		case -1:
+			assert_not_reached ();
+			break;
+		case 0:
+			launch_server ();
+			exit (0);
+			break;
+		default:
+			test.pid = pid;
 	}
 
 	setenv ("P11_KIT_PRIVATEDIR", BUILDDIR "/p11-kit", 1);
@@ -311,7 +311,7 @@ invoke_in_thread (void *arg)
 	assert_num_eq (rv, CKR_OK);
 
 	assert (memcmp (info.manufacturerID, MOCK_INFO.manufacturerID,
-	                sizeof (info.manufacturerID)) == 0);
+			sizeof (info.manufacturerID)) == 0);
 
 	return NULL;
 }
@@ -372,7 +372,7 @@ test_fork_and_reinitialize (void)
 	pid = fork ();
 	assert_num_cmp (pid, >=, 0);
 
-	/* The child */
+        /* The child */
 	if (pid == 0) {
 		rv = (module->C_Initialize) (NULL);
 		assert_num_eq (CKR_OK, rv);
@@ -409,7 +409,7 @@ test_fork_and_reinitialize (void)
 extern bool p11_conf_force_user_config;
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	CK_MECHANISM_TYPE mechanisms[] = {
@@ -426,7 +426,7 @@ main (int argc,
 
 	p11_conf_force_user_config = true;
 
-	/* Override the mechanisms that the RPC mechanism will handle */
+        /* Override the mechanisms that the RPC mechanism will handle */
 	p11_rpc_mechanisms_override_supported = mechanisms;
 
 	p11_fixture (setup_remote, teardown_remote);
@@ -445,5 +445,5 @@ main (int argc,
 	p11_test (test_basic_exec, "/transport/unix/basic");
 #endif
 
-	return  p11_test_run (argc, argv);
+	return p11_test_run (argc, argv);
 }

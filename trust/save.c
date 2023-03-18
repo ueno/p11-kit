@@ -52,7 +52,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -75,17 +75,17 @@ struct _p11_save_dir {
 	int flags;
 };
 
-static char *   make_unique_name    (const char *bare,
-                                     const char *extension,
-                                     int (*check) (void *, char *),
-                                     void *data);
+static char *   make_unique_name (const char *bare,
+				  const char *extension,
+				  int ( *check ) (void *, char *),
+				  void *data);
 static void filo_free (p11_save_file *file);
 static void dir_free (p11_save_dir *dir);
 
 bool
 p11_save_write_and_finish (p11_save_file *file,
-                           const void *data,
-                           ssize_t length)
+                           const void    *data,
+                           ssize_t        length)
 {
 	bool ret;
 
@@ -102,7 +102,7 @@ p11_save_write_and_finish (p11_save_file *file,
 p11_save_file *
 p11_save_open_file (const char *path,
                     const char *extension,
-                    int flags)
+                    int         flags)
 {
 	p11_save_file *file;
 	char *temp;
@@ -147,8 +147,8 @@ p11_save_open_file (const char *path,
 
 bool
 p11_save_write (p11_save_file *file,
-                const void *data,
-                ssize_t length)
+                const void    *data,
+                ssize_t        length)
 {
 	const unsigned char *buf = data;
 	ssize_t written = 0;
@@ -157,7 +157,7 @@ p11_save_write (p11_save_file *file,
 	if (!file)
 		return false;
 
-	/* Automatically calculate length */
+        /* Automatically calculate length */
 	if (length < 0) {
 		if (!data)
 			return true;
@@ -189,7 +189,8 @@ filo_free (p11_save_file *file)
 }
 
 static void
-dir_free (p11_save_dir *dir) {
+dir_free (p11_save_dir *dir)
+{
 	p11_dict_free (dir->cache);
 	free (dir->path);
 	free (dir);
@@ -236,9 +237,9 @@ on_unique_try_rename (void *data,
 #endif /* OS_WIN32 */
 
 bool
-p11_save_finish_file (p11_save_file *file,
-                      char **path_out,
-                      bool commit)
+p11_save_finish_file (p11_save_file  *file,
+                      char          **path_out,
+                      bool            commit)
 {
 	bool ret = true;
 	char *path;
@@ -261,12 +262,12 @@ p11_save_finish_file (p11_save_file *file,
 		ret = false;
 
 #ifdef OS_UNIX
-	/* Set the mode of the file, readable by everyone, but not writable */
+                /* Set the mode of the file, readable by everyone, but not writable */
 	} else if (chmod (file->temp, S_IRUSR | S_IRGRP | S_IROTH) < 0) {
 		p11_message_err (errno, _("couldn't set file permissions: %s"), file->temp);
 		ret = false;
 
-	/* Atomically rename the tempfile over the filename */
+                /* Atomically rename the tempfile over the filename */
 	} else if (file->flags & P11_SAVE_OVERWRITE) {
 		if (rename (file->temp, path) < 0) {
 			p11_message_err (errno, _("couldn't complete writing file: %s"), path);
@@ -275,37 +276,34 @@ p11_save_finish_file (p11_save_file *file,
 			unlink (file->temp);
 		}
 
-	/* Create a unique name if requested unique file name */
+                /* Create a unique name if requested unique file name */
 	} else if (file->flags & P11_SAVE_UNIQUE) {
 		free (path);
 		path = make_unique_name (file->bare, file->extension,
-		                         on_unique_try_link, file);
+					 on_unique_try_link, file);
 		if (!path)
 			ret = false;
 		unlink (file->temp);
 
-	/* When not overwriting, link will fail if filename exists. */
+                /* When not overwriting, link will fail if filename exists. */
 	} else {
 		if (link (file->temp, path) < 0) {
 			p11_message_err (errno, _("couldn't complete writing of file: %s"), path);
 			ret = false;
 		}
 		unlink (file->temp);
-
 #else /* OS_WIN32 */
-
-	/* Windows does not do atomic renames, so delete original file first */
+                /* Windows does not do atomic renames, so delete original file first */
 	} else {
-		/* Create a unique name if requested unique file name */
+                /* Create a unique name if requested unique file name */
 		if (file->flags & P11_SAVE_UNIQUE) {
 			free (path);
 			path = make_unique_name (file->bare, file->extension,
-			                         on_unique_try_rename, file);
+						 on_unique_try_rename, file);
 			if (!path)
 				ret = false;
-
 		} else if ((file->flags & P11_SAVE_OVERWRITE) &&
-			    unlink (path) < 0 && errno != ENOENT) {
+			   unlink (path) < 0 && errno != ENOENT) {
 			p11_message_err (errno, _("couldn't remove original file: %s"), path);
 			ret = false;
 		}
@@ -318,7 +316,6 @@ p11_save_finish_file (p11_save_file *file,
 
 			unlink (file->temp);
 		}
-
 #endif /* OS_WIN32 */
 	}
 
@@ -334,7 +331,7 @@ p11_save_finish_file (p11_save_file *file,
 
 p11_save_dir *
 p11_save_open_directory (const char *path,
-                         int flags)
+                         int         flags)
 {
 #ifdef OS_UNIX
 	struct stat sb;
@@ -345,26 +342,26 @@ p11_save_open_directory (const char *path,
 	return_val_if_fail (path != NULL, NULL);
 
 #ifdef OS_UNIX
-	/* We update the permissions when we finish writing */
+        /* We update the permissions when we finish writing */
 	if (mkdir (path, S_IRWXU) < 0) {
 #else /* OS_WIN32 */
 	if (mkdir (path) < 0) {
 #endif
-		/* Some random error, report it */
+                /* Some random error, report it */
 		if (errno != EEXIST) {
 			p11_message_err (errno, _("couldn't create directory: %s"), path);
 
-		/* The directory exists and we're not overwriting */
+                        /* The directory exists and we're not overwriting */
 		} else if (!(flags & P11_SAVE_OVERWRITE)) {
 			p11_message (_("directory already exists: %s"), path);
 			return NULL;
 		}
 #ifdef OS_UNIX
-		/*
-		 * If the directory exists on unix, we may have restricted
-		 * the directory permissions to read-only. We have to change
-		 * them back to writable in order for things to work.
-		 */
+                /*
+                 * If the directory exists on unix, we may have restricted
+                 * the directory permissions to read-only. We have to change
+                 * them back to writable in order for things to work.
+                 */
 		fd = open (path, O_RDONLY | O_CLOEXEC | O_DIRECTORY);
 		if (fd < 0) {
 			p11_message_err (errno, _("couldn't open directory: %s"), path);
@@ -406,9 +403,9 @@ p11_save_open_directory (const char *path,
 
 static char *
 make_unique_name (const char *bare,
-                  const char *extension,
-                  int (*check) (void *, char *),
-                  void *data)
+		  const char *extension,
+		  int ( *check ) (void *, char *),
+		  void *data)
 {
 	char unique[16];
 	p11_buffer buf;
@@ -421,37 +418,35 @@ make_unique_name (const char *bare,
 	p11_buffer_init_null (&buf, 0);
 
 	for (i = 0; true; i++) {
-
 		p11_buffer_reset (&buf, 64);
 
 		switch (i) {
+                        /*
+                         * For the first iteration, just build the filename as
+                         * provided by the caller.
+                         */
+			case 0:
+				p11_buffer_add (&buf, bare, -1);
+				break;
 
-		/*
-		 * For the first iteration, just build the filename as
-		 * provided by the caller.
-		 */
-		case 0:
-			p11_buffer_add (&buf, bare, -1);
-			break;
+                        /*
+                         * On later iterations we try to add a numeric .N suffix
+                         * before the extension, so the resulting file might look
+                         * like filename.1.ext.
+                         *
+                         * As a special case if the extension is already '.0' then
+                         * just just keep incerementing that.
+                         */
+			case 1:
+				if (extension && strcmp (extension, ".0") == 0)
+					extension = NULL;
+                        /* fall through */
 
-		/*
-		 * On later iterations we try to add a numeric .N suffix
-		 * before the extension, so the resulting file might look
-		 * like filename.1.ext.
-		 *
-		 * As a special case if the extension is already '.0' then
-		 * just just keep incerementing that.
-		 */
-		case 1:
-			if (extension && strcmp (extension, ".0") == 0)
-				extension = NULL;
-			/* fall through */
-
-		default:
-			p11_buffer_add (&buf, bare, -1);
-			snprintf (unique, sizeof (unique), ".%d", i);
-			p11_buffer_add (&buf, unique, -1);
-			break;
+			default:
+				p11_buffer_add (&buf, bare, -1);
+				snprintf (unique, sizeof (unique), ".%d", i);
+				p11_buffer_add (&buf, unique, -1);
+				break;
 		}
 
 		if (extension)
@@ -483,8 +478,8 @@ on_unique_check_dir (void *data,
 
 p11_save_file *
 p11_save_open_file_in (p11_save_dir *dir,
-                       const char *basename,
-                       const char *extension)
+                       const char   *basename,
+                       const char   *extension)
 {
 	p11_save_file *file = NULL;
 	char *name;
@@ -517,9 +512,9 @@ p11_save_open_file_in (p11_save_dir *dir,
 
 bool
 p11_save_symlink_in (p11_save_dir *dir,
-                     const char *linkname,
-                     const char *extension,
-                     const char *destination)
+                     const char   *linkname,
+                     const char   *extension,
+                     const char   *destination)
 {
 	char *name;
 	char *path;
@@ -557,7 +552,7 @@ p11_save_symlink_in (p11_save_dir *dir,
 
 static bool
 cleanup_directory (const char *directory,
-                   p11_dict *cache)
+                   p11_dict   *cache)
 {
 	struct dirent *dp;
 	struct stat st;
@@ -567,7 +562,7 @@ cleanup_directory (const char *directory,
 	DIR *dir;
 	bool ret;
 
-	/* First we load all the modules */
+        /* First we load all the modules */
 	dir = opendir (directory);
 	if (!dir) {
 		p11_message_err (errno, _("couldn't list directory: %s"), directory);
@@ -596,7 +591,7 @@ cleanup_directory (const char *directory,
 
 	ret = true;
 
-	/* Remove all the files still in the cache */
+        /* Remove all the files still in the cache */
 	p11_dict_iterate (remove, &iter);
 	while (p11_dict_next (&iter, (void **)&path, NULL)) {
 		if (unlink (path) < 0 && errno != ENOENT) {
@@ -613,7 +608,7 @@ cleanup_directory (const char *directory,
 
 bool
 p11_save_finish_directory (p11_save_dir *dir,
-                           bool commit)
+                           bool          commit)
 {
 	bool ret = true;
 
@@ -625,9 +620,9 @@ p11_save_finish_directory (p11_save_dir *dir,
 			ret = cleanup_directory (dir->path, dir->cache);
 
 #ifdef OS_UNIX
-		/* Try to set the mode of the directory to readable */
+                /* Try to set the mode of the directory to readable */
 		if (ret && chmod (dir->path, S_IRUSR | S_IXUSR | S_IRGRP |
-		                             S_IXGRP | S_IROTH | S_IXOTH) < 0) {
+				  S_IXGRP | S_IROTH | S_IXOTH) < 0) {
 			p11_message_err (errno, _("couldn't set directory permissions: %s"), dir->path);
 			ret = false;
 		}

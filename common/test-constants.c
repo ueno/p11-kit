@@ -83,7 +83,7 @@ test_constants (void *arg)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_testx (test_constants, (void *)p11_constant_types, "/constants/types");

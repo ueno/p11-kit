@@ -75,7 +75,7 @@ test_progname_set (void)
 extern char p11_my_progname[];
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

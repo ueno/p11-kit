@@ -104,7 +104,7 @@ const p11_constant p11_constant_types[] = {
 	CT (CKA_SUBPRIME, "subprime")
 	CT (CKA_BASE, "base")
 	CT (CKA_PRIME_BITS, "prime-bits")
-	/* CT (CKA_SUBPRIME_BITS) */
+        /* CT (CKA_SUBPRIME_BITS) */
 	CT (CKA_SUB_PRIME_BITS, "subprime-bits")
 	CT (CKA_VALUE_BITS, "value-bits")
 	CT (CKA_VALUE_LEN, "value-len")
@@ -115,7 +115,7 @@ const p11_constant p11_constant_types[] = {
 	CT (CKA_KEY_GEN_MECHANISM, "key-gen-mechanism")
 	CT (CKA_MODIFIABLE, "modifiable")
 	CT (CKA_ECDSA_PARAMS, "ecdsa-params")
-	/* CT (CKA_EC_PARAMS) */
+        /* CT (CKA_EC_PARAMS) */
 	CT (CKA_EC_POINT, "ec-point")
 	CT (CKA_SECONDARY_AUTH, "secondary-auth")
 	CT (CKA_AUTH_PIN_FLAGS, "auth-pin-flags")
@@ -203,7 +203,9 @@ const p11_constant p11_constant_types[] = {
 	CT (CKA_X_PEER, "x-peer")
 	CT (CKA_X_DISTRUSTED, "x-distrusted")
 	CT (CKA_X_CRITICAL, "x-critical")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_classes[] = {
@@ -223,7 +225,9 @@ const p11_constant p11_constant_classes[] = {
 	CT (CKO_NSS_DELSLOT, "nss-delslot")
 	CT (CKO_X_TRUST_ASSERTION, "x-trust-assertion")
 	CT (CKO_X_CERTIFICATE_EXTENSION, "x-certificate-extension")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_trusts[] = {
@@ -233,21 +237,25 @@ const p11_constant p11_constant_trusts[] = {
 	CT (CKT_NSS_TRUST_UNKNOWN, "nss-trust-unknown")
 	CT (CKT_NSS_NOT_TRUSTED, "nss-not-trusted")
 	CT (CKT_NSS_VALID_DELEGATOR, "nss-valid-delegator")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_certs[] = {
 	CT (CKC_X_509, "x-509")
 	CT (CKC_X_509_ATTR_CERT, "x-509-attr-cert")
 	CT (CKC_WTLS, "wtls")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_keys[] = {
 	CT (CKK_RSA, "rsa")
 	CT (CKK_DSA, "dsa")
 	CT (CKK_DH, "dh")
-	/* CT (CKK_ECDSA) */
+        /* CT (CKK_ECDSA) */
 	CT (CKK_EC, "ec")
 	CT (CKK_X9_42_DH, "x9-42-dh")
 	CT (CKK_KEA, "kea")
@@ -271,21 +279,25 @@ const p11_constant p11_constant_keys[] = {
 	CT (CKK_TWOFISH, "twofish")
 	CT (CKK_IBM_PQC_DILITHIUM, "ibm-dilithium")
 	CT (CKK_NSS_PKCS8, "nss-pkcs8")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_asserts[] = {
 	CT (CKT_X_DISTRUSTED_CERTIFICATE, "x-distrusted-certificate")
 	CT (CKT_X_PINNED_CERTIFICATE, "x-pinned-certificate")
 	CT (CKT_X_ANCHORED_CERTIFICATE, "x-anchored-certificate")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_categories[] = {
 	{ 0, "unspecified", { "unspecified" } },
-	{ 1, "token-user",  { "token-user" } },
-	{ 2, "authority",  { "authority" } },
-	{ 3, "other-entry",  { "other-entry" } },
+	{ 1, "token-user", { "token-user" } },
+	{ 2, "authority", { "authority" } },
+	{ 3, "other-entry", { "other-entry" } },
 	{ CKA_INVALID },
 };
 
@@ -293,7 +305,9 @@ const p11_constant p11_constant_users[] = {
 	CT (CKU_SO, NULL)
 	CT (CKU_USER, NULL)
 	CT (CKU_CONTEXT_SPECIFIC, NULL)
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_states[] = {
@@ -302,7 +316,9 @@ const p11_constant p11_constant_states[] = {
 	CT (CKS_RW_PUBLIC_SESSION, NULL)
 	CT (CKS_RW_USER_FUNCTIONS, NULL)
 	CT (CKS_RW_SO_FUNCTIONS, NULL)
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_returns[] = {
@@ -391,7 +407,9 @@ const p11_constant p11_constant_returns[] = {
 	CT (CKR_MUTEX_BAD, NULL)
 	CT (CKR_MUTEX_NOT_LOCKED, NULL)
 	CT (CKR_FUNCTION_REJECTED, NULL)
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 const p11_constant p11_constant_mechanisms[] = {
@@ -493,17 +511,17 @@ const p11_constant p11_constant_mechanisms[] = {
 	CT (CKM_CAST3_MAC_GENERAL, "cast3-mac-general")
 	CT (CKM_CAST3_CBC_PAD, "cast3-cbc-pad")
 	CT (CKM_CAST5_KEY_GEN, "cast5-key-gen")
-	/* CT (CKM_CAST128_KEY_GEN) */
+        /* CT (CKM_CAST128_KEY_GEN) */
 	CT (CKM_CAST5_ECB, "cast5-ecb")
-	/* CT (CKM_CAST128_ECB) */
+        /* CT (CKM_CAST128_ECB) */
 	CT (CKM_CAST5_CBC, "cast5-cbc")
-	/* CT (CKM_CAST128_CBC) */
+        /* CT (CKM_CAST128_CBC) */
 	CT (CKM_CAST5_MAC, "cast5-mac")
-	/* CT (CKM_CAST128_MAC) */
+        /* CT (CKM_CAST128_MAC) */
 	CT (CKM_CAST5_MAC_GENERAL, "cast5-mac-general")
-	/* CT (CKM_CAST128_MAC_GENERAL) */
+        /* CT (CKM_CAST128_MAC_GENERAL) */
 	CT (CKM_CAST5_CBC_PAD, "cast5-cbc-pad")
-	/* CT (CKM_CAST128_CBC_PAD) */
+        /* CT (CKM_CAST128_CBC_PAD) */
 	CT (CKM_RC5_KEY_GEN, "rc5-key-gen")
 	CT (CKM_RC5_ECB, "rc5-ecb")
 	CT (CKM_RC5_CBC, "rc5-cbc")
@@ -530,7 +548,7 @@ const p11_constant p11_constant_mechanisms[] = {
 	CT (CKM_TLS_MASTER_KEY_DERIVE, "tls-master-key-derive")
 	CT (CKM_TLS_KEY_AND_MAC_DERIVE, "tls-key-and-mac-derive")
 	CT (CKM_TLS_MASTER_KEY_DERIVE_DH, "tls-master-key-derive-dh")
-	/* CT (CKM_TLS_PRF) */
+        /* CT (CKM_TLS_PRF) */
 	CT (CKM_SSL3_MD5_MAC, "ssl3-md5-mac")
 	CT (CKM_SSL3_SHA1_MAC, "ssl3-sha1-mac")
 	CT (CKM_MD5_KEY_DERIVATION, "md5-key-derivation")
@@ -544,9 +562,9 @@ const p11_constant p11_constant_mechanisms[] = {
 	CT (CKM_PBE_MD5_CAST_CBC, "pbe-md5-cast-cbc")
 	CT (CKM_PBE_MD5_CAST3_CBC, "pbe-md5-cast3-cbc")
 	CT (CKM_PBE_MD5_CAST5_CBC, "pbe-md5-cast5-cbc")
-	/* CT (CKM_PBE_MD5_CAST128_CBC) */
+        /* CT (CKM_PBE_MD5_CAST128_CBC) */
 	CT (CKM_PBE_SHA1_CAST5_CBC, "pbe-sha1-cast5-cbc")
-	/* CT (CKM_PBE_SHA1_CAST128_CBC) */
+        /* CT (CKM_PBE_SHA1_CAST128_CBC) */
 	CT (CKM_PBE_SHA1_RC4_128, "pbe-sha1-rc4-128")
 	CT (CKM_PBE_SHA1_RC4_40, "pbe-sha1-rc4-40")
 	CT (CKM_PBE_SHA1_DES3_EDE_CBC, "pbe-sha1-des3-ede-cbc")
@@ -586,7 +604,7 @@ const p11_constant p11_constant_mechanisms[] = {
 	CT (CKM_BATON_SHUFFLE, "baton-shuffle")
 	CT (CKM_BATON_WRAP, "baton-wrap")
 	CT (CKM_ECDSA_KEY_PAIR_GEN, "ecdsa-key-pair-gen")
-	/* CT (CKM_EC_KEY_PAIR_GEN) */
+        /* CT (CKM_EC_KEY_PAIR_GEN) */
 	CT (CKM_ECDSA, "ecdsa")
 	CT (CKM_ECDSA_SHA1, "ecdsa-sha1")
 	CT (CKM_ECDH1_DERIVE, "ecdh1-derive")
@@ -633,7 +651,9 @@ const p11_constant p11_constant_mechanisms[] = {
 	CT (CKM_IBM_SHA3_384_HMAC, "ibm-sha3-384-hmac")
 	CT (CKM_IBM_SHA3_512_HMAC, "ibm-sha3-512-hmac")
 	CT (CKM_IBM_ATTRIBUTEBOUND_WRAP, "ibm-attributebound-wrap")
-	{ CKA_INVALID },
+	{
+		CKA_INVALID
+	},
 };
 
 #undef CT
@@ -670,7 +690,7 @@ compar_attr_info (const void *one,
 
 static const p11_constant *
 lookup_info (const p11_constant *table,
-             CK_ATTRIBUTE_TYPE type)
+             CK_ATTRIBUTE_TYPE   type)
 {
 	p11_constant match = { type, NULL, { NULL } };
 	int length = -1;
@@ -687,11 +707,10 @@ lookup_info (const p11_constant *table,
 		return_val_if_reached (NULL);
 
 	return bsearch (&match, table, length, sizeof (p11_constant), compar_attr_info);
-
 }
 const char *
 p11_constant_name (const p11_constant *constants,
-                   CK_ULONG type)
+                   CK_ULONG            type)
 {
 	const p11_constant *constant = lookup_info (constants, type);
 	return constant ? constant->name : NULL;
@@ -699,7 +718,7 @@ p11_constant_name (const p11_constant *constants,
 
 const char *
 p11_constant_nick (const p11_constant *constants,
-                   CK_ULONG type)
+                   CK_ULONG            type)
 {
 	const p11_constant *constant = lookup_info (constants, type);
 	return constant ? constant->nicks[0] : NULL;
@@ -724,7 +743,7 @@ p11_constant_reverse (bool nick)
 			if (nick) {
 				for (k = 0; table[j].nicks[k] != NULL; k++) {
 					if (!p11_dict_set (lookups, (void *)table[j].nicks[k],
-					                   (void *)&table[j].value))
+							   (void *)&table[j].value))
 						return_val_if_reached (NULL);
 				}
 			} else {
@@ -738,8 +757,8 @@ p11_constant_reverse (bool nick)
 }
 
 CK_ULONG
-p11_constant_resolve (p11_dict *reversed,
-                     const char *string)
+p11_constant_resolve (p11_dict   *reversed,
+                      const char *string)
 {
 	CK_ULONG *ptr;
 

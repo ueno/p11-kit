@@ -133,7 +133,7 @@ test_md5 (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_sha1, "/digest/sha1");

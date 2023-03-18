@@ -46,11 +46,11 @@
 #include <string.h>
 
 unsigned char *
-p11_x509_find_extension (asn1_node cert,
-                         const unsigned char *oid,
-                         const unsigned char *der,
-                         size_t der_len,
-                         size_t *ext_len)
+p11_x509_find_extension (asn1_node            cert,
+			 const unsigned char *oid,
+			 const unsigned char *der,
+			 size_t               der_len,
+			 size_t              *ext_len)
 {
 	char field[128];
 	int start;
@@ -68,17 +68,17 @@ p11_x509_find_extension (asn1_node cert,
 
 		ret = asn1_der_decoding_startEnd (cert, der, der_len, field, &start, &end);
 
-		/* No more extensions */
+                /* No more extensions */
 		if (ret == ASN1_ELEMENT_NOT_FOUND)
 			break;
 
 		return_val_if_fail (ret == ASN1_SUCCESS, NULL);
 
-		/* Make sure it's a straightforward oid with certain assumptions */
+                /* Make sure it's a straightforward oid with certain assumptions */
 		if (!p11_oid_simple (der + start, (end - start) + 1))
 			continue;
 
-		/* The one we're lookin for? */
+                /* The one we're lookin for? */
 		if (!p11_oid_equal (der + start, oid))
 			continue;
 
@@ -92,10 +92,10 @@ p11_x509_find_extension (asn1_node cert,
 }
 
 bool
-p11_x509_hash_subject_public_key (asn1_node cert,
-                                  const unsigned char *der,
-                                  size_t der_len,
-                                  unsigned char *keyid)
+p11_x509_hash_subject_public_key (asn1_node            cert,
+				  const unsigned char *der,
+				  size_t               der_len,
+				  unsigned char       *keyid)
 {
 	int start, end;
 	size_t len;
@@ -114,10 +114,10 @@ p11_x509_hash_subject_public_key (asn1_node cert,
 }
 
 unsigned char *
-p11_x509_parse_subject_key_identifier  (p11_dict *asn1_defs,
-                                        const unsigned char *ext_der,
-                                        size_t ext_len,
-                                        size_t *keyid_len)
+p11_x509_parse_subject_key_identifier (p11_dict            *asn1_defs,
+				       const unsigned char *ext_der,
+				       size_t               ext_len,
+				       size_t              *keyid_len)
 {
 	unsigned char *keyid;
 	asn1_node ext;
@@ -137,10 +137,10 @@ p11_x509_parse_subject_key_identifier  (p11_dict *asn1_defs,
 }
 
 bool
-p11_x509_parse_basic_constraints (p11_dict *asn1_defs,
-                                  const unsigned char *ext_der,
-                                  size_t ext_len,
-                                  bool *is_ca)
+p11_x509_parse_basic_constraints (p11_dict            *asn1_defs,
+				  const unsigned char *ext_der,
+				  size_t               ext_len,
+				  bool                *is_ca)
 {
 	char buffer[8];
 	asn1_node ext;
@@ -156,10 +156,9 @@ p11_x509_parse_basic_constraints (p11_dict *asn1_defs,
 	len = sizeof (buffer);
 	ret = asn1_read_value (ext, "cA", buffer, &len);
 
-	/* Default value for cA is FALSE */
+        /* Default value for cA is FALSE */
 	if (ret == ASN1_ELEMENT_NOT_FOUND) {
 		*is_ca = false;
-
 	} else {
 		return_val_if_fail (ret == ASN1_SUCCESS, false);
 		*is_ca = (strcmp (buffer, "TRUE") == 0);
@@ -171,10 +170,10 @@ p11_x509_parse_basic_constraints (p11_dict *asn1_defs,
 }
 
 bool
-p11_x509_parse_key_usage (p11_dict *asn1_defs,
-                          const unsigned char *ext_der,
-                          size_t ext_len,
-                          unsigned int *ku)
+p11_x509_parse_key_usage (p11_dict            *asn1_defs,
+			  const unsigned char *ext_der,
+			  size_t               ext_len,
+			  unsigned int        *ku)
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };
 	unsigned char buf[2];
@@ -190,7 +189,7 @@ p11_x509_parse_key_usage (p11_dict *asn1_defs,
 	ret = asn1_read_value (ext, "", buf, &len);
 	return_val_if_fail (ret == ASN1_SUCCESS, false);
 
-	/* A bit string, so combine into one set of flags */
+        /* A bit string, so combine into one set of flags */
 	*ku = buf[0] | (buf[1] << 8);
 
 	asn1_delete_structure (&ext);
@@ -199,9 +198,9 @@ p11_x509_parse_key_usage (p11_dict *asn1_defs,
 }
 
 p11_array *
-p11_x509_parse_extended_key_usage (p11_dict *asn1_defs,
-                                   const unsigned char *ext_der,
-                                   size_t ext_len)
+p11_x509_parse_extended_key_usage (p11_dict            *asn1_defs,
+				   const unsigned char *ext_der,
+				   size_t               ext_len)
 {
 	asn1_node asn;
 	char field[128];
@@ -226,7 +225,7 @@ p11_x509_parse_extended_key_usage (p11_dict *asn1_defs,
 
 		eku[len] = 0;
 
-		/* If it's our reserved OID, then skip */
+                /* If it's our reserved OID, then skip */
 		if (strcmp (eku, P11_OID_RESERVED_PURPOSE_STR) == 0) {
 			free (eku);
 			continue;
@@ -243,9 +242,9 @@ p11_x509_parse_extended_key_usage (p11_dict *asn1_defs,
 
 char *
 p11_x509_parse_directory_string (const unsigned char *input,
-                                 size_t input_len,
-                                 bool *unknown_string,
-                                 size_t *string_len)
+				 size_t               input_len,
+				 bool                *unknown_string,
+				 size_t              *string_len)
 {
 	unsigned long tag;
 	unsigned char cls;
@@ -267,39 +266,38 @@ p11_x509_parse_directory_string (const unsigned char *input,
 	if (unknown_string)
 		*unknown_string = false;
 
-	/* The following strings are the ones we normalize */
+        /* The following strings are the ones we normalize */
 	switch (tag) {
-	case 12: /* UTF8String */
-	case 18: /* NumericString */
-	case 22: /* IA5String */
-	case 20: /* TeletexString */
-	case 19: /* PrintableString */
-		if (!p11_utf8_validate (octets, octet_len))
+		case 12: /* UTF8String */
+		case 18: /* NumericString */
+		case 22: /* IA5String */
+		case 20: /* TeletexString */
+		case 19: /* PrintableString */
+			if (!p11_utf8_validate (octets, octet_len))
+				return NULL;
+			if (string_len)
+				*string_len = octet_len;
+			return strndup (octets, octet_len);
+
+		case 28: /* UniversalString */
+			return p11_utf8_for_ucs4be (octets, octet_len, string_len);
+
+		case 30: /* BMPString */
+			return p11_utf8_for_ucs2be (octets, octet_len, string_len);
+
+                /* Just pass through all the non-string types */
+		default:
+			if (unknown_string)
+				*unknown_string = true;
 			return NULL;
-		if (string_len)
-			*string_len = octet_len;
-		return strndup (octets, octet_len);
-
-	case 28: /* UniversalString */
-		return p11_utf8_for_ucs4be (octets, octet_len, string_len);
-
-	case 30: /* BMPString */
-		return p11_utf8_for_ucs2be (octets, octet_len, string_len);
-
-	/* Just pass through all the non-string types */
-	default:
-		if (unknown_string)
-			*unknown_string = true;
-		return NULL;
 	}
-
 }
 
 char *
-p11_x509_parse_dn_name (p11_dict *asn_defs,
-                        const unsigned char *der,
-                        size_t der_len,
-                        const unsigned char *oid)
+p11_x509_parse_dn_name (p11_dict            *asn_defs,
+			const unsigned char *der,
+			size_t               der_len,
+			const unsigned char *oid)
 {
 	asn1_node asn;
 	char *part;
@@ -314,11 +312,11 @@ p11_x509_parse_dn_name (p11_dict *asn_defs,
 }
 
 char *
-p11_x509_lookup_dn_name (asn1_node asn,
-                         const char *dn_field,
-                         const unsigned char *der,
-                         size_t der_len,
-                         const unsigned char *oid)
+p11_x509_lookup_dn_name (asn1_node            asn,
+			 const char          *dn_field,
+			 const unsigned char *der,
+			 size_t               der_len,
+			 const unsigned char *oid)
 {
 	unsigned char *value;
 	char field[128];
@@ -332,26 +330,26 @@ p11_x509_lookup_dn_name (asn1_node asn,
 	for (i = 1; true; i++) {
 		for (j = 1; true; j++) {
 			snprintf (field, sizeof (field), "%s%srdnSequence.?%d.?%d.type",
-			          dn_field, dn_field ? "." : "", i, j);
+				  dn_field, dn_field ? "." : "", i, j);
 
 			ret = asn1_der_decoding_startEnd (asn, der, der_len, field, &start, &end);
 
-			/* No more dns */
+                        /* No more dns */
 			if (ret == ASN1_ELEMENT_NOT_FOUND)
 				break;
 
 			return_val_if_fail (ret == ASN1_SUCCESS, NULL);
 
-			/* Make sure it's a straightforward oid with certain assumptions */
+                        /* Make sure it's a straightforward oid with certain assumptions */
 			if (!p11_oid_simple (der + start, (end - start) + 1))
 				continue;
 
-			/* The one we're lookin for? */
+                        /* The one we're lookin for? */
 			if (!p11_oid_equal (der + start, oid))
 				continue;
 
 			snprintf (field, sizeof (field), "%s%srdnSequence.?%d.?%d.value",
-			          dn_field, dn_field ? "." : "", i, j);
+				  dn_field, dn_field ? "." : "", i, j);
 
 			value = p11_asn1_read (asn, field, &value_len);
 			return_val_if_fail (value != NULL, NULL);

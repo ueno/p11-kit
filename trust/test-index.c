@@ -394,7 +394,7 @@ test_find (void)
 
 static bool
 handles_are (CK_OBJECT_HANDLE *handles,
-             ...)
+	     ...)
 {
 	CK_OBJECT_HANDLE handle;
 	bool matched = true;
@@ -406,7 +406,7 @@ handles_are (CK_OBJECT_HANDLE *handles,
 	if (!handles)
 		return false;
 
-	/* Count number of handles */
+        /* Count number of handles */
 	for (num = 0; handles[num]; num++);
 
 	va_start (va, handles);
@@ -505,7 +505,7 @@ test_find_all (void)
 	assert_num_eq (0, check[0]);
 	free (check);
 
-	/* A double check of this method */
+        /* A double check of this method */
 	one = 0UL;
 	check = &one;
 	assert (!handles_are (check, 29292929, 0UL));
@@ -627,27 +627,27 @@ test_replace_all (void)
 	assert_num_eq (0, array->num);
 	p11_array_free (array);
 
-	/* eins should have replaced one */
+        /* eins should have replaced one */
 	check = p11_index_find (test.index, eins, -1);
 	assert_num_eq (one, check);
 
-	/* two should still be around */
+        /* two should still be around */
 	check = p11_index_find (test.index, second, -1);
 	assert_num_eq (two, check);
 
-	/* three should have been removed */
+        /* three should have been removed */
 	check = p11_index_find (test.index, third, -1);
 	assert_num_eq (0, check);
 
-	/* five should have been removed */
+        /* five should have been removed */
 	check = p11_index_find (test.index, fifth, -1);
 	assert_num_eq (0, check);
 
-	/* sieben should have been added */
+        /* sieben should have been added */
 	check = p11_index_find (test.index, sieben, -1);
 	assert (check != one && check != two && check != three && check != five);
 
-	/* neun should have been added */
+        /* neun should have been added */
 	check = p11_index_find (test.index, neun, -1);
 	assert (check != one && check != two && check != three && check != five);
 
@@ -655,10 +655,10 @@ test_replace_all (void)
 }
 
 static CK_RV
-on_index_build_fail (void *data,
-                     p11_index *index,
-                     CK_ATTRIBUTE *attrs,
-                     CK_ATTRIBUTE *merge,
+on_index_build_fail (void          *data,
+                     p11_index     *index,
+                     CK_ATTRIBUTE  *attrs,
+                     CK_ATTRIBUTE  *merge,
                      CK_ATTRIBUTE **populate)
 {
 	CK_ATTRIBUTE *match = data;
@@ -704,10 +704,10 @@ test_replace_all_build_fails (void)
 
 
 static CK_RV
-on_build_populate (void *data,
-                   p11_index *index,
-                   CK_ATTRIBUTE *attrs,
-                   CK_ATTRIBUTE *merge,
+on_build_populate (void          *data,
+                   p11_index     *index,
+                   CK_ATTRIBUTE  *attrs,
+                   CK_ATTRIBUTE  *merge,
                    CK_ATTRIBUTE **populate)
 {
 	CK_ATTRIBUTE more[] = {
@@ -730,7 +730,6 @@ test_build_populate (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	CK_ATTRIBUTE after[] = {
@@ -768,10 +767,10 @@ test_build_populate (void)
 }
 
 static CK_RV
-on_build_fail (void *data,
-               p11_index *index,
-               CK_ATTRIBUTE *attrs,
-               CK_ATTRIBUTE *merge,
+on_build_fail (void          *data,
+               p11_index     *index,
+               CK_ATTRIBUTE  *attrs,
+               CK_ATTRIBUTE  *merge,
                CK_ATTRIBUTE **populate)
 {
 	CK_ATTRIBUTE check[] = {
@@ -831,16 +830,15 @@ static bool on_change_removing = false;
 static bool on_change_batching = false;
 
 static void
-on_change_check (void *data,
-                 p11_index *index,
-                 CK_OBJECT_HANDLE handle,
-                 CK_ATTRIBUTE *attrs)
+on_change_check (void             *data,
+                 p11_index        *index,
+                 CK_OBJECT_HANDLE  handle,
+                 CK_ATTRIBUTE     *attrs)
 {
 	CK_ATTRIBUTE check[] = {
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	assert_str_eq (data, "change-check");
@@ -865,7 +863,6 @@ test_change_called (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	CK_OBJECT_HANDLE handle;
@@ -910,7 +907,6 @@ test_change_batch (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	CK_OBJECT_HANDLE handle;
@@ -942,7 +938,7 @@ test_change_batch (void)
 
 	assert_num_eq (0, on_change_called);
 
-	/* Nested batch is a noop */
+        /* Nested batch is a noop */
 	p11_index_load (index);
 
 	rv = p11_index_remove (index, handle);
@@ -950,21 +946,21 @@ test_change_batch (void)
 
 	assert_num_eq (0, on_change_called);
 
-	/*
-	 * Batch finishes when first finish call is called,
-	 * even when batches are nested
-	 */
+        /*
+         * Batch finishes when first finish call is called,
+         * even when batches are nested
+         */
 	p11_index_finish (index);
 
 	assert (!p11_index_loading (index));
 
-	/*
-	 * Only three calls, because later operations on the
-	 * same handle override the earlier one.
-	 */
+        /*
+         * Only three calls, because later operations on the
+         * same handle override the earlier one.
+         */
 	assert_num_eq (3, on_change_called);
 
-	/* This is a noop */
+        /* This is a noop */
 	p11_index_finish (index);
 
 	assert (!p11_index_loading (index));
@@ -973,10 +969,10 @@ test_change_batch (void)
 }
 
 static void
-on_change_nested (void *data,
-                  p11_index *index,
-                  CK_OBJECT_HANDLE handle,
-                  CK_ATTRIBUTE *attrs)
+on_change_nested (void             *data,
+                  p11_index        *index,
+                  CK_OBJECT_HANDLE  handle,
+                  CK_ATTRIBUTE     *attrs)
 {
 	CK_RV rv;
 
@@ -984,13 +980,12 @@ on_change_nested (void *data,
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	assert_str_eq (data, "change-nested");
 	on_change_called++;
 
-	/* A nested call */
+        /* A nested call */
 	rv = p11_index_add (index, second, 2, NULL);
 	assert (rv == CKR_OK);
 }
@@ -1002,7 +997,6 @@ test_change_nested (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	p11_index *index;
@@ -1028,8 +1022,8 @@ test_change_nested (void)
 }
 
 static CK_RV
-on_remove_callback (void *data,
-                    p11_index *index,
+on_remove_callback (void         *data,
+                    p11_index    *index,
                     CK_ATTRIBUTE *attrs)
 {
 	int *removed = data;
@@ -1046,7 +1040,6 @@ test_remove_callback (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	CK_OBJECT_HANDLE handle;
@@ -1072,8 +1065,8 @@ test_remove_callback (void)
 }
 
 static CK_RV
-on_remove_fail (void *data,
-                p11_index *index,
+on_remove_fail (void         *data,
+                p11_index    *index,
                 CK_ATTRIBUTE *attrs)
 {
 	assert_str_eq (data, "remove-fail");
@@ -1087,7 +1080,6 @@ test_remove_fail (void)
 		{ CKA_LABEL, "yay", 3 },
 		{ CKA_VALUE, "eight", 5 },
 		{ CKA_INVALID }
-
 	};
 
 	CK_OBJECT_HANDLE handle;
@@ -1111,7 +1103,7 @@ test_remove_fail (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_message_quiet ();

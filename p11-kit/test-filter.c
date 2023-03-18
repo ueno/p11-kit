@@ -298,7 +298,7 @@ test_write_protected (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

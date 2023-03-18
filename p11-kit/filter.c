@@ -57,7 +57,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -83,7 +83,8 @@ extern int p11_match_uri_token_info (CK_TOKEN_INFO_PTR one,
 				     CK_TOKEN_INFO_PTR two);
 
 static const CK_TOKEN_INFO *
-filter_match_token (FilterData *filter, CK_TOKEN_INFO *token)
+filter_match_token (FilterData    *filter,
+                    CK_TOKEN_INFO *token)
 {
 	unsigned int i;
 
@@ -100,7 +101,9 @@ filter_match_token (FilterData *filter, CK_TOKEN_INFO *token)
 }
 
 static bool
-filter_add_slot (FilterData *filter, CK_SLOT_ID slot, const CK_TOKEN_INFO *token)
+filter_add_slot (FilterData          *filter,
+                 CK_SLOT_ID           slot,
+                 const CK_TOKEN_INFO *token)
 {
 	if (filter->n_slots >= filter->max_slots) {
 		FilterSlot *slots;
@@ -163,7 +166,7 @@ filter_ensure (FilterData *filter)
 	}
 
 	rv = CKR_OK;
- out:
+out:
 	p11_kit_iter_free (iter);
 	if (lower)
 		p11_virtual_unwrap (lower);
@@ -186,7 +189,7 @@ filter_reinit (FilterData *filter)
 
 static CK_RV
 filter_C_Initialize (CK_X_FUNCTION_LIST *self,
-		     CK_VOID_PTR pInitArgs)
+                     CK_VOID_PTR         pInitArgs)
 {
 	FilterData *filter = (FilterData *)self;
 	CK_RV rv;
@@ -199,7 +202,7 @@ filter_C_Initialize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_Finalize (CK_X_FUNCTION_LIST *self,
-		   CK_VOID_PTR pReserved)
+                   CK_VOID_PTR         pReserved)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -214,9 +217,9 @@ filter_C_Finalize (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_GetSlotList (CK_X_FUNCTION_LIST *self,
-		      CK_BBOOL tokenPresent,
-		      CK_SLOT_ID_PTR pSlotList,
-		      CK_ULONG_PTR pulCount)
+                      CK_BBOOL            tokenPresent,
+                      CK_SLOT_ID_PTR      pSlotList,
+                      CK_ULONG_PTR        pulCount)
 {
 	FilterData *filter = (FilterData *)self;
 	CK_ULONG count;
@@ -241,8 +244,8 @@ filter_C_GetSlotList (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
-		      CK_SLOT_ID slotID,
-		      CK_SLOT_INFO_PTR pInfo)
+                      CK_SLOT_ID          slotID,
+                      CK_SLOT_INFO_PTR    pInfo)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -254,8 +257,8 @@ filter_C_GetSlotInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
-		       CK_SLOT_ID slotID,
-		       CK_TOKEN_INFO_PTR pInfo)
+                       CK_SLOT_ID          slotID,
+                       CK_TOKEN_INFO_PTR   pInfo)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -266,10 +269,10 @@ filter_C_GetTokenInfo (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-filter_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
-			   CK_SLOT_ID slotID,
-			   CK_MECHANISM_TYPE_PTR pMechanismList,
-			   CK_ULONG_PTR pulCount)
+filter_C_GetMechanismList (CK_X_FUNCTION_LIST    *self,
+                           CK_SLOT_ID             slotID,
+                           CK_MECHANISM_TYPE_PTR  pMechanismList,
+                           CK_ULONG_PTR           pulCount)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -283,10 +286,10 @@ filter_C_GetMechanismList (CK_X_FUNCTION_LIST *self,
 }
 
 static CK_RV
-filter_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
-			   CK_SLOT_ID slotID,
-			   CK_MECHANISM_TYPE type,
-			   CK_MECHANISM_INFO_PTR pInfo)
+filter_C_GetMechanismInfo (CK_X_FUNCTION_LIST    *self,
+                           CK_SLOT_ID             slotID,
+                           CK_MECHANISM_TYPE      type,
+                           CK_MECHANISM_INFO_PTR  pInfo)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -301,10 +304,10 @@ filter_C_GetMechanismInfo (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_InitToken (CK_X_FUNCTION_LIST *self,
-		    CK_SLOT_ID slotID,
-		    CK_UTF8CHAR_PTR pPin,
-		    CK_ULONG ulPinLen,
-		    CK_UTF8CHAR_PTR pLabel)
+                    CK_SLOT_ID          slotID,
+                    CK_UTF8CHAR_PTR     pPin,
+                    CK_ULONG            ulPinLen,
+                    CK_UTF8CHAR_PTR     pLabel)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -320,20 +323,20 @@ filter_C_InitToken (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_WaitForSlotEvent (CK_X_FUNCTION_LIST *self,
-			   CK_FLAGS flags,
-			   CK_SLOT_ID_PTR pSlot,
-			   CK_VOID_PTR pReserved)
+                           CK_FLAGS            flags,
+                           CK_SLOT_ID_PTR      pSlot,
+                           CK_VOID_PTR         pReserved)
 {
 	return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
 static CK_RV
-filter_C_OpenSession (CK_X_FUNCTION_LIST *self,
-		      CK_SLOT_ID slotID,
-		      CK_FLAGS flags,
-		      CK_VOID_PTR pApplication,
-		      CK_NOTIFY Notify,
-		      CK_SESSION_HANDLE_PTR phSession)
+filter_C_OpenSession (CK_X_FUNCTION_LIST    *self,
+                      CK_SLOT_ID             slotID,
+                      CK_FLAGS               flags,
+                      CK_VOID_PTR            pApplication,
+                      CK_NOTIFY              Notify,
+                      CK_SESSION_HANDLE_PTR  phSession)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -352,7 +355,7 @@ filter_C_OpenSession (CK_X_FUNCTION_LIST *self,
 
 static CK_RV
 filter_C_CloseAllSessions (CK_X_FUNCTION_LIST *self,
-			   CK_SLOT_ID slotID)
+                           CK_SLOT_ID          slotID)
 {
 	FilterData *filter = (FilterData *)self;
 
@@ -375,8 +378,8 @@ p11_filter_release (void *data)
 }
 
 p11_virtual *
-p11_filter_subclass (p11_virtual *lower,
-		     p11_destroyer destroyer)
+p11_filter_subclass (p11_virtual   *lower,
+                     p11_destroyer  destroyer)
 {
 	FilterData *filter;
 	CK_X_FUNCTION_LIST functions;
@@ -404,8 +407,8 @@ p11_filter_subclass (p11_virtual *lower,
 }
 
 void
-p11_filter_allow_token (p11_virtual *virt,
-			CK_TOKEN_INFO *token)
+p11_filter_allow_token (p11_virtual   *virt,
+                        CK_TOKEN_INFO *token)
 {
 	FilterData *filter = (FilterData *)virt;
 	CK_TOKEN_INFO *token_copy;
@@ -424,8 +427,8 @@ p11_filter_allow_token (p11_virtual *virt,
 }
 
 void
-p11_filter_deny_token (p11_virtual *virt,
-		       CK_TOKEN_INFO *token)
+p11_filter_deny_token (p11_virtual   *virt,
+                       CK_TOKEN_INFO *token)
 {
 	FilterData *filter = (FilterData *)virt;
 	CK_TOKEN_INFO *token_copy;

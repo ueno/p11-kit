@@ -137,7 +137,7 @@ test_token_load (void *path)
 	count = p11_token_load (test.token);
 	assert_num_eq (8, count);
 
-	/* A certificate and trust object for each parsed object */
+        /* A certificate and trust object for each parsed object */
 	index = p11_token_index (test.token);
 	assert (((count - 1) * 2) + 1 <= p11_index_size (index));
 }
@@ -145,11 +145,11 @@ test_token_load (void *path)
 static void
 test_token_flags (void *path)
 {
-	/*
-	 * blocklist comes from the input/distrust.pem file. It is not in the blocklist
-	 * directory, but is an OpenSSL trusted certificate file, and is marked
-	 * in the blocklist style for OpenSSL.
-	 */
+        /*
+         * blocklist comes from the input/distrust.pem file. It is not in the blocklist
+         * directory, but is an OpenSSL trusted certificate file, and is marked
+         * in the blocklist style for OpenSSL.
+         */
 
 	CK_ATTRIBUTE blocklist[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -160,11 +160,11 @@ test_token_flags (void *path)
 		{ CKA_INVALID },
 	};
 
-	/*
-	 * blocklist2 comes from the input/blocklist/self-server.der file. It is
-	 * explicitly put on the blocklist, even though it contains no trust
-	 * policy information.
-	 */
+        /*
+         * blocklist2 comes from the input/blocklist/self-server.der file. It is
+         * explicitly put on the blocklist, even though it contains no trust
+         * policy information.
+         */
 
 	const unsigned char self_server_subject[] = {
 		0x30, 0x4b, 0x31, 0x13, 0x30, 0x11, 0x06, 0x0a, 0x09, 0x92, 0x26, 0x89, 0x93, 0xf2, 0x2c, 0x64,
@@ -182,11 +182,11 @@ test_token_flags (void *path)
 		{ CKA_INVALID },
 	};
 
-	/*
-	 * anchor comes from the input/anchors/cacert3.der file. It is
-	 * explicitly marked as an anchor, even though it contains no trust
-	 * policy information.
-	 */
+        /*
+         * anchor comes from the input/anchors/cacert3.der file. It is
+         * explicitly marked as an anchor, even though it contains no trust
+         * policy information.
+         */
 
 	CK_ATTRIBUTE anchor[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -207,11 +207,11 @@ test_token_flags (void *path)
 		0x40, 0x63, 0x61, 0x63, 0x65, 0x72, 0x74, 0x2e, 0x6f, 0x72, 0x67,
 	};
 
-	/*
-	 * notrust comes from the input/cacert-ca.der file. It contains no
-	 * trust information, and is not explicitly marked as an anchor, so
-	 * it's neither trusted or distrusted.
-	 */
+        /*
+         * notrust comes from the input/cacert-ca.der file. It contains no
+         * trust information, and is not explicitly marked as an anchor, so
+         * it's neither trusted or distrusted.
+         */
 
 	CK_ATTRIBUTE notrust[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -236,7 +236,7 @@ test_token_flags (void *path)
 	if (p11_token_load (test.token) < 0)
 		assert_not_reached ();
 
-	/* The other objects */
+        /* The other objects */
 	for (i = 0; expected[i]; i++) {
 		handle = p11_index_find (p11_token_index (test.token), expected[i], 2);
 		assert (handle != 0);
@@ -300,7 +300,7 @@ test_not_writable (void)
 static void
 test_writable_exists (void)
 {
-	/* A writable directory since we created it */
+        /* A writable directory since we created it */
 	assert (p11_token_is_writable (test.token));
 }
 
@@ -319,7 +319,7 @@ test_writable_no_exist (void)
 	token = p11_token_new (333, path, "Label", P11_TOKEN_FLAG_NONE);
 	free (path);
 
-	/* A writable directory since parent is writable */
+        /* A writable directory since parent is writable */
 	assert (p11_token_is_writable (token));
 
 	p11_token_free (token);
@@ -344,14 +344,14 @@ test_load_already (void)
 	int ret;
 
 	p11_test_file_write (test.directory, "test.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
 	handle = p11_index_find (test.index, cert, -1);
 	assert (handle != 0);
 
-	/* Have to wait to make sure changes are detected */
+        /* Have to wait to make sure changes are detected */
 	p11_sleep_ms (1100);
 
 	ret = p11_token_load (test.token);
@@ -372,7 +372,7 @@ test_load_unreadable (void)
 	int ret;
 
 	p11_test_file_write (test.directory, "test.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
@@ -380,7 +380,7 @@ test_load_unreadable (void)
 
 	p11_test_file_write (test.directory, "test.cer", "", 0);
 
-	/* Have to wait to make sure changes are detected */
+        /* Have to wait to make sure changes are detected */
 	p11_sleep_ms (1100);
 
 	ret = p11_token_load (test.token);
@@ -401,7 +401,7 @@ test_load_gone (void)
 	int ret;
 
 	p11_test_file_write (test.directory, "test.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
@@ -409,7 +409,7 @@ test_load_gone (void)
 
 	p11_test_file_delete (test.directory, "test.cer");
 
-	/* Have to wait to make sure changes are detected */
+        /* Have to wait to make sure changes are detected */
 	p11_sleep_ms (1100);
 
 	ret = p11_token_load (test.token);
@@ -433,11 +433,11 @@ test_load_found (void)
 	assert_num_eq (ret, 0);
 	assert (p11_index_find (test.index, cert, -1) == 0);
 
-	/* Have to wait to make sure changes are detected */
+        /* Have to wait to make sure changes are detected */
 	p11_sleep_ms (1100);
 
 	p11_test_file_write (test.directory, "test.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
@@ -451,7 +451,7 @@ test_load_contrived (void)
 	p11_index *index;
 
 	p11_test_file_write (test.directory, "contrived.der", test_contrived_der,
-	                     sizeof (test_contrived_der));
+			     sizeof (test_contrived_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
@@ -481,22 +481,22 @@ test_reload_changed (void)
 	CK_OBJECT_HANDLE handle;
 	int ret;
 
-	/* Just one file */
+        /* Just one file */
 	p11_test_file_write (test.directory, "test.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 1);
 	handle = p11_index_find (test.index, cacert3, -1);
 	assert (handle != 0);
 
-	/* Replace the file with verisign */
+        /* Replace the file with verisign */
 	p11_test_file_write (test.directory, "test.cer", verisign_v1_ca,
-	                     sizeof (verisign_v1_ca));
+			     sizeof (verisign_v1_ca));
 
-	/* Add another file with cacert3, but not reloaded */
+        /* Add another file with cacert3, but not reloaded */
 	p11_test_file_write (test.directory, "another.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 
 	attrs = p11_index_lookup (test.index, handle);
 	assert_ptr_not_null (attrs);
@@ -527,11 +527,11 @@ test_reload_gone (void)
 	CK_OBJECT_HANDLE handle;
 	int ret;
 
-	/* Just one file */
+        /* Just one file */
 	p11_test_file_write (test.directory, "cacert3.cer", test_cacert3_ca_der,
-	                     sizeof (test_cacert3_ca_der));
+			     sizeof (test_cacert3_ca_der));
 	p11_test_file_write (test.directory, "verisign.cer", verisign_v1_ca,
-	                     sizeof (verisign_v1_ca));
+			     sizeof (verisign_v1_ca));
 
 	ret = p11_token_load (test.token);
 	assert_num_eq (ret, 2);
@@ -594,7 +594,7 @@ test_write_new (void)
 	rv = p11_index_add (test.index, original, 4, &handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* The expected file name */
+        /* The expected file name */
 	path = p11_path_build (test.directory, "Yay_.p11-kit", NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
 	assert_num_eq (ret, P11_PARSE_SUCCESS);
@@ -634,7 +634,7 @@ test_write_no_label (void)
 	rv = p11_index_add (test.index, original, 4, &handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* The expected file name */
+        /* The expected file name */
 	path = p11_path_build (test.directory, "data.p11-kit", NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
 	assert_num_eq (ret, P11_PARSE_SUCCESS);
@@ -697,7 +697,7 @@ test_modify_multiple (void)
 
 	p11_test_file_write (test.directory, "Test.p11-kit", test_data, strlen (test_data));
 
-	/* Reload now that we have this new file */
+        /* Reload now that we have this new file */
 	p11_token_load (test.token);
 
 	handle = p11_index_find (test.index, &match, 1);
@@ -705,7 +705,7 @@ test_modify_multiple (void)
 	rv = p11_index_update (test.index, handle, p11_attrs_dup (second));
 	assert_num_eq (rv, CKR_OK);
 
-	/* Now read in the file and make sure it has all the objects */
+        /* Now read in the file and make sure it has all the objects */
 	path = p11_path_build (test.directory, "Test.p11-kit", NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
 	assert_num_eq (ret, P11_PARSE_SUCCESS);
@@ -714,7 +714,7 @@ test_modify_multiple (void)
 	parsed = p11_parser_parsed (test.parser);
 	assert_num_eq (parsed->num, 3);
 
-	/* The modified one will be first */
+        /* The modified one will be first */
 	test_check_attrs (second, parsed->elem[0]);
 	test_check_attrs (first, parsed->elem[1]);
 	test_check_attrs (third, parsed->elem[2]);
@@ -738,7 +738,7 @@ test_remove_one (void)
 	p11_test_file_write (test.directory, "Test.p11-kit", test_data, strlen (test_data));
 	test_check_directory (test.directory, ("Test.p11-kit", NULL));
 
-	/* Reload now that we have this new file */
+        /* Reload now that we have this new file */
 	p11_token_load (test.token);
 
 	handle = p11_index_find (test.index, &match, 1);
@@ -747,7 +747,7 @@ test_remove_one (void)
 	rv = p11_index_remove (test.index, handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* No other files in the test directory, all files gone */
+        /* No other files in the test directory, all files gone */
 	test_check_directory (test.directory, (NULL, NULL));
 }
 
@@ -794,7 +794,7 @@ test_remove_multiple (void)
 
 	p11_test_file_write (test.directory, "Test.p11-kit", test_data, strlen (test_data));
 
-	/* Reload now that we have this new file */
+        /* Reload now that we have this new file */
 	p11_token_load (test.token);
 
 	handle = p11_index_find (test.index, &match, 1);
@@ -803,7 +803,7 @@ test_remove_multiple (void)
 	rv = p11_index_remove (test.index, handle);
 	assert_num_eq (rv, CKR_OK);
 
-	/* Now read in the file and make sure it has all the objects */
+        /* Now read in the file and make sure it has all the objects */
 	path = p11_path_build (test.directory, "Test.p11-kit", NULL);
 	ret = p11_parse_file (test.parser, path, NULL, 0);
 	assert_num_eq (ret, P11_PARSE_SUCCESS);
@@ -812,13 +812,13 @@ test_remove_multiple (void)
 	parsed = p11_parser_parsed (test.parser);
 	assert_num_eq (parsed->num, 2);
 
-	/* The modified one will be first */
+        /* The modified one will be first */
 	test_check_attrs (first, parsed->elem[0]);
 	test_check_attrs (third, parsed->elem[1]);
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

@@ -55,15 +55,15 @@ static void
 test_magic (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "value: \"blah\"\n"
-	                    "application: \"test-persist\"\n";
+			    "class: data\n"
+			    "value: \"blah\"\n"
+			    "application: \"test-persist\"\n";
 
 	const char *other = "            "
-			"\n\n[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "value: \"blah\"\n"
-	                    "application: \"test-persist\"\n";
+			    "\n\n[p11-kit-object-v1]\n"
+			    "class: data\n"
+			    "value: \"blah\"\n"
+			    "application: \"test-persist\"\n";
 
 	assert (p11_persist_magic ((unsigned char *)input, strlen (input)));
 	assert (!p11_persist_magic ((unsigned char *)input, 5));
@@ -73,11 +73,11 @@ test_magic (void)
 
 static p11_array *
 args_to_array (void *arg,
-               ...) GNUC_NULL_TERMINATED;
+	       ...) GNUC_NULL_TERMINATED;
 
 static p11_array *
 args_to_array (void *arg,
-               ...)
+	       ...)
 {
 	p11_array *array = p11_array_new (NULL);
 
@@ -96,10 +96,10 @@ args_to_array (void *arg,
 
 static void
 check_read_msg (const char *file,
-                int line,
+                int         line,
                 const char *function,
                 const char *input,
-                p11_array *expected)
+                p11_array  *expected)
 {
 	p11_array *objects;
 	p11_persist *persist;
@@ -130,10 +130,10 @@ check_read_msg (const char *file,
 
 static void
 check_write_msg (const char *file,
-                 int line,
+                 int         line,
                  const char *function,
                  const char *expected,
-                 p11_array *input)
+                 p11_array  *input)
 {
 	p11_persist *persist;
 	p11_buffer buf;
@@ -148,8 +148,8 @@ check_write_msg (const char *file,
 	}
 
 	if (strcmp (buf.data, expected) != 0) {
-	         p11_test_fail (file, line, function, "persist doesn't match: (\n%s----\n%s\n)", \
-	                        expected, (char *)buf.data);
+		p11_test_fail (file, line, function, "persist doesn't match: (\n%s----\n%s\n)", \
+			       expected, (char *)buf.data);
 	}
 
 	p11_buffer_uninit (&buf);
@@ -177,9 +177,9 @@ static void
 test_simple (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "value: \"blah\"\n"
-	                    "application: \"test-persist\"\n\n";
+			     "class: data\n"
+			     "value: \"blah\"\n"
+			     "application: \"test-persist\"\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_CLASS, &data, sizeof (data) },
@@ -196,9 +196,9 @@ static void
 test_number (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "value-len: 29202390\n"
-	                    "application: \"test-persist\"\n\n";
+			     "class: data\n"
+			     "value-len: 29202390\n"
+			     "application: \"test-persist\"\n\n";
 
 	CK_ULONG value = 29202390;
 
@@ -217,10 +217,10 @@ static void
 test_bool (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "private: true\n"
-	                    "modifiable: false\n"
-	                    "application: \"test-persist\"\n\n";
+			     "class: data\n"
+			     "private: true\n"
+			     "modifiable: false\n"
+			     "application: \"test-persist\"\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_CLASS, &data, sizeof (data) },
@@ -238,8 +238,8 @@ static void
 test_oid (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "object-id: 1.2.3.4\n\n";
+			     "class: data\n"
+			     "object-id: 1.2.3.4\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_CLASS, &data, sizeof (data) },
@@ -255,13 +255,13 @@ static void
 test_constant (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "certificate-type: x-509-attr-cert\n"
-	                    "key-type: rsa\n"
-	                    "x-assertion-type: x-pinned-certificate\n"
-	                    "certificate-category: authority\n"
-	                    "mechanism-type: rsa-pkcs-key-pair-gen\n"
-	                    "trust-server-auth: nss-trust-unknown\n\n";
+			     "class: data\n"
+			     "certificate-type: x-509-attr-cert\n"
+			     "key-type: rsa\n"
+			     "x-assertion-type: x-pinned-certificate\n"
+			     "certificate-category: authority\n"
+			     "mechanism-type: rsa-pkcs-key-pair-gen\n"
+			     "trust-server-auth: nss-trust-unknown\n\n";
 
 	CK_TRUST trust = CKT_NSS_TRUST_UNKNOWN;
 	CK_CERTIFICATE_TYPE type = CKC_X_509_ATTR_CERT;
@@ -289,8 +289,8 @@ static void
 test_unknown (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "38383838: \"the-value-here\"\n\n";
+			     "class: data\n"
+			     "38383838: \"the-value-here\"\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_CLASS, &data, sizeof (data) },
@@ -306,11 +306,11 @@ static void
 test_multiple (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "object-id: 1.2.3.4\n\n"
-	                    "[p11-kit-object-v1]\n"
-	                    "class: nss-trust\n"
-	                    "trust-server-auth: nss-trust-unknown\n\n";
+			     "class: data\n"
+			     "object-id: 1.2.3.4\n\n"
+			     "[p11-kit-object-v1]\n"
+			     "class: nss-trust\n"
+			     "trust-server-auth: nss-trust-unknown\n\n";
 
 	CK_TRUST trust = CKT_NSS_TRUST_UNKNOWN;
 
@@ -334,23 +334,23 @@ static void
 test_pem_block (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "id: \"292c92\"\n"
-	                    "trusted: true\n"
-	    "-----BEGIN CERTIFICATE-----\n"
-	    "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
-	    "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
-	    "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
-	    "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
-	    "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
-	    "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
-	    "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
-	    "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
-	    "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
-	    "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
-	    "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
-	    "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
-	    "-----END CERTIFICATE-----\n"
-	                    "\n";
+			     "id: \"292c92\"\n"
+			     "trusted: true\n"
+			     "-----BEGIN CERTIFICATE-----\n"
+			     "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
+			     "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
+			     "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
+			     "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
+			     "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
+			     "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
+			     "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
+			     "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
+			     "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
+			     "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
+			     "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
+			     "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
+			     "-----END CERTIFICATE-----\n"
+			     "\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -369,24 +369,24 @@ static void
 test_pem_middle (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: certificate\n"
-	                    "id: \"292c92\"\n"
-	    "-----BEGIN CERTIFICATE-----\n"
-	    "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
-	    "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
-	    "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
-	    "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
-	    "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
-	    "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
-	    "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
-	    "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
-	    "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
-	    "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
-	    "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
-	    "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
-	    "-----END CERTIFICATE-----\n"
-	                    "\n"
-	                    "trusted: true";
+			    "class: certificate\n"
+			    "id: \"292c92\"\n"
+			    "-----BEGIN CERTIFICATE-----\n"
+			    "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
+			    "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
+			    "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
+			    "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
+			    "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
+			    "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
+			    "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
+			    "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
+			    "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
+			    "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
+			    "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
+			    "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
+			    "-----END CERTIFICATE-----\n"
+			    "\n"
+			    "trusted: true";
 
 	CK_ATTRIBUTE expected[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -403,16 +403,16 @@ static void
 test_pem_public_key (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "id: \"292c92\"\n"
-	    "-----BEGIN PUBLIC KEY-----\n"
-	   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAryQICCl6NZ5gDKrnSztO\n"
-	   "3Hy8PEUcuyvg/ikC+VcIo2SFFSf18a3IMYldIugqqqZCs4/4uVW3sbdLs/6PfgdX\n"
-	   "7O9D22ZiFWHPYA2k2N744MNiCD1UE+tJyllUhSblK48bn+v1oZHCM0nYQ2NqUkvS\n"
-	   "j+hwUU3RiWl7x3D2s9wSdNt7XUtW05a/FXehsPSiJfKvHJJnGOX0BgTvkLnkAOTd\n"
-	   "OrUZ/wK69Dzu4IvrN4vs9Nes8vbwPa/ddZEzGR0cQMt0JBkhk9kU/qwqUseP1QRJ\n"
-	   "5I1jR4g8aYPL/ke9K35PxZWuDp3U0UPAZ3PjFAh+5T+fc7gzCs9dPzSHloruU+gl\n"
-	   "FQIDAQAB\n"
-           "-----END PUBLIC KEY-----\n\n";
+			     "id: \"292c92\"\n"
+			     "-----BEGIN PUBLIC KEY-----\n"
+			     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAryQICCl6NZ5gDKrnSztO\n"
+			     "3Hy8PEUcuyvg/ikC+VcIo2SFFSf18a3IMYldIugqqqZCs4/4uVW3sbdLs/6PfgdX\n"
+			     "7O9D22ZiFWHPYA2k2N744MNiCD1UE+tJyllUhSblK48bn+v1oZHCM0nYQ2NqUkvS\n"
+			     "j+hwUU3RiWl7x3D2s9wSdNt7XUtW05a/FXehsPSiJfKvHJJnGOX0BgTvkLnkAOTd\n"
+			     "OrUZ/wK69Dzu4IvrN4vs9Nes8vbwPa/ddZEzGR0cQMt0JBkhk9kU/qwqUseP1QRJ\n"
+			     "5I1jR4g8aYPL/ke9K35PxZWuDp3U0UPAZ3PjFAh+5T+fc7gzCs9dPzSHloruU+gl\n"
+			     "FQIDAQAB\n"
+			     "-----END PUBLIC KEY-----\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_ID, "292c92", 6, },
@@ -429,21 +429,21 @@ static void
 test_pem_invalid (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: certificate\n"
-	    "-----BEGIN CERT-----\n"
-	    "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
-	    "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
-	    "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
-	    "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
-	    "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
-	    "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
-	    "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
-	    "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
-	    "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
-	    "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
-	    "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
-	    "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
-	    "-----END CERTIFICATEXXX-----\n";
+			    "class: certificate\n"
+			    "-----BEGIN CERT-----\n"
+			    "MIICPDCCAaUCED9pHoGc8JpK83P/uUii5N0wDQYJKoZIhvcNAQEFBQAwXzELMAkG\n"
+			    "A1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFz\n"
+			    "cyAxIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTk2\n"
+			    "MDEyOTAwMDAwMFoXDTI4MDgwMjIzNTk1OVowXzELMAkGA1UEBhMCVVMxFzAVBgNV\n"
+			    "BAoTDlZlcmlTaWduLCBJbmMuMTcwNQYDVQQLEy5DbGFzcyAxIFB1YmxpYyBQcmlt\n"
+			    "YXJ5IENlcnRpZmljYXRpb24gQXV0aG9yaXR5MIGfMA0GCSqGSIb3DQEBAQUAA4GN\n"
+			    "ADCBiQKBgQDlGb9to1ZhLZlIcfZn3rmN67eehoAKkQ76OCWvRoiC5XOooJskXQ0f\n"
+			    "zGVuDLDQVoQYh5oGmxChc9+0WDlrbsH2FdWoqD+qEgaNMax/sDTXjzRniAnNFBHi\n"
+			    "TkVWaR94AoDa3EeRKbs2yWNcxeDXLYd7obcysHswuiovMaruo2fa2wIDAQABMA0G\n"
+			    "CSqGSIb3DQEBBQUAA4GBAFgVKTk8d6PaXCUDfGD67gmZPCcQcMgMCeazh88K4hiW\n"
+			    "NWLMv5sneYlfycQJ9M61Hd8qveXbhpxoJeUwfLaJFf5n0a3hUKw8fGJLj7qE1xIV\n"
+			    "Gx/KXQ/BUpQqEZnae88MNhPVNdwQGVnqlMEAv3WP2fr9dgTbYruQagPZRjXZ+Hxb\n"
+			    "-----END CERTIFICATEXXX-----\n";
 
 	p11_message_quiet ();
 
@@ -456,10 +456,10 @@ static void
 test_pem_unsupported (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: certificate\n"
-	                    "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
-	                    "-----END BLOCK1-----\n";
+			    "class: certificate\n"
+			    "-----BEGIN BLOCK1-----\n"
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
+			    "-----END BLOCK1-----\n";
 
 	p11_message_quiet ();
 
@@ -472,10 +472,10 @@ static void
 test_pem_first (void)
 {
 	const char *input = "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
-	                    "-----END BLOCK1-----\n"
-	                    "[p11-kit-object-v1]\n"
-	                    "class: certificate\n";
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
+			    "-----END BLOCK1-----\n"
+			    "[p11-kit-object-v1]\n"
+			    "class: certificate\n";
 
 	p11_message_quiet ();
 
@@ -488,14 +488,14 @@ static void
 test_skip_unknown (void)
 {
 	const char *input = "[version-2]\n"
-	                    "class: data\n"
-	                    "object-id: 1.2.3.4\n"
-	                    "-----BEGIN BLOCK1-----\n"
-	                    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
-	                    "-----END BLOCK1-----\n"
-	                    "[p11-kit-object-v1]\n"
-	                    "class: nss-trust\n"
-	                    "trust-server-auth: nss-trust-unknown";
+			    "class: data\n"
+			    "object-id: 1.2.3.4\n"
+			    "-----BEGIN BLOCK1-----\n"
+			    "aYNNXqshlVxCdo8QfKeXh3GUzd/yn4LYIVgQrx4a\n"
+			    "-----END BLOCK1-----\n"
+			    "[p11-kit-object-v1]\n"
+			    "class: nss-trust\n"
+			    "trust-server-auth: nss-trust-unknown";
 
 	CK_TRUST trust = CKT_NSS_TRUST_UNKNOWN;
 
@@ -516,8 +516,8 @@ static void
 test_bad_value (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "value: \"%38%\"\n";
+			    "class: data\n"
+			    "value: \"%38%\"\n";
 
 	p11_message_quiet ();
 
@@ -530,8 +530,8 @@ static void
 test_bad_oid (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "object-id: 1.2";
+			    "class: data\n"
+			    "object-id: 1.2";
 
 	p11_message_quiet ();
 
@@ -544,8 +544,8 @@ static void
 test_bad_field (void)
 {
 	const char *input = "[p11-kit-object-v1]\n"
-	                    "class: data\n"
-	                    "invalid-field: true";
+			    "class: data\n"
+			    "invalid-field: true";
 
 	p11_message_quiet ();
 
@@ -558,8 +558,8 @@ static void
 test_attribute_first (void)
 {
 	const char *input = "class: data\n"
-	                    "[p11-kit-object-v1]\n"
-	                    "invalid-field: true";
+			    "[p11-kit-object-v1]\n"
+			    "invalid-field: true";
 
 	p11_message_quiet ();
 
@@ -572,7 +572,7 @@ static void
 test_not_boolean (void)
 {
 	const char *output = "[p11-kit-object-v1]\n"
-	                    "private: \"x\"\n\n";
+			     "private: \"x\"\n\n";
 
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_PRIVATE, "x", 1 },
@@ -598,8 +598,8 @@ test_not_ulong (void)
 	buffer[sizeof (CK_ULONG)] = 0;
 
 	if (asprintf (&output, "[p11-kit-object-v1]\n"
-	                       "bits-per-pixel: \"xx\"\n"
-	                       "value: \"%s\"\n\n", buffer) < 0)
+		      "bits-per-pixel: \"xx\"\n"
+		      "value: \"%s\"\n\n", buffer) < 0)
 		assert_not_reached ();
 
 	check_write_success (output, (attrs, NULL));
@@ -607,7 +607,7 @@ test_not_ulong (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_magic, "/persist/magic");

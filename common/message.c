@@ -61,7 +61,7 @@
 bool p11_print_messages = false;
 
 #ifdef HAVE_STRERROR_L
-locale_t p11_message_locale = (locale_t) 0;
+locale_t p11_message_locale = (locale_t)0;
 #endif
 
 static char *
@@ -75,19 +75,19 @@ default_message_storage (void)
 char * (* p11_message_storage) (void) = default_message_storage;
 
 void
-p11_message_store (const char* msg,
-                   size_t length)
+p11_message_store (const char *msg,
+                   size_t      length)
 {
 	char *buffer;
 
-	/*
-	 * p11_message_storage() is called to get a storage location for
-	 * the last message. It defaults to a globally allocated buffer
-	 * but is overridden in library.c with a function that returns
-	 * per thread buffers.
-	 *
-	 * The returned value is P11_MESSAGE_MAX bytes long
-	 */
+        /*
+         * p11_message_storage() is called to get a storage location for
+         * the last message. It defaults to a globally allocated buffer
+         * but is overridden in library.c with a function that returns
+         * per thread buffers.
+         *
+         * The returned value is P11_MESSAGE_MAX bytes long
+         */
 	buffer = p11_message_storage ();
 
 	if (length > P11_MESSAGE_MAX - 1)
@@ -100,9 +100,9 @@ p11_message_store (const char* msg,
 }
 
 void
-p11_message_err (int errnum,
-                 const char* msg,
-                 ...)
+p11_message_err (int         errnum,
+		 const char *msg,
+		 ...)
 {
 	char buffer[P11_MESSAGE_MAX];
 	char strerr[P11_MESSAGE_MAX];
@@ -113,14 +113,14 @@ p11_message_err (int errnum,
 	length = vsnprintf (buffer, P11_MESSAGE_MAX - 1, msg, va);
 	va_end (va);
 
-	/* Was it truncated? */
+        /* Was it truncated? */
 	if (length > P11_MESSAGE_MAX - 1)
 		length = P11_MESSAGE_MAX - 1;
 	buffer[length] = 0;
 
 	snprintf (strerr, sizeof (strerr), "Unknown error %d", errnum);
 #ifdef HAVE_STRERROR_L
-	if (p11_message_locale != (locale_t) 0)
+	if (p11_message_locale != (locale_t)0)
 		strncpy (strerr, strerror_l (errnum, p11_message_locale), sizeof (strerr));
 #else
 	strerror_r (errnum, strerr, sizeof (strerr));
@@ -131,8 +131,8 @@ p11_message_err (int errnum,
 }
 
 void
-p11_message (const char* msg,
-             ...)
+p11_message (const char *msg,
+	     ...)
 {
 	char buffer[P11_MESSAGE_MAX];
 	va_list va;
@@ -142,12 +142,12 @@ p11_message (const char* msg,
 	length = vsnprintf (buffer, P11_MESSAGE_MAX - 1, msg, va);
 	va_end (va);
 
-	/* Was it truncated? */
+        /* Was it truncated? */
 	if (length > P11_MESSAGE_MAX - 1)
 		length = P11_MESSAGE_MAX - 1;
 	buffer[length] = 0;
 
-	/* If printing is not disabled, just print out */
+        /* If printing is not disabled, just print out */
 	if (p11_print_messages)
 		fprintf (stderr, "p11-kit: %s\n", buffer);
 	else

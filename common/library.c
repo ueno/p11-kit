@@ -146,7 +146,7 @@ _p11_library_get_thread_local (void)
 static void
 count_forks (void)
 {
-	/* Thread safe, executed in child, one thread exists */
+        /* Thread safe, executed in child, one thread exists */
 	p11_forkid++;
 }
 
@@ -162,7 +162,7 @@ p11_library_init_impl (void)
 #endif
 	p11_message_storage = thread_local_message;
 #ifdef HAVE_STRERROR_L
-	p11_message_locale = newlocale (LC_ALL_MASK, "POSIX", (locale_t) 0);
+	p11_message_locale = newlocale (LC_ALL_MASK, "POSIX", (locale_t)0);
 #endif
 
 	pthread_atfork (NULL, NULL, count_forks);
@@ -180,13 +180,13 @@ p11_library_uninit (void)
 	uninit_common ();
 
 #ifndef P11_TLS_KEYWORD
-	/* Some cleanup to pacify valgrind */
+        /* Some cleanup to pacify valgrind */
 	free (pthread_getspecific (thread_local));
 	pthread_setspecific (thread_local, NULL);
 #endif
 
 #ifdef HAVE_STRERROR_L
-	if (p11_message_locale != (locale_t) 0)
+	if (p11_message_locale != (locale_t)0)
 		freelocale (p11_message_locale);
 #endif
 	p11_message_storage = dont_store_message;
@@ -207,7 +207,9 @@ p11_library_uninit (void)
 
 static DWORD thread_local = TLS_OUT_OF_INDEXES;
 
-BOOL WINAPI DllMain (HINSTANCE, DWORD, LPVOID);
+BOOL WINAPI DllMain (HINSTANCE,
+		     DWORD,
+		     LPVOID);
 
 static p11_local *
 _p11_library_get_thread_local (void)

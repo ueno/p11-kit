@@ -131,7 +131,7 @@ test_initialize_child (void)
 
 	assert (p11_proxy_module_check (proxy));
 
-	rv = proxy->C_Initialize(NULL);
+	rv = proxy->C_Initialize (NULL);
 	assert_num_eq (rv, CKR_OK);
 
 	count = 32;
@@ -142,32 +142,32 @@ test_initialize_child (void)
 
 	pid = fork ();
 	if (!pid) {
-		/* The PKCS#11 Usage Guide (v2.40) advocates in §2.5.2 that
-		 * a child should call C_Initialize() after forking, and
-		 * then immediately C_Finalize() if it's not going to do
-		 * anything more with the PKCS#11 token. In a multi-threaded
-		 * program this is a violation of the POSIX standard, which
-		 * puts strict limits on what you're allowed to do between
-		 * fork and an eventual exec or exit. But some things (like
-		 * pkcs11-helper and thus OpenVPN) do it anyway, and we
-		 * need to cope... */
+                /* The PKCS#11 Usage Guide (v2.40) advocates in §2.5.2 that
+                 * a child should call C_Initialize() after forking, and
+                 * then immediately C_Finalize() if it's not going to do
+                 * anything more with the PKCS#11 token. In a multi-threaded
+                 * program this is a violation of the POSIX standard, which
+                 * puts strict limits on what you're allowed to do between
+                 * fork and an eventual exec or exit. But some things (like
+                 * pkcs11-helper and thus OpenVPN) do it anyway, and we
+                 * need to cope... */
 
-		/* https://bugs.freedesktop.org/show_bug.cgi?id=90289 reports
-		 * a deadlock when this happens. Catch it with SIGALRM... */
-		alarm(1);
+                /* https://bugs.freedesktop.org/show_bug.cgi?id=90289 reports
+                 * a deadlock when this happens. Catch it with SIGALRM... */
+		alarm (1);
 
-		rv = proxy->C_Initialize(NULL);
+		rv = proxy->C_Initialize (NULL);
 		assert_num_eq (rv, CKR_OK);
 
 		rv = proxy->C_GetSlotList (CK_FALSE, slots, &count);
 		assert_num_eq (rv, CKR_OK);
 		assert_num_cmp (count, >=, 2);
 
-		/* One of the module initializations should fail after
-		 * fork (see mock-module-ep4.c) and the total number
-		 * of slots should be less than last_count. */
+                /* One of the module initializations should fail after
+                 * fork (see mock-module-ep4.c) and the total number
+                 * of slots should be less than last_count. */
 		assert_num_cmp (count, <, last_count);
-		/* Check if the last valid slot ID is preserved */
+                /* Check if the last valid slot ID is preserved */
 		assert_num_eq (slots[count - 1], last_slot);
 
 		rv = proxy->C_Finalize (NULL);
@@ -176,19 +176,18 @@ test_initialize_child (void)
 		_exit (0);
 	}
 	assert (pid != -1);
-	waitpid(pid, &st, 0);
+	waitpid (pid, &st, 0);
 
 	rv = proxy->C_Finalize (NULL);
 	assert_num_eq (rv, CKR_OK);
 
 	p11_proxy_module_cleanup ();
 
-	/* If the assertion fails, p11_kit_failed() doesn't return. So make
-	 * sure we do all the cleanup before the (expected) failure, or it
-	 * causes all the *later* tests to fail too! */
-	if (!WIFEXITED (st) || WEXITSTATUS(st) != 0)
-		assert_fail("Child failed to C_Initialize() and C_Finalize()", NULL);
-
+        /* If the assertion fails, p11_kit_failed() doesn't return. So make
+         * sure we do all the cleanup before the (expected) failure, or it
+         * causes all the *later* tests to fail too! */
+	if (!WIFEXITED (st) || WEXITSTATUS (st) != 0)
+		assert_fail ("Child failed to C_Initialize() and C_Finalize()", NULL);
 }
 #endif
 
@@ -286,7 +285,7 @@ test_no_slot (void)
 	assert (rv == CKR_OK);
 	assert_num_eq (count, 0);
 
-	/* 0x10 == MAPPING_OFFSET, defined in proxy.c */
+        /* 0x10 == MAPPING_OFFSET, defined in proxy.c */
 	rv = proxy->C_OpenSession (0x10, CKF_SERIAL_SESSION, NULL, NULL, &session);
 	assert (rv == CKR_SLOT_ID_INVALID);
 
@@ -320,7 +319,6 @@ test_disable (void)
 	p11_test_file_write (test.directory, "two.module", TWO_MODULE, strlen (TWO_MODULE));
 	enabled = load_modules_and_count_slots ();
 	assert_num_eq (enabled, count);
-
 }
 
 static void
@@ -424,7 +422,7 @@ test_reuse_slots (void)
 	assert (rv == CKR_OK);
 	assert_num_eq (count, 2);
 
-	/* Make sure the assigned slot IDs are different */
+        /* Make sure the assigned slot IDs are different */
 	assert_num_cmp (slots[0], !=, slots[1]);
 
 	rv = proxy->C_Finalize (NULL);
@@ -453,7 +451,7 @@ setup_mock_module (CK_SESSION_HANDLE *session)
 	assert (rv == CKR_OK);
 	assert_num_cmp (mock_slots_all, >=, 2);
 
-	/* Assume this is the slot we want to deal with */
+        /* Assume this is the slot we want to deal with */
 	mock_slot_one_id = slots[0];
 	mock_slot_two_id = slots[1];
 
@@ -463,8 +461,8 @@ setup_mock_module (CK_SESSION_HANDLE *session)
 
 	if (session) {
 		rv = (proxy->C_OpenSession) (mock_slot_one_id,
-		                             CKF_RW_SESSION | CKF_SERIAL_SESSION,
-		                             NULL, NULL, session);
+					     CKF_RW_SESSION | CKF_SERIAL_SESSION,
+					     NULL, NULL, session);
 		assert (rv == CKR_OK);
 	}
 
@@ -505,7 +503,7 @@ static const CK_INFO mock_info = {
 #include "test-mock.c"
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

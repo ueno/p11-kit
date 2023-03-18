@@ -46,11 +46,11 @@
 
 #define err_if_fail(ret, msg) \
 	do { if ((ret) != ASN1_SUCCESS) { \
-		fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
-		exit (1); \
-	} } while (0)
+		     fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
+		     exit (1); \
+	     } } while (0)
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };
@@ -71,7 +71,7 @@ main (int argc,
 		return 1;
 	}
 
-	/* AttributeType is a OBJECT IDENTIFIER */
+        /* AttributeType is a OBJECT IDENTIFIER */
 	ret = asn1_create_element (definitions, "PKIX1.AttributeType", &oid);
 	err_if_fail (ret, "AttributeType");
 

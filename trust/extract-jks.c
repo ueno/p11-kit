@@ -53,7 +53,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -62,11 +62,11 @@ time_t _p11_extract_jks_timestamp = 0;
 
 static void
 encode_msb_short (unsigned char *data,
-                  int16_t value)
+		  int16_t        value)
 {
 	uint16_t v;
 
-	/* At this point we only support positive numbers */
+        /* At this point we only support positive numbers */
 	assert (value >= 0);
 	assert (value < INT16_MAX);
 
@@ -77,11 +77,11 @@ encode_msb_short (unsigned char *data,
 
 static void
 encode_msb_int (unsigned char *data,
-                int32_t value)
+		int32_t        value)
 {
 	uint32_t v;
 
-	/* At this point we only support positive numbers */
+        /* At this point we only support positive numbers */
 	assert (value >= 0);
 	assert (value < INT32_MAX);
 
@@ -94,11 +94,11 @@ encode_msb_int (unsigned char *data,
 
 static void
 encode_msb_long (unsigned char *data,
-                 int64_t value)
+		 int64_t        value)
 {
 	uint64_t v;
 
-	/* At this point we only support positive numbers */
+        /* At this point we only support positive numbers */
 	assert (value >= 0);
 	assert (value < INT64_MAX);
 
@@ -115,7 +115,7 @@ encode_msb_long (unsigned char *data,
 
 static void
 add_msb_int (p11_buffer *buffer,
-             int32_t value)
+             int32_t     value)
 {
 	unsigned char *data = p11_buffer_append (buffer, 4);
 	return_if_fail (data != NULL);
@@ -124,7 +124,7 @@ add_msb_int (p11_buffer *buffer,
 
 static void
 add_msb_long (p11_buffer *buffer,
-              int64_t value)
+              int64_t     value)
 {
 	unsigned char *data = p11_buffer_append (buffer, 8);
 	return_if_fail (data != NULL);
@@ -134,7 +134,7 @@ add_msb_long (p11_buffer *buffer,
 static void
 add_string (p11_buffer *buffer,
             const char *string,
-            size_t length)
+            size_t      length)
 {
 	unsigned char *data;
 
@@ -151,19 +151,19 @@ add_string (p11_buffer *buffer,
 
 static void
 convert_alias (const char *input,
-            size_t length,
-            p11_buffer *buf)
+               size_t      length,
+               p11_buffer *buf)
 {
 	char ch;
 	size_t i;
 
-	/*
-	 * Java requires that the aliases are 'converted'. For the basic java
-	 * cacerts key store this is lower case. We just do this for ASCII, since
-	 * we don't want to have to bring in unicode case rules. Since we're
-	 * screwing around, we also take out spaces, to make these look like
-	 * java aliases.
-	 */
+        /*
+         * Java requires that the aliases are 'converted'. For the basic java
+         * cacerts key store this is lower case. We just do this for ASCII, since
+         * we don't want to have to bring in unicode case rules. Since we're
+         * screwing around, we also take out spaces, to make these look like
+         * java aliases.
+         */
 
 	for (i = 0; i < length; i++) {
 		ch = input[i];
@@ -175,8 +175,8 @@ convert_alias (const char *input,
 }
 
 static bool
-add_alias (p11_buffer *buffer,
-           p11_dict *aliases,
+add_alias (p11_buffer   *buffer,
+           p11_dict     *aliases,
            CK_ATTRIBUTE *label)
 {
 	const char *input;
@@ -223,7 +223,7 @@ add_alias (p11_buffer *buffer,
 
 static bool
 prepare_jks_buffer (p11_enumerate *ex,
-                    p11_buffer *buffer)
+                    p11_buffer    *buffer)
 {
 	const unsigned char magic[] = { 0xfe, 0xed, 0xfe, 0xed };
 	const int version = 2;
@@ -241,10 +241,10 @@ prepare_jks_buffer (p11_enumerate *ex,
 		trusted_cert = 2,
 	};
 
-	/*
-	 * Documented in the java sources in the file:
-	 * src/share/classes/sun/security/provider/JavaKeyStore.java
-	 */
+        /*
+         * Documented in the java sources in the file:
+         * src/share/classes/sun/security/provider/JavaKeyStore.java
+         */
 
 	p11_buffer_add (buffer, magic, sizeof (magic));
 	add_msb_int (buffer, version);
@@ -252,11 +252,11 @@ prepare_jks_buffer (p11_enumerate *ex,
 	p11_buffer_append (buffer, 4);
 	count = 0;
 
-	/*
-	 * We use the current time for each entry. Java expects the time
-	 * when this was this certificate was added to the keystore, however
-	 * we don't have that information. Java uses time in milliseconds
-	 */
+        /*
+         * We use the current time for each entry. Java expects the time
+         * when this was this certificate was added to the keystore, however
+         * we don't have that information. Java uses time in milliseconds
+         */
 	if (_p11_extract_jks_timestamp)
 		now = _p11_extract_jks_timestamp;
 	else {
@@ -292,21 +292,21 @@ prepare_jks_buffer (p11_enumerate *ex,
 	return_val_if_fail (now >= 0, false);
 	now *= 1000; /* seconds to milliseconds */
 
-	/*
-	 * The aliases in the output file need to be unique. We use a hash
-	 * table to guarantee this.
-	 */
+        /*
+         * The aliases in the output file need to be unique. We use a hash
+         * table to guarantee this.
+         */
 	aliases = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, free, NULL);
 	return_val_if_fail (aliases != NULL, false);
 
-	/* For every certificate */
+        /* For every certificate */
 	while ((rv = p11_kit_iter_next (ex->iter)) == CKR_OK) {
 		count++;
 
-		/* The type of entry */
+                /* The type of entry */
 		add_msb_int (buffer, trusted_cert);
 
-		/* The alias */
+                /* The alias */
 		label = p11_attrs_find_valid (ex->attrs, CKA_LABEL);
 		if (!add_alias (buffer, aliases, label)) {
 			p11_message (_("could not generate a certificate alias name"));
@@ -314,13 +314,13 @@ prepare_jks_buffer (p11_enumerate *ex,
 			return false;
 		}
 
-		/* The creation date: current time */
+                /* The creation date: current time */
 		add_msb_long (buffer, now);
 
-		/* The type of the certificate */
+                /* The type of the certificate */
 		add_string (buffer, "X.509", 5);
 
-		/* The DER encoding of the certificate */
+                /* The DER encoding of the certificate */
 		add_msb_int (buffer, ex->cert_len);
 		p11_buffer_add (buffer, ex->cert_der, ex->cert_len);
 	}
@@ -332,22 +332,22 @@ prepare_jks_buffer (p11_enumerate *ex,
 		return false;
 	}
 
-	/* Place the count in the right place */
+        /* Place the count in the right place */
 	encode_msb_int ((unsigned char *)buffer->data + count_at, count);
 
-	/*
-	 * Java keystore reinvents HMAC and uses it to try and "secure" the
-	 * cacerts. We fill this in and use the default "changeit" string
-	 * as the password for this keyed digest.
-	 */
+        /*
+         * Java keystore reinvents HMAC and uses it to try and "secure" the
+         * cacerts. We fill this in and use the default "changeit" string
+         * as the password for this keyed digest.
+         */
 	length = buffer->len;
 	digest = p11_buffer_append (buffer, P11_DIGEST_SHA1_LEN);
 	return_val_if_fail (digest != NULL, false);
 	p11_digest_sha1 (digest,
-	                 "\000c\000h\000a\000n\000g\000e\000i\000t", (size_t)16, /* default password */
-	                 "Mighty Aphrodite", (size_t)16, /* go figure */
-	                 buffer->data, length,
-	                 NULL);
+			 "\000c\000h\000a\000n\000g\000e\000i\000t", (size_t)16, /* default password */
+			 "Mighty Aphrodite", (size_t)16, /* go figure */
+			 buffer->data, length,
+			 NULL);
 
 	return_val_if_fail (p11_buffer_ok (buffer), false);
 	return true;
@@ -355,7 +355,7 @@ prepare_jks_buffer (p11_enumerate *ex,
 
 bool
 p11_extract_jks_cacerts (p11_enumerate *ex,
-                         const char *destination)
+                         const char    *destination)
 {
 	p11_buffer buffer;
 	p11_save_file *file;

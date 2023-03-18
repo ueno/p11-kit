@@ -54,7 +54,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -71,7 +71,7 @@ short_option (int opt)
 
 static const struct option *
 find_option (const struct option *longopts,
-             int opt)
+	     int                  opt)
 {
 	int i;
 
@@ -85,7 +85,7 @@ find_option (const struct option *longopts,
 
 void
 p11_tool_usage (const p11_tool_desc *usages,
-                const struct option *longopts)
+		const struct option *longopts)
 {
 	const struct option *longopt;
 	const int indent = 22;
@@ -98,8 +98,7 @@ p11_tool_usage (const p11_tool_desc *usages,
 	int i;
 
 	for (i = 0; usages[i].text != NULL; i++) {
-
-		/* If no option, then this is a heading */
+                /* If no option, then this is a heading */
 		if (!usages[i].option) {
 			printf ("%s\n\n", usages[i].text);
 			continue;
@@ -118,8 +117,8 @@ p11_tool_usage (const p11_tool_desc *usages,
 			len = printf ("  -%c", (int)short_name);
 		if (longopt && longopt->has_arg)
 			len += printf ("%s<%s>",
-			               long_name ? "=" : " ",
-			               usages[i].arg ? usages[i].arg : "...");
+				       long_name ? "=" : " ",
+				       usages[i].arg ? usages[i].arg : "...");
 		if (len < indent) {
 			spaces = indent - len;
 		} else {
@@ -140,14 +139,13 @@ p11_tool_usage (const p11_tool_desc *usages,
 				break;
 			}
 		}
-
 	}
 }
 
 int
-p11_tool_getopt (int argc,
-                 char *argv[],
-                 const struct option *longopts)
+p11_tool_getopt (int                  argc,
+		 char                *argv[],
+		 const struct option *longopts)
 {
 	p11_buffer buf;
 	int ret;
@@ -213,9 +211,9 @@ quiet_arg (void)
 }
 
 int
-p11_tool_main (int argc,
-               char *argv[],
-               const p11_tool_command *commands)
+p11_tool_main (int                     argc,
+	       char                   *argv[],
+	       const p11_tool_command *commands)
 {
 	const p11_tool_command *fallback = NULL;
 	char *command = NULL;
@@ -232,18 +230,17 @@ p11_tool_main (int argc,
 	textdomain (PACKAGE_NAME);
 #endif
 
-	/* Print messages by default. */
+        /* Print messages by default. */
 	p11_message_loud ();
 
-	/*
-	 * Parse the global options. We rearrange the options as
-	 * necessary, in order to pass relevant options through
-	 * to the commands, but also have them take effect globally.
-	 */
+        /*
+         * Parse the global options. We rearrange the options as
+         * necessary, in order to pass relevant options through
+         * to the commands, but also have them take effect globally.
+         */
 
 	for (in = 1, out = 1; in < argc; in++, out++) {
-
-		/* The non-option is the command, take it out of the arguments */
+                /* The non-option is the command, take it out of the arguments */
 		if (argv[in][0] != '-') {
 			if (!command) {
 				skip = true;
@@ -252,7 +249,7 @@ p11_tool_main (int argc,
 				skip = false;
 			}
 
-		/* The global long options */
+                        /* The global long options */
 		} else if (argv[in][1] == '-') {
 			skip = false;
 
@@ -263,66 +260,62 @@ p11_tool_main (int argc,
 				} else {
 					break;
 				}
-
 			} else if (strcmp (argv[in], "--verbose") == 0) {
 				verbose_arg ();
-
 			} else if (strcmp (argv[in], "--quiet") == 0) {
 				quiet_arg ();
-
 			} else if (strcmp (argv[in], "--help") == 0) {
 				want_help = true;
-
 			} else if (!command) {
 				p11_message (_("unknown global option: %s"), argv[in]);
 				return 2;
 			}
 
-		/* The global short options */
+                        /* The global short options */
 		} else {
 			skip = false;
 
 			for (i = 1; argv[in][i] != '\0'; i++) {
 				switch (argv[in][i]) {
-				case 'h':
-					want_help = true;
-					break;
+					case 'h':
+						want_help = true;
+						break;
 
-				/* Compatibility option */
-				case 'l':
-					command = "list-modules";
-					break;
+                                        /* Compatibility option */
+					case 'l':
+						command = "list-modules";
+						break;
 
-				case 'v':
-					verbose_arg ();
-					break;
+					case 'v':
+						verbose_arg ();
+						break;
 
-				case 'q':
-					quiet_arg ();
-					break;
+					case 'q':
+						quiet_arg ();
+						break;
 
-				default:
-					if (!command) {
-						p11_message (_("unknown global option: -%c"), (int)argv[in][i]);
-						return 2;
-					}
-					break;
+					default:
+						if (!command) {
+							p11_message (_("unknown global option: -%c"), (int)argv[in][i]);
+							return 2;
+						}
+						break;
 				}
 			}
 		}
 
-		/* Skipping this argument? */
+                /* Skipping this argument? */
 		if (skip)
 			out--;
 		else
 			argv[out] = argv[in];
 	}
 
-	/* Initialize tool's debugging after setting env vars above */
+        /* Initialize tool's debugging after setting env vars above */
 	p11_debug_init ();
 
 	if (command == NULL) {
-		/* As a special favor if someone just typed the command, help them out */
+                /* As a special favor if someone just typed the command, help them out */
 		if (argc == 1) {
 			command_usage (commands);
 			return 2;
@@ -337,25 +330,24 @@ p11_tool_main (int argc,
 
 	argc = out;
 
-	/* Look for the command */
+        /* Look for the command */
 	for (i = 0; commands[i].name != NULL; i++) {
 		if (strcmp (commands[i].name, P11_TOOL_FALLBACK) == 0) {
 			fallback = commands + i;
-
 		} else if (strcmp (commands[i].name, command) == 0) {
 			argv[0] = command;
 			return (commands[i].function) (argc, argv);
 		}
 	}
 
-	/* Got here because no command matched */
+        /* Got here because no command matched */
 	if (fallback != NULL) {
 		argv[0] = command;
 		return (fallback->function) (argc, argv);
 	}
 
-	/* At this point we have no command */
+        /* At this point we have no command */
 	p11_message (_("'%s' is not a valid command. See '%s --help'"),
-	             command, getprogname ());
+		     command, getprogname ());
 	return 2;
 }

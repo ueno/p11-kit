@@ -83,7 +83,8 @@
  * Returns: The length of the space padded string.
  */
 size_t
-p11_kit_space_strlen (const unsigned char *string, size_t max_length)
+p11_kit_space_strlen (const unsigned char *string,
+		      size_t               max_length)
 {
 	size_t i = max_length;
 
@@ -114,8 +115,9 @@ p11_kit_space_strlen (const unsigned char *string, size_t max_length)
  *
  * Returns: The newly allocated string, or %NULL if memory could not be allocated.
  */
-char*
-p11_kit_space_strdup (const unsigned char *string, size_t max_length)
+char *
+p11_kit_space_strdup (const unsigned char *string,
+		      size_t               max_length)
 {
 	size_t length;
 	char *result;
@@ -176,7 +178,7 @@ p11_kit_be_loud (void)
  *
  * Returns: The last failure message, or %NULL.
  */
-const char*
+const char *
 p11_kit_message (void)
 {
 	return p11_message_last ();
@@ -219,7 +221,7 @@ p11_kit_set_progname (const char *progname)
 void
 _p11_set_progname_unlocked (const char *progname)
 {
-	/* We can be called with NULL */
+        /* We can be called with NULL */
 	if (progname == NULL)
 		progname = "";
 

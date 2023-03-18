@@ -135,8 +135,8 @@ test_load_globals_merge (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-merge.conf",
-	                                 SRCDIR "/p11-kit/fixtures/test-user.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/test-user.conf",
+					 &user_mode);
 	assert_ptr_not_null (config);
 	assert (NULL == p11_message_last ());
 	assert_num_eq (CONF_USER_MERGE, user_mode);
@@ -157,8 +157,8 @@ test_load_globals_no_user (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-none.conf",
-	                                 SRCDIR "/p11-kit/fixtures/test-user.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/test-user.conf",
+					 &user_mode);
 	assert_ptr_not_null (config);
 	assert (NULL == p11_message_last ());
 	assert_num_eq (CONF_USER_NONE, user_mode);
@@ -179,8 +179,8 @@ test_load_globals_user_sets_only (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-merge.conf",
-	                                 SRCDIR "/p11-kit/fixtures/test-user-only.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/test-user-only.conf",
+					 &user_mode);
 	assert_ptr_not_null (config);
 	assert (NULL == p11_message_last ());
 	assert_num_eq (CONF_USER_ONLY, user_mode);
@@ -201,8 +201,8 @@ test_load_globals_system_sets_only (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-only.conf",
-	                                 SRCDIR "/p11-kit/fixtures/test-user.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/test-user.conf",
+					 &user_mode);
 	assert_ptr_not_null (config);
 	assert (NULL == p11_message_last ());
 	assert_num_eq (CONF_USER_ONLY, user_mode);
@@ -224,8 +224,8 @@ test_load_globals_system_sets_invalid (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-invalid.conf",
-	                                 SRCDIR "/p11-kit/fixtures/non-existant.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/non-existant.conf",
+					 &user_mode);
 	error = errno;
 	assert_ptr_eq (NULL, config);
 	assert_num_eq (EINVAL, error);
@@ -244,8 +244,8 @@ test_load_globals_user_sets_invalid (void)
 	p11_message_clear ();
 
 	config = _p11_conf_load_globals (SRCDIR "/p11-kit/fixtures/test-system-merge.conf",
-	                                 SRCDIR "/p11-kit/fixtures/test-user-invalid.conf",
-	                                 &user_mode);
+					 SRCDIR "/p11-kit/fixtures/test-user-invalid.conf",
+					 &user_mode);
 	error = errno;
 	assert_ptr_eq (NULL, config);
 	assert_num_eq (EINVAL, error);
@@ -270,9 +270,9 @@ test_load_modules_merge (void)
 	p11_message_clear ();
 
 	configs = _p11_conf_load_modules (CONF_USER_MERGE,
-	                                  SRCDIR "/p11-kit/fixtures/package-modules",
-	                                  SRCDIR "/p11-kit/fixtures/system-modules",
-	                                  SRCDIR "/p11-kit/fixtures/user-modules");
+					  SRCDIR "/p11-kit/fixtures/package-modules",
+					  SRCDIR "/p11-kit/fixtures/system-modules",
+					  SRCDIR "/p11-kit/fixtures/user-modules");
 	assert_ptr_not_null (configs);
 	assert (assert_msg_contains (p11_message_last (), "invalid config filename"));
 
@@ -303,9 +303,9 @@ test_load_modules_user_none (void)
 	p11_message_clear ();
 
 	configs = _p11_conf_load_modules (CONF_USER_NONE,
-	                                  SRCDIR "/p11-kit/fixtures/package-modules",
-	                                  SRCDIR "/p11-kit/fixtures/system-modules",
-	                                  SRCDIR "/p11-kit/fixtures/user-modules");
+					  SRCDIR "/p11-kit/fixtures/package-modules",
+					  SRCDIR "/p11-kit/fixtures/system-modules",
+					  SRCDIR "/p11-kit/fixtures/user-modules");
 	assert_ptr_not_null (configs);
 	assert (assert_msg_contains (p11_message_last (), "invalid config filename"));
 
@@ -334,9 +334,9 @@ test_load_modules_user_only (void)
 	p11_message_clear ();
 
 	configs = _p11_conf_load_modules (CONF_USER_ONLY,
-	                                  SRCDIR "/p11-kit/fixtures/package-modules",
-	                                  SRCDIR "/p11-kit/fixtures/system-modules",
-	                                  SRCDIR "/p11-kit/fixtures/user-modules");
+					  SRCDIR "/p11-kit/fixtures/package-modules",
+					  SRCDIR "/p11-kit/fixtures/system-modules",
+					  SRCDIR "/p11-kit/fixtures/user-modules");
 	assert_ptr_not_null (configs);
 	assert_ptr_eq (NULL, (void *)p11_message_last ());
 
@@ -365,9 +365,9 @@ test_load_modules_no_user (void)
 	p11_message_clear ();
 
 	configs = _p11_conf_load_modules (CONF_USER_MERGE,
-	                                  SRCDIR "/p11-kit/fixtures/package-modules",
-	                                  SRCDIR "/p11-kit/fixtures/system-modules",
-	                                  SRCDIR "/p11-kit/fixtures/non-existant");
+					  SRCDIR "/p11-kit/fixtures/package-modules",
+					  SRCDIR "/p11-kit/fixtures/system-modules",
+					  SRCDIR "/p11-kit/fixtures/non-existant");
 	assert_ptr_not_null (configs);
 	assert (assert_msg_contains (p11_message_last (), "invalid config filename"));
 
@@ -409,7 +409,7 @@ test_setuid (void)
 	if (getuid () == 0)
 		assert_skip ("cannot perform setuid test as root", NULL);
 
-	/* This is the 'number' setting set in one.module user configuration. */
+        /* This is the 'number' setting set in one.module user configuration. */
 	ret = p11_test_run_child (args, true);
 	assert_num_eq (ret, 33);
 
@@ -419,7 +419,7 @@ test_setuid (void)
 
 	args[0] = path;
 
-	/* This is the 'number' setting set in one.module system configuration. */
+        /* This is the 'number' setting set in one.module system configuration. */
 	ret = p11_test_run_child (args, true);
 	assert_num_eq (ret, 18);
 
@@ -433,7 +433,7 @@ test_setuid (void)
 extern bool p11_conf_force_user_config;
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_conf_force_user_config = true;
@@ -454,8 +454,8 @@ main (int argc,
 	p11_test (test_load_modules_user_none, "/conf/test_load_modules_user_none");
 	p11_test (test_parse_boolean, "/conf/test_parse_boolean");
 #ifdef OS_UNIX
-	/* Don't run this test when under fakeroot, or the binary is
-	 * written under /tmp */
+        /* Don't run this test when under fakeroot, or the binary is
+         * written under /tmp */
 	if (!getenv ("FAKED_MODE") && strncmp (BUILDDIR, "/tmp/", 5) != 0) {
 		p11_test (test_setuid, "/conf/setuid");
 	}

@@ -65,28 +65,28 @@ typedef struct {
 } index_bucket;
 
 struct _p11_index {
-	/* The list of objects by handle */
+        /* The list of objects by handle */
 	p11_dict *objects;
 
-	/* Used for indexing */
+        /* Used for indexing */
 	index_bucket *buckets;
 
-	/* Data passed to callbacks */
+        /* Data passed to callbacks */
 	void *data;
 
-	/* Called to build an new/modified object */
+        /* Called to build an new/modified object */
 	p11_index_build_cb build;
 
-	/* Called after each object ready to be stored */
+        /* Called after each object ready to be stored */
 	p11_index_store_cb store;
 
-	/* Called after an object has been removed */
+        /* Called after an object has been removed */
 	p11_index_remove_cb remove;
 
-	/* Called after objects change */
+        /* Called after objects change */
 	p11_index_notify_cb notify;
 
-	/* Used for queueing changes, when in a batch */
+        /* Used for queueing changes, when in a batch */
 	p11_dict *changes;
 	bool notifying;
 };
@@ -105,47 +105,46 @@ free_object (void *data)
 }
 
 static CK_RV
-default_build (void *data,
-               p11_index *index,
-               CK_ATTRIBUTE *attrs,
-               CK_ATTRIBUTE *merge,
+default_build (void          *data,
+               p11_index     *index,
+               CK_ATTRIBUTE  *attrs,
+               CK_ATTRIBUTE  *merge,
                CK_ATTRIBUTE **populate)
 {
 	return CKR_OK;
 }
 
 static CK_RV
-default_store (void *data,
-               p11_index *index,
-               CK_OBJECT_HANDLE handle,
-               CK_ATTRIBUTE **attrs)
+default_store (void              *data,
+               p11_index         *index,
+               CK_OBJECT_HANDLE   handle,
+               CK_ATTRIBUTE     **attrs)
 {
 	return CKR_OK;
 }
 
 static void
-default_notify (void *data,
-                p11_index *index,
-                CK_OBJECT_HANDLE handle,
-                CK_ATTRIBUTE *attrs)
+default_notify (void             *data,
+                p11_index        *index,
+                CK_OBJECT_HANDLE  handle,
+                CK_ATTRIBUTE     *attrs)
 {
-
 }
 
 static CK_RV
-default_remove (void *data,
-                p11_index *index,
+default_remove (void         *data,
+                p11_index    *index,
                 CK_ATTRIBUTE *attrs)
 {
 	return CKR_OK;
 }
 
 p11_index *
-p11_index_new (p11_index_build_cb build,
-               p11_index_store_cb store,
-               p11_index_remove_cb remove,
-               p11_index_notify_cb notify,
-               void *data)
+p11_index_new (p11_index_build_cb   build,
+               p11_index_store_cb   store,
+               p11_index_remove_cb  remove,
+               p11_index_notify_cb  notify,
+               void                *data)
 {
 	p11_index *index;
 
@@ -168,8 +167,8 @@ p11_index_new (p11_index_build_cb build,
 	index->data = data;
 
 	index->objects = p11_dict_new (p11_dict_ulongptr_hash,
-	                               p11_dict_ulongptr_equal,
-	                               NULL, free_object);
+				       p11_dict_ulongptr_equal,
+				       NULL, free_object);
 	if (index->objects == NULL) {
 		p11_index_free (index);
 		return_val_if_reached (NULL);
@@ -209,16 +208,16 @@ p11_index_size (p11_index *index)
 }
 
 static bool
-is_indexable (p11_index *index,
-              CK_ATTRIBUTE_TYPE type)
+is_indexable (p11_index         *index,
+              CK_ATTRIBUTE_TYPE  type)
 {
 	switch (type) {
-	case CKA_CLASS:
-	case CKA_VALUE:
-	case CKA_OBJECT_ID:
-	case CKA_ID:
-	case CKA_X_ORIGIN:
-		return true;
+		case CKA_CLASS:
+		case CKA_VALUE:
+		case CKA_OBJECT_ID:
+		case CKA_ID:
+		case CKA_X_ORIGIN:
+			return true;
 	}
 
 	return false;
@@ -235,9 +234,9 @@ alloc_size (int num)
 
 static int
 binary_search (CK_OBJECT_HANDLE *elem,
-               int low,
-               int high,
-               CK_OBJECT_HANDLE handle)
+               int               low,
+               int               high,
+               CK_OBJECT_HANDLE  handle)
 {
 	int mid;
 
@@ -255,8 +254,8 @@ binary_search (CK_OBJECT_HANDLE *elem,
 
 
 static void
-bucket_insert (index_bucket *bucket,
-               CK_OBJECT_HANDLE handle)
+bucket_insert (index_bucket     *bucket,
+               CK_OBJECT_HANDLE  handle)
 {
 	unsigned int alloc;
 	int at = 0;
@@ -280,14 +279,14 @@ bucket_insert (index_bucket *bucket,
 
 	return_if_fail (bucket->elem != NULL);
 	memmove (bucket->elem + at + 1, bucket->elem + at,
-	         (bucket->num - at) * sizeof (CK_OBJECT_HANDLE));
+		 (bucket->num - at) * sizeof (CK_OBJECT_HANDLE));
 	bucket->elem[at] = handle;
 	bucket->num++;
 }
 
 static bool
-bucket_push (index_bucket *bucket,
-             CK_OBJECT_HANDLE handle)
+bucket_push (index_bucket     *bucket,
+             CK_OBJECT_HANDLE  handle)
 {
 	unsigned int alloc;
 
@@ -308,7 +307,7 @@ bucket_push (index_bucket *bucket,
 }
 
 static void
-index_hash (p11_index *index,
+index_hash (p11_index    *index,
             index_object *obj)
 {
 	unsigned int hash;
@@ -324,33 +323,32 @@ index_hash (p11_index *index,
 
 static void
 merge_attrs (CK_ATTRIBUTE *output,
-             CK_ULONG *noutput,
+             CK_ULONG     *noutput,
              CK_ATTRIBUTE *merge,
-             CK_ULONG nmerge,
-             p11_array *to_free)
+             CK_ULONG      nmerge,
+             p11_array    *to_free)
 {
 	CK_ULONG i;
 
 	for (i = 0; i < nmerge; i++) {
-		/* Already have this attribute? */
+                /* Already have this attribute? */
 		if (p11_attrs_findn (output, *noutput, merge[i].type)) {
 			p11_array_push (to_free, merge[i].pValue);
-
 		} else {
 			memcpy (output + *noutput, merge + i, sizeof (CK_ATTRIBUTE));
 			(*noutput)++;
 		}
 	}
 
-	/* Freeing the array itself */
+        /* Freeing the array itself */
 	p11_array_push (to_free, merge);
 }
 
 static CK_RV
-index_build (p11_index *index,
-             CK_OBJECT_HANDLE handle,
-             CK_ATTRIBUTE **attrs,
-             CK_ATTRIBUTE *merge)
+index_build (p11_index         *index,
+             CK_OBJECT_HANDLE   handle,
+             CK_ATTRIBUTE     **attrs,
+             CK_ATTRIBUTE      *merge)
 {
 	CK_ATTRIBUTE *extra = NULL;
 	CK_ATTRIBUTE *built;
@@ -366,18 +364,17 @@ index_build (p11_index *index,
 	if (rv != CKR_OK)
 		return rv;
 
-	/* Short circuit when nothing to merge */
+        /* Short circuit when nothing to merge */
 	if (*attrs == NULL && extra == NULL) {
 		built = merge;
 		stack = NULL;
-
 	} else {
 		stack = p11_array_new (NULL);
 		nattrs = p11_attrs_count (*attrs);
 		nmerge = p11_attrs_count (merge);
 		nextra = p11_attrs_count (extra);
 
-		/* Make a shallow copy of the combined attributes for validation */
+                /* Make a shallow copy of the combined attributes for validation */
 		built = calloc (nmerge + nattrs + nextra + 1, sizeof (CK_ATTRIBUTE));
 		return_val_if_fail (built != NULL, CKR_GENERAL_ERROR);
 
@@ -387,7 +384,7 @@ index_build (p11_index *index,
 		merge_attrs (built, &count, *attrs, nattrs, stack);
 		merge_attrs (built, &count, extra, nextra, stack);
 
-		/* The terminator attribute */
+                /* The terminator attribute */
 		built[count].type = CKA_INVALID;
 		assert (p11_attrs_terminator (built + count));
 	}
@@ -408,19 +405,19 @@ index_build (p11_index *index,
 }
 
 static void
-call_notify (p11_index *index,
-             CK_OBJECT_HANDLE handle,
-             CK_ATTRIBUTE *attrs)
+call_notify (p11_index        *index,
+             CK_OBJECT_HANDLE  handle,
+             CK_ATTRIBUTE     *attrs)
 {
 	assert (index->notify);
 
-	/* When attrs is NULL, means this is a modify */
+        /* When attrs is NULL, means this is a modify */
 	if (attrs == NULL) {
 		attrs = p11_index_lookup (index, handle);
 		if (attrs == NULL)
 			return;
 
-	/* Otherwise a remove operation, handle not valid anymore */
+                /* Otherwise a remove operation, handle not valid anymore */
 	} else {
 		handle = 0;
 	}
@@ -431,19 +428,17 @@ call_notify (p11_index *index,
 }
 
 static void
-index_notify (p11_index *index,
-              CK_OBJECT_HANDLE handle,
-              CK_ATTRIBUTE *removed)
+index_notify (p11_index        *index,
+              CK_OBJECT_HANDLE  handle,
+              CK_ATTRIBUTE     *removed)
 {
 	index_object *obj;
 
 	if (!index->notify || index->notifying) {
 		p11_attrs_free (removed);
-
 	} else if (!index->changes) {
 		call_notify (index, handle, removed);
 		p11_attrs_free (removed);
-
 	} else {
 		obj = calloc (1, sizeof (index_object));
 		return_if_fail (obj != NULL);
@@ -464,8 +459,8 @@ p11_index_load (p11_index *index)
 		return;
 
 	index->changes = p11_dict_new (p11_dict_ulongptr_hash,
-	                               p11_dict_ulongptr_equal,
-	                               NULL, free_object);
+				       p11_dict_ulongptr_equal,
+				       NULL, free_object);
 	return_if_fail (index->changes != NULL);
 }
 
@@ -501,8 +496,8 @@ p11_index_loading (p11_index *index)
 }
 
 CK_RV
-p11_index_take (p11_index *index,
-                CK_ATTRIBUTE *attrs,
+p11_index_take (p11_index        *index,
+                CK_ATTRIBUTE     *attrs,
                 CK_OBJECT_HANDLE *handle)
 {
 	index_object *obj;
@@ -538,9 +533,9 @@ p11_index_take (p11_index *index,
 }
 
 CK_RV
-p11_index_add (p11_index *index,
-               CK_ATTRIBUTE *attrs,
-               CK_ULONG count,
+p11_index_add (p11_index        *index,
+               CK_ATTRIBUTE     *attrs,
+               CK_ULONG          count,
                CK_OBJECT_HANDLE *handle)
 {
 	CK_ATTRIBUTE *copy;
@@ -555,9 +550,9 @@ p11_index_add (p11_index *index,
 }
 
 CK_RV
-p11_index_update (p11_index *index,
-                  CK_OBJECT_HANDLE handle,
-                  CK_ATTRIBUTE *update)
+p11_index_update (p11_index        *index,
+                  CK_OBJECT_HANDLE  handle,
+                  CK_ATTRIBUTE     *update)
 {
 	index_object *obj;
 	CK_RV rv;
@@ -584,10 +579,10 @@ p11_index_update (p11_index *index,
 }
 
 CK_RV
-p11_index_set (p11_index *index,
-               CK_OBJECT_HANDLE handle,
-               CK_ATTRIBUTE *attrs,
-               CK_ULONG count)
+p11_index_set (p11_index        *index,
+               CK_OBJECT_HANDLE  handle,
+               CK_ATTRIBUTE     *attrs,
+               CK_ULONG          count)
 {
 	CK_ATTRIBUTE *update;
 	index_object *obj;
@@ -605,8 +600,8 @@ p11_index_set (p11_index *index,
 }
 
 CK_RV
-p11_index_remove (p11_index *index,
-                  CK_OBJECT_HANDLE handle)
+p11_index_remove (p11_index        *index,
+                  CK_OBJECT_HANDLE  handle)
 {
 	index_object *obj;
 	CK_RV rv;
@@ -618,14 +613,14 @@ p11_index_remove (p11_index *index,
 
 	rv = (index->remove) (index->data, index, obj->attrs);
 
-	/* If the writer failed the remove, then add it back */
+        /* If the writer failed the remove, then add it back */
 	if (rv != CKR_OK) {
 		if (!p11_dict_set (index->objects, &obj->handle, obj))
 			return_val_if_reached (CKR_HOST_MEMORY);
 		return rv;
 	}
 
-	/* This takes ownership of the attributes */
+        /* This takes ownership of the attributes */
 	index_notify (index, handle, obj->attrs);
 	obj->attrs = NULL;
 	free_object (obj);
@@ -634,11 +629,11 @@ p11_index_remove (p11_index *index,
 }
 
 static CK_RV
-index_replacev (p11_index *index,
-                CK_OBJECT_HANDLE *handles,
-                CK_ATTRIBUTE_TYPE key,
-                CK_ATTRIBUTE **replace,
-                CK_ULONG replacen)
+index_replacev (p11_index          *index,
+                CK_OBJECT_HANDLE   *handles,
+                CK_ATTRIBUTE_TYPE   key,
+                CK_ATTRIBUTE      **replace,
+                CK_ULONG            replacen)
 {
 	index_object *obj;
 	CK_ATTRIBUTE *attrs;
@@ -655,7 +650,7 @@ index_replacev (p11_index *index,
 		handled = false;
 		attr = p11_attrs_find (obj->attrs, key);
 
-		/* The match doesn't have the key, so remove it */
+                /* The match doesn't have the key, so remove it */
 		if (attr != NULL) {
 			for (j = 0; j < replacen; j++) {
 				if (!replace[j])
@@ -697,21 +692,21 @@ index_replacev (p11_index *index,
 }
 
 CK_RV
-p11_index_replace (p11_index *index,
-                   CK_OBJECT_HANDLE handle,
-                   CK_ATTRIBUTE *replace)
+p11_index_replace (p11_index        *index,
+                   CK_OBJECT_HANDLE  handle,
+                   CK_ATTRIBUTE     *replace)
 {
 	CK_OBJECT_HANDLE handles[] = { handle, 0 };
 	return_val_if_fail (index != NULL, CKR_GENERAL_ERROR);
 	return index_replacev (index, handles, CKA_INVALID,
-	                       &replace, replace ? 1 : 0);
+			       &replace, replace ? 1 : 0);
 }
 
 CK_RV
-p11_index_replace_all (p11_index *index,
-                       CK_ATTRIBUTE *match,
-                       CK_ATTRIBUTE_TYPE key,
-                       p11_array *replace)
+p11_index_replace_all (p11_index         *index,
+                       CK_ATTRIBUTE      *match,
+                       CK_ATTRIBUTE_TYPE  key,
+                       p11_array         *replace)
 {
 	CK_OBJECT_HANDLE *handles;
 	CK_RV rv;
@@ -722,8 +717,8 @@ p11_index_replace_all (p11_index *index,
 	handles = p11_index_find_all (index, match, -1);
 
 	rv = index_replacev (index, handles, key,
-	                     replace ? (CK_ATTRIBUTE **)replace->elem : NULL,
-	                     replace ? replace->num : 0);
+			     replace ? (CK_ATTRIBUTE **)replace->elem : NULL,
+			     replace ? replace->num : 0);
 
 	if (rv == CKR_OK) {
 		if (replace)
@@ -742,8 +737,8 @@ p11_index_replace_all (p11_index *index,
 }
 
 CK_ATTRIBUTE *
-p11_index_lookup (p11_index *index,
-                  CK_OBJECT_HANDLE handle)
+p11_index_lookup (p11_index        *index,
+                  CK_OBJECT_HANDLE  handle)
 {
 	index_object *obj;
 
@@ -756,18 +751,18 @@ p11_index_lookup (p11_index *index,
 	return obj ? obj->attrs : NULL;
 }
 
-typedef bool (* index_sink) (p11_index *index,
-                             index_object *obj,
-                             CK_ATTRIBUTE *match,
-                             CK_ULONG count,
-                             void *data);
+typedef bool (* index_sink) (p11_index    *index,
+			     index_object *obj,
+			     CK_ATTRIBUTE *match,
+			     CK_ULONG      count,
+			     void         *data);
 
 static void
-index_select (p11_index *index,
+index_select (p11_index    *index,
               CK_ATTRIBUTE *match,
-              CK_ULONG count,
-              index_sink sink,
-              void *data)
+              CK_ULONG      count,
+              index_sink    sink,
+              void         *data)
 {
 	index_bucket *selected[MAX_SELECT];
 	CK_OBJECT_HANDLE handle;
@@ -778,13 +773,13 @@ index_select (p11_index *index,
 	int num, at;
 	int i, j;
 
-	/* First look for any matching buckets */
+        /* First look for any matching buckets */
 	for (n = 0, num = 0; n < count && num < MAX_SELECT; n++) {
 		if (is_indexable (index, match[n].type)) {
 			hash = p11_attr_hash (match + n);
 			selected[num] = index->buckets + (hash % NUM_BUCKETS);
 
-			/* If any index is empty, then obviously no match */
+                        /* If any index is empty, then obviously no match */
 			if (!selected[num]->num)
 				return;
 
@@ -792,7 +787,7 @@ index_select (p11_index *index,
 		}
 	}
 
-	/* Fall back on selecting all the items, if no index */
+        /* Fall back on selecting all the items, if no index */
 	if (num == 0) {
 		p11_dict_iterate (index->objects, &iter);
 		while (p11_dict_next (&iter, NULL, (void *)&obj)) {
@@ -803,10 +798,10 @@ index_select (p11_index *index,
 	}
 
 	for (i = 0; i < selected[0]->num; i++) {
-		/* A candidate match from first bucket */
+                /* A candidate match from first bucket */
 		handle = selected[0]->elem[i];
 
-		/* Check if the candidate is in other buckets */
+                /* Check if the candidate is in other buckets */
 		for (j = 1; j < num; j++) {
 			assert (selected[j]->elem); /* checked above */
 			at = binary_search (selected[j]->elem, 0, selected[j]->num, handle);
@@ -816,7 +811,7 @@ index_select (p11_index *index,
 			}
 		}
 
-		/* Matched all the buckets, now actually match attrs */
+                /* Matched all the buckets, now actually match attrs */
 		if (handle != 0) {
 			obj = p11_dict_get (index->objects, &handle);
 			if (obj != NULL) {
@@ -828,11 +823,11 @@ index_select (p11_index *index,
 }
 
 static bool
-sink_one_match (p11_index *index,
+sink_one_match (p11_index    *index,
                 index_object *obj,
                 CK_ATTRIBUTE *match,
-                CK_ULONG count,
-                void *data)
+                CK_ULONG      count,
+                void         *data)
 {
 	CK_OBJECT_HANDLE *result = data;
 
@@ -845,9 +840,9 @@ sink_one_match (p11_index *index,
 }
 
 CK_OBJECT_HANDLE
-p11_index_find (p11_index *index,
+p11_index_find (p11_index    *index,
                 CK_ATTRIBUTE *match,
-                int count)
+                int           count)
 {
 	CK_OBJECT_HANDLE handle = 0UL;
 
@@ -861,11 +856,11 @@ p11_index_find (p11_index *index,
 }
 
 static bool
-sink_if_match (p11_index *index,
+sink_if_match (p11_index    *index,
                index_object *obj,
                CK_ATTRIBUTE *match,
-               CK_ULONG count,
-               void *data)
+               CK_ULONG      count,
+               void         *data)
 {
 	index_bucket *handles = data;
 
@@ -875,9 +870,9 @@ sink_if_match (p11_index *index,
 }
 
 CK_OBJECT_HANDLE *
-p11_index_find_all (p11_index *index,
+p11_index_find_all (p11_index    *index,
                     CK_ATTRIBUTE *match,
-                    int count)
+                    int           count)
 {
 	index_bucket handles = { NULL, 0 };
 
@@ -888,17 +883,17 @@ p11_index_find_all (p11_index *index,
 
 	index_select (index, match, count, sink_if_match, &handles);
 
-	/* Null terminate */
+        /* Null terminate */
 	bucket_push (&handles, 0UL);
 	return handles.elem;
 }
 
 static bool
-sink_any (p11_index *index,
+sink_any (p11_index    *index,
           index_object *obj,
           CK_ATTRIBUTE *match,
-          CK_ULONG count,
-          void *data)
+          CK_ULONG      count,
+          void         *data)
 {
 	index_bucket *handles = data;
 	bucket_push (handles, obj->handle);
@@ -906,10 +901,10 @@ sink_any (p11_index *index,
 }
 
 CK_OBJECT_HANDLE *
-p11_index_snapshot (p11_index *index,
-                    p11_index *base,
+p11_index_snapshot (p11_index    *index,
+                    p11_index    *base,
                     CK_ATTRIBUTE *attrs,
-                    CK_ULONG count)
+                    CK_ULONG      count)
 {
 	index_bucket handles = { NULL, 0 };
 
@@ -919,7 +914,7 @@ p11_index_snapshot (p11_index *index,
 	if (base)
 		index_select (base, attrs, count, sink_any, &handles);
 
-	/* Null terminate */
+        /* Null terminate */
 	bucket_push (&handles, 0UL);
 	return handles.elem;
 }

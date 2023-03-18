@@ -47,17 +47,23 @@
 #include "p11-kit/private.h"
 
 static P11KitPin *
-callback_one (const char *pin_source, P11KitUri *pin_uri, const char *pin_description,
-              P11KitPinFlags pin_flags, void *callback_data)
+callback_one (const char     *pin_source,
+              P11KitUri      *pin_uri,
+              const char     *pin_description,
+              P11KitPinFlags  pin_flags,
+              void           *callback_data)
 {
 	int *data = callback_data;
 	assert (*data == 33);
-	return p11_kit_pin_new_for_buffer ((unsigned char*)strdup ("one"), 3, free);
+	return p11_kit_pin_new_for_buffer ((unsigned char *)strdup ("one"), 3, free);
 }
 
-static P11KitPin*
-callback_other (const char *pin_source, P11KitUri *pin_uri, const char *pin_description,
-                P11KitPinFlags pin_flags, void *callback_data)
+static P11KitPin *
+callback_other (const char     *pin_source,
+                P11KitUri      *pin_uri,
+                const char     *pin_description,
+                P11KitPinFlags  pin_flags,
+                void           *callback_data)
 {
 	char *data = callback_data;
 	return p11_kit_pin_new_for_string (data);
@@ -76,10 +82,10 @@ test_pin_register_unregister (void)
 	int data = 33;
 
 	p11_kit_pin_register_callback ("/the/pin_source", callback_one,
-	                               &data, destroy_data);
+				       &data, destroy_data);
 
 	p11_kit_pin_unregister_callback ("/the/pin_source", callback_one,
-	                                 &data);
+					 &data);
 
 	assert_num_eq (34, data);
 }
@@ -94,11 +100,11 @@ test_pin_read (void)
 	const unsigned char *ptr;
 
 	p11_kit_pin_register_callback ("/the/pin_source", callback_one,
-	                               &data, destroy_data);
+				       &data, destroy_data);
 
 	uri = p11_kit_uri_new ();
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 	p11_kit_uri_free (uri);
 
 	assert_ptr_not_null (pin);
@@ -107,7 +113,7 @@ test_pin_read (void)
 	assert (memcmp (ptr, "one", 3) == 0);
 
 	p11_kit_pin_unregister_callback ("/the/pin_source", callback_one,
-	                                 &data);
+					 &data);
 
 	p11_kit_pin_unref (pin);
 }
@@ -120,7 +126,7 @@ test_pin_read_no_match (void)
 
 	uri = p11_kit_uri_new ();
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 	p11_kit_uri_free (uri);
 
 	assert_ptr_eq (NULL, pin);
@@ -139,13 +145,13 @@ test_pin_register_duplicate (void)
 	uri = p11_kit_uri_new ();
 
 	p11_kit_pin_register_callback ("/the/pin_source", callback_one,
-	                               &data, destroy_data);
+				       &data, destroy_data);
 
 	p11_kit_pin_register_callback ("/the/pin_source", callback_other,
-	                               value, NULL);
+				       value, NULL);
 
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_not_null (pin);
 	ptr = p11_kit_pin_get_value (pin, &length);
@@ -154,10 +160,10 @@ test_pin_register_duplicate (void)
 	p11_kit_pin_unref (pin);
 
 	p11_kit_pin_unregister_callback ("/the/pin_source", callback_other,
-	                                 value);
+					 value);
 
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_not_null (pin);
 	ptr = p11_kit_pin_get_value (pin, &length);
@@ -166,10 +172,10 @@ test_pin_register_duplicate (void)
 	p11_kit_pin_unref (pin);
 
 	p11_kit_pin_unregister_callback ("/the/pin_source", callback_one,
-	                                 &data);
+					 &data);
 
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_eq (NULL, pin);
 
@@ -189,10 +195,10 @@ test_pin_register_fallback (void)
 	uri = p11_kit_uri_new ();
 
 	p11_kit_pin_register_callback (P11_KIT_PIN_FALLBACK, callback_one,
-	                               &data, destroy_data);
+				       &data, destroy_data);
 
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_not_null (pin);
 	ptr = p11_kit_pin_get_value (pin, &length);
@@ -201,10 +207,10 @@ test_pin_register_fallback (void)
 	p11_kit_pin_unref (pin);
 
 	p11_kit_pin_register_callback ("/the/pin_source", callback_other,
-	                               value, NULL);
+				       value, NULL);
 
 	pin = p11_kit_pin_request ("/the/pin_source", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_not_null (pin);
 	ptr = p11_kit_pin_get_value (pin, &length);
@@ -213,10 +219,10 @@ test_pin_register_fallback (void)
 	p11_kit_pin_unref (pin);
 
 	p11_kit_pin_unregister_callback ("/the/pin_source", callback_other,
-	                                 value);
+					 value);
 
 	p11_kit_pin_unregister_callback (P11_KIT_PIN_FALLBACK, callback_one,
-	                                 &data);
+					 &data);
 
 	p11_kit_uri_free (uri);
 }
@@ -232,10 +238,10 @@ test_pin_file (void)
 	uri = p11_kit_uri_new ();
 
 	p11_kit_pin_register_callback (P11_KIT_PIN_FALLBACK, p11_kit_pin_file_callback,
-	                               NULL, NULL);
+				       NULL, NULL);
 
 	pin = p11_kit_pin_request (SRCDIR "/p11-kit/fixtures/test-pinfile", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_not_null (pin);
 	ptr = p11_kit_pin_get_value (pin, &length);
@@ -244,12 +250,12 @@ test_pin_file (void)
 	p11_kit_pin_unref (pin);
 
 	pin = p11_kit_pin_request (SRCDIR "/p11-kit/fixtures/nonexistent", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	assert_ptr_eq (NULL, pin);
 
 	p11_kit_pin_unregister_callback (P11_KIT_PIN_FALLBACK, p11_kit_pin_file_callback,
-	                                 NULL);
+					 NULL);
 
 	p11_kit_uri_free (uri);
 }
@@ -264,17 +270,17 @@ test_pin_file_large (void)
 	uri = p11_kit_uri_new ();
 
 	p11_kit_pin_register_callback (P11_KIT_PIN_FALLBACK, p11_kit_pin_file_callback,
-	                               NULL, NULL);
+				       NULL, NULL);
 
 	pin = p11_kit_pin_request (SRCDIR "/p11-kit/fixtures/test-pinfile-large", uri, "The token",
-	                            P11_KIT_PIN_FLAGS_USER_LOGIN);
+				   P11_KIT_PIN_FLAGS_USER_LOGIN);
 
 	error = errno;
 	assert_ptr_eq (NULL, pin);
 	assert_num_eq (EFBIG, error);
 
 	p11_kit_pin_unregister_callback (P11_KIT_PIN_FALLBACK, p11_kit_pin_file_callback,
-	                                 NULL);
+					 NULL);
 
 	p11_kit_uri_free (uri);
 }
@@ -295,7 +301,7 @@ test_pin_ref_unref (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

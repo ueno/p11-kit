@@ -85,7 +85,7 @@ test_build_one (void)
 
 	attrs = p11_attrs_build (NULL, &add, NULL);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert (attrs->type == CKA_LABEL);
 	assert_num_eq (3, attrs->ulValueLen);
@@ -156,7 +156,7 @@ test_buildn_two (void)
 
 	attrs = p11_attrs_buildn (NULL, add, 2);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert (attrs->type == CKA_LABEL);
 	assert_num_eq (3, attrs->ulValueLen);
@@ -180,7 +180,7 @@ test_buildn_one (void)
 
 	attrs = p11_attrs_buildn (NULL, &add, 1);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert (attrs->type == CKA_LABEL);
 	assert_num_eq (3, attrs->ulValueLen);
@@ -234,7 +234,7 @@ test_build_null (void)
 
 	attrs = p11_attrs_build (NULL, &add, NULL);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert (attrs->type == CKA_LABEL);
 	assert (attrs->ulValueLen == (CK_ULONG)-1);
@@ -258,19 +258,19 @@ test_build_recursive (void)
 
 	attrs = p11_attrs_build (NULL, &add, NULL);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert_num_eq (attrs->type, CKA_WRAP_TEMPLATE);
 	assert_num_eq (attrs->ulValueLen, sizeof (template));
 	array = attrs->pValue;
-	/* Check that the CKA_LOCAL attribute has been copied, but
-	 * still has the same value */
+        /* Check that the CKA_LOCAL attribute has been copied, but
+         * still has the same value */
 	assert_num_eq (array[0].type, CKA_LOCAL);
 	assert_num_eq (array[0].ulValueLen, sizeof (vtrue));
 	assert_ptr_cmp (array[0].pValue, !=, &vtrue);
 	assert_num_eq (*(CK_BBOOL *)array[0].pValue, vtrue);
-	/* Check that the CKA_EC_POINT attribute has been allocated,
-	 * even if the length is zero */
+        /* Check that the CKA_EC_POINT attribute has been allocated,
+         * even if the length is zero */
 	assert_num_eq (array[1].type, CKA_EC_POINT);
 	assert_num_eq (array[1].ulValueLen, 0);
 	assert_ptr_not_null (array[1].pValue);
@@ -290,7 +290,7 @@ test_dup (void)
 
 	attrs = p11_attrs_dup (original);
 
-	/* Test the first attribute */
+        /* Test the first attribute */
 	assert_ptr_not_null (attrs);
 	assert (attrs->type == CKA_LABEL);
 	assert_num_eq (3, attrs->ulValueLen);
@@ -616,7 +616,7 @@ test_purge (void)
 	attr = p11_attrs_find (attrs, CKA_LABEL);
 	assert_ptr_eq (attrs + 0, attr);
 
-	attr[0].ulValueLen = (CK_ULONG) -1;
+	attr[0].ulValueLen = (CK_ULONG)-1;
 
 	p11_attrs_purge (attrs);
 
@@ -785,7 +785,7 @@ test_find_valid (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_equal, "/attrs/equal");

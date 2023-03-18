@@ -40,8 +40,8 @@
 #include <string.h>
 
 static bool
-maybe_expand_array (p11_array *array,
-                    unsigned int length)
+maybe_expand_array (p11_array   *array,
+		    unsigned int length)
 {
 	unsigned int new_allocated;
 	void **new_memory;
@@ -59,7 +59,7 @@ maybe_expand_array (p11_array *array,
 	if (new_allocated < length)
 		new_allocated = length;
 
-	new_memory = reallocarray (array->elem, new_allocated, sizeof (void*));
+	new_memory = reallocarray (array->elem, new_allocated, sizeof (void *));
 	return_val_if_fail (new_memory != NULL, false);
 
 	array->elem = new_memory;
@@ -98,7 +98,7 @@ p11_array_free (p11_array *array)
 
 bool
 p11_array_push (p11_array *array,
-                void *value)
+                void      *value)
 {
 	if (!maybe_expand_array (array, array->num + 1))
 		return_val_if_reached (false);
@@ -109,29 +109,29 @@ p11_array_push (p11_array *array,
 }
 
 bool
-p11_array_insert (p11_array *array,
+p11_array_insert (p11_array   *array,
 		  unsigned int index,
-		  void *value)
+		  void        *value)
 {
 	return_val_if_fail (index <= array->num, false);
 	if (!maybe_expand_array (array, array->num + 1))
 		return_val_if_reached (false);
 
 	memmove (array->elem + index + 1, array->elem + index,
-	         (array->num - index) * sizeof (void*));
+		 (array->num - index) * sizeof (void *));
 	array->elem[index] = value;
 	array->num++;
 	return true;
 }
 
 void
-p11_array_remove (p11_array *array,
-                  unsigned int index)
+p11_array_remove (p11_array   *array,
+		  unsigned int index)
 {
 	if (array->destroyer)
 		(array->destroyer) (array->elem[index]);
 	memmove (array->elem + index, array->elem + index + 1,
-	         (array->num - (index + 1)) * sizeof (void*));
+		 (array->num - (index + 1)) * sizeof (void *));
 	array->num--;
 }
 

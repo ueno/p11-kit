@@ -75,12 +75,11 @@ p11_asn1_defs_load (void)
 	defs = p11_dict_new (p11_dict_str_hash, p11_dict_str_equal, NULL, free_asn1_def);
 
 	for (i = 0; asn1_tabs[i].tab != NULL; i++) {
-
 		def = NULL;
 		ret = asn1_array2tree (asn1_tabs[i].tab, &def, message);
 		if (ret != ASN1_SUCCESS) {
 			p11_debug_precond ("failed to load %s* definitions: %s: %s\n",
-			                   asn1_tabs[i].prefix, asn1_strerror (ret), message);
+					   asn1_tabs[i].prefix, asn1_strerror (ret), message);
 			return NULL;
 		}
 
@@ -92,7 +91,7 @@ p11_asn1_defs_load (void)
 }
 
 static asn1_node
-lookup_def (p11_dict *asn1_defs,
+lookup_def (p11_dict   *asn1_defs,
             const char *struct_name)
 {
 	int i;
@@ -107,7 +106,7 @@ lookup_def (p11_dict *asn1_defs,
 }
 
 asn1_node
-p11_asn1_create (p11_dict *asn1_defs,
+p11_asn1_create (p11_dict   *asn1_defs,
                  const char *struct_name)
 {
 	asn1_node def;
@@ -122,7 +121,7 @@ p11_asn1_create (p11_dict *asn1_defs,
 	ret = asn1_create_element (def, struct_name, &asn);
 	if (ret != ASN1_SUCCESS) {
 		p11_debug_precond ("failed to create element %s: %s\n",
-		                   struct_name, asn1_strerror (ret));
+				   struct_name, asn1_strerror (ret));
 		return NULL;
 	}
 
@@ -130,11 +129,11 @@ p11_asn1_create (p11_dict *asn1_defs,
 }
 
 asn1_node
-p11_asn1_decode (p11_dict *asn1_defs,
-                 const char *struct_name,
-                 const unsigned char *der,
-                 size_t der_len,
-                 char *message)
+p11_asn1_decode (p11_dict            *asn1_defs,
+		 const char          *struct_name,
+		 const unsigned char *der,
+		 size_t               der_len,
+		 char                *message)
 {
 	char msg[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
 	asn1_node asn = NULL;
@@ -145,14 +144,14 @@ p11_asn1_decode (p11_dict *asn1_defs,
 	asn = p11_asn1_create (asn1_defs, struct_name);
 	return_val_if_fail (asn != NULL, NULL);
 
-	/* asn1_der_decoding destroys the element if fails */
+        /* asn1_der_decoding destroys the element if fails */
 	ret = asn1_der_decoding (&asn, der, der_len, message ? message : msg);
 
 	if (ret != ASN1_SUCCESS) {
-		/* If caller passed in a message buffer, assume they're logging */
+                /* If caller passed in a message buffer, assume they're logging */
 		if (!message) {
 			p11_debug ("couldn't parse %s: %s: %s",
-			           struct_name, asn1_strerror (ret), msg);
+				   struct_name, asn1_strerror (ret), msg);
 		}
 		return NULL;
 	}
@@ -161,8 +160,8 @@ p11_asn1_decode (p11_dict *asn1_defs,
 }
 
 unsigned char *
-p11_asn1_encode (asn1_node asn,
-                 size_t *der_len)
+p11_asn1_encode (asn1_node  asn,
+                 size_t    *der_len)
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
 	unsigned char *der;
@@ -193,9 +192,9 @@ p11_asn1_encode (asn1_node asn,
 }
 
 void *
-p11_asn1_read (asn1_node asn,
+p11_asn1_read (asn1_node   asn,
                const char *field,
-               size_t *length)
+               size_t     *length)
 {
 	unsigned char *value;
 	int len;
@@ -218,7 +217,7 @@ p11_asn1_read (asn1_node asn,
 	ret = asn1_read_value (asn, field, value, &len);
 	return_val_if_fail (ret == ASN1_SUCCESS, NULL);
 
-	/* Courtesy zero terminated */
+        /* Courtesy zero terminated */
 	value[len] = '\0';
 
 	*length = len;
@@ -235,7 +234,7 @@ p11_asn1_free (void *asn)
 
 ssize_t
 p11_asn1_tlv_length (const unsigned char *data,
-                     size_t length)
+		     size_t               length)
 {
 	unsigned char cls;
 	int counter = 0;
@@ -291,7 +290,7 @@ p11_asn1_cache_new (void)
 	}
 
 	cache->items = p11_dict_new (p11_dict_direct_hash, p11_dict_direct_equal,
-	                             NULL, free_asn1_item);
+				     NULL, free_asn1_item);
 	if (cache->items == NULL) {
 		p11_asn1_cache_free (cache);
 		return_val_if_reached (NULL);
@@ -301,10 +300,10 @@ p11_asn1_cache_new (void)
 }
 
 asn1_node
-p11_asn1_cache_get (p11_asn1_cache *cache,
-                    const char *struct_name,
-                    const unsigned char *der,
-                    size_t der_len)
+p11_asn1_cache_get (p11_asn1_cache      *cache,
+		    const char          *struct_name,
+		    const unsigned char *der,
+		    size_t               der_len)
 {
 	asn1_item *item;
 
@@ -325,11 +324,11 @@ p11_asn1_cache_get (p11_asn1_cache *cache,
 }
 
 void
-p11_asn1_cache_take (p11_asn1_cache *cache,
-                     asn1_node node,
-                     const char *struct_name,
-                     const unsigned char *der,
-                     size_t der_len)
+p11_asn1_cache_take (p11_asn1_cache      *cache,
+		     asn1_node            node,
+		     const char          *struct_name,
+		     const unsigned char *der,
+		     size_t               der_len)
 {
 	asn1_item *item;
 

@@ -67,9 +67,9 @@ p11_get_runtime_directory (char **directoryp)
 	int i;
 #endif
 
-	/* We can't always assume the XDG_RUNTIME_DIR envvar here,
-	 * because the PKCS#11 module can be loaded by a program that
-	 * calls setuid().  */
+        /* We can't always assume the XDG_RUNTIME_DIR envvar here,
+         * because the PKCS#11 module can be loaded by a program that
+         * calls setuid().  */
 	envvar = secure_getenv ("XDG_RUNTIME_DIR");
 
 	if (envvar != NULL && envvar[0] != '\0') {
@@ -86,7 +86,7 @@ p11_get_runtime_directory (char **directoryp)
 
 	for (i = 0; bases[i] != NULL; i++) {
 		if (asprintf (&prefix, "%s/user/%u",
-			      bases[i], (unsigned int) uid) < 0)
+			      bases[i], (unsigned int)uid) < 0)
 			return CKR_HOST_MEMORY;
 		if (stat (prefix, &sb) != -1 && S_ISDIR (sb.st_mode)) {
 			*directoryp = prefix;
@@ -96,7 +96,7 @@ p11_get_runtime_directory (char **directoryp)
 	}
 #endif
 
-	/* We can't use /run/user/<UID>, fallback to ~/.cache.  */
+        /* We can't use /run/user/<UID>, fallback to ~/.cache.  */
 	envvar = secure_getenv ("XDG_CACHE_HOME");
 
 	if (envvar != NULL && envvar[0] != '\0') {

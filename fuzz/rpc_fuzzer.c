@@ -31,26 +31,28 @@ static p11_virtual base;
 #ifdef __cplusplus
 extern "C"
 #endif
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+int
+LLVMFuzzerTestOneInput (const uint8_t *data,
+                        size_t         size)
 {
-    p11_buffer buffer;
+	p11_buffer buffer;
 
-    mock_module_init ();
-    p11_library_init ();
+	mock_module_init ();
+	p11_library_init ();
 
-    p11_buffer_init (&buffer, 0);
+	p11_buffer_init (&buffer, 0);
 
-    p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
-    base.funcs.C_Initialize (&base.funcs, NULL);
+	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
+	base.funcs.C_Initialize (&base.funcs, NULL);
 
-    p11_buffer_add (&buffer, data, size);
-    assert (!p11_buffer_failed (&buffer));
+	p11_buffer_add (&buffer, data, size);
+	assert (!p11_buffer_failed (&buffer));
 
-    p11_rpc_server_handle (&base.funcs, &buffer, &buffer);
+	p11_rpc_server_handle (&base.funcs, &buffer, &buffer);
 
-    p11_buffer_uninit (&buffer);
-    mock_module_reset ();
-    p11_library_uninit ();
+	p11_buffer_uninit (&buffer);
+	mock_module_reset ();
+	p11_library_uninit ();
 
-    return 0;
+	return 0;
 }

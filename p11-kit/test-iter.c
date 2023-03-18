@@ -75,8 +75,8 @@ finalize_and_free_modules (CK_FUNCTION_LIST_PTR_PTR modules)
 
 static int
 has_handle (CK_ULONG *objects,
-            int count,
-            CK_ULONG handle)
+            int       count,
+            CK_ULONG  handle)
 {
 	int i;
 	for (i = 0; i < count; i++) {
@@ -116,7 +116,7 @@ test_all (void)
 		session = p11_kit_iter_get_session (iter);
 		assert (session != 0);
 
-		/* Do something with the object */
+                /* Do something with the object */
 		size = 0;
 		rv = (module->C_GetObjectSize) (session, objects[at], &size);
 		assert (rv == CKR_OK);
@@ -127,7 +127,7 @@ test_all (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, at);
 
 	assert (has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -143,8 +143,8 @@ test_all (void)
 
 static CK_RV
 on_iter_callback (P11KitIter *iter,
-                  CK_BBOOL *matches,
-                  void *data)
+                  CK_BBOOL   *matches,
+                  void       *data)
 {
 	CK_OBJECT_HANDLE object;
 	CK_FUNCTION_LIST_PTR module;
@@ -166,7 +166,7 @@ on_iter_callback (P11KitIter *iter,
 	session = p11_kit_iter_get_session (iter);
 	assert (session != 0);
 
-	/* Do something with the object */
+        /* Do something with the object */
 	size = 0;
 	rv = (module->C_GetObjectSize) (session, object, &size);
 	assert (rv == CKR_OK);
@@ -190,7 +190,7 @@ test_callback (void)
 	p11_kit_iter_add_callback (iter, on_iter_callback, "callback", NULL);
 	p11_kit_iter_begin (iter, modules);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK) {
 		assert (at < 128);
 		objects[at] = p11_kit_iter_get_object (iter);
@@ -199,7 +199,7 @@ test_callback (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 2 public keys */
+        /* Three modules, each with 1 slot, and 2 public keys */
 	assert_num_eq (6, at);
 
 	assert (!has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -215,8 +215,8 @@ test_callback (void)
 
 static CK_RV
 on_callback_fail (P11KitIter *iter,
-                  CK_BBOOL *matches,
-                  void *data)
+                  CK_BBOOL   *matches,
+                  void       *data)
 {
 	return CKR_DATA_INVALID;
 }
@@ -235,13 +235,13 @@ test_callback_fails (void)
 	p11_kit_iter_add_callback (iter, on_callback_fail, "callback", NULL);
 	p11_kit_iter_begin (iter, modules);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_DATA_INVALID);
 
-	/* Shouldn't have succeeded at all */
+        /* Shouldn't have succeeded at all */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -289,7 +289,7 @@ test_with_session (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &mock_module, 0, session);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK) {
 		assert (at < 128);
 		objects[at] = p11_kit_iter_get_object (iter);
@@ -306,7 +306,7 @@ test_with_session (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* 1 modules, each with 1 slot, and 3 public objects */
+        /* 1 modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, at);
 
 	assert (has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -317,7 +317,7 @@ test_with_session (void)
 
 	p11_kit_iter_free (iter);
 
-	/* The session is still valid ... */
+        /* The session is still valid ... */
 	rv = mock_module.C_CloseSession (session);
 	assert (rv == CKR_OK);
 
@@ -342,7 +342,7 @@ test_with_slot (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &mock_module, MOCK_SLOT_ONE_ID, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK) {
 		assert (at < 128);
 		objects[at] = p11_kit_iter_get_object (iter);
@@ -357,7 +357,7 @@ test_with_slot (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* 1 modules, each with 1 slot, and 3 public objects */
+        /* 1 modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, at);
 
 	assert (has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -388,7 +388,7 @@ test_with_module (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &mock_module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK) {
 		assert (at < 128);
 		objects[at] = p11_kit_iter_get_object (iter);
@@ -400,7 +400,7 @@ test_with_module (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* 1 modules, each with 1 slot, and 3 public objects */
+        /* 1 modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, at);
 
 	assert (has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -435,7 +435,7 @@ test_keep_session (void)
 	session = p11_kit_iter_keep_session (iter);
 	p11_kit_iter_free (iter);
 
-	/* The session is still valid ... */
+        /* The session is still valid ... */
 	rv = mock_module.C_CloseSession (session);
 	assert (rv == CKR_OK);
 
@@ -467,7 +467,7 @@ test_unrecognized (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	assert_num_eq (0, count);
 
 	p11_kit_iter_free (iter);
@@ -506,7 +506,7 @@ test_uri_with_type (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 2 public keys */
+        /* Three modules, each with 1 slot, and 2 public keys */
 	assert_num_eq (6, at);
 
 	assert (!has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -538,7 +538,7 @@ test_set_uri (void)
 
 	p11_kit_iter_begin (iter, modules);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	rv = p11_kit_iter_next (iter);
 	assert_num_eq (rv, CKR_CANCEL);
 
@@ -579,7 +579,7 @@ test_filter (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 2 public keys */
+        /* Three modules, each with 1 slot, and 2 public keys */
 	assert_num_eq (6, at);
 
 	assert (!has_handle (objects, at, MOCK_DATA_OBJECT));
@@ -655,7 +655,7 @@ test_module_match (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, count);
 
 	p11_kit_iter_free (iter);
@@ -690,7 +690,7 @@ test_module_mismatch (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	assert_num_eq (0, count);
 
 	p11_kit_iter_free (iter);
@@ -728,7 +728,7 @@ test_module_only (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, count);
 
 	p11_kit_iter_free (iter);
@@ -763,7 +763,7 @@ test_slot_match (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, count);
 
 	p11_kit_iter_free (iter);
@@ -798,7 +798,7 @@ test_slot_mismatch (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	assert_num_eq (0, count);
 
 	p11_kit_iter_free (iter);
@@ -836,7 +836,7 @@ test_slot_only (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, count);
 
 	p11_kit_iter_free (iter);
@@ -875,7 +875,7 @@ test_slot_match_by_id (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, count);
 
 	p11_kit_iter_free (iter);
@@ -910,7 +910,7 @@ test_slot_mismatch_by_id (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	assert_num_eq (0, count);
 
 	p11_kit_iter_free (iter);
@@ -977,7 +977,7 @@ test_token_match (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, count);
 
 	p11_kit_iter_free (iter);
@@ -1012,7 +1012,7 @@ test_token_mismatch (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Nothing should have matched */
+        /* Nothing should have matched */
 	assert_num_eq (0, count);
 
 	p11_kit_iter_free (iter);
@@ -1050,7 +1050,7 @@ test_token_only (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (3, count);
 
 	p11_kit_iter_free (iter);
@@ -1107,13 +1107,13 @@ test_getslotlist_fail_first (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_VENDOR_DEFINED);
 
-	/* Should fail on the first iteration */
+        /* Should fail on the first iteration */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -1140,13 +1140,13 @@ test_getslotlist_fail_late (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_VENDOR_DEFINED);
 
-	/* Should fail on the first iteration */
+        /* Should fail on the first iteration */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -1173,13 +1173,13 @@ test_open_session_fail (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_DEVICE_ERROR);
 
-	/* Should fail on the first iteration */
+        /* Should fail on the first iteration */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -1206,13 +1206,13 @@ test_find_init_fail (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_DEVICE_MEMORY);
 
-	/* Should fail on the first iteration */
+        /* Should fail on the first iteration */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -1239,13 +1239,13 @@ test_find_objects_fail (void)
 	iter = p11_kit_iter_new (NULL, 0);
 	p11_kit_iter_begin_with (iter, &module, 0, 0);
 
-	at= 0;
+	at = 0;
 	while ((rv = p11_kit_iter_next (iter)) == CKR_OK)
 		at++;
 
 	assert (rv == CKR_DEVICE_REMOVED);
 
-	/* Should fail on the first iteration */
+        /* Should fail on the first iteration */
 	assert_num_eq (0, at);
 
 	p11_kit_iter_free (iter);
@@ -1289,21 +1289,21 @@ test_get_attributes (void)
 
 		object = p11_kit_iter_get_object (iter);
 		switch (object) {
-		case MOCK_DATA_OBJECT:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_DATA);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "TEST LABEL", -1));
-			break;
-		case MOCK_PUBLIC_KEY_CAPITALIZE:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public Capitalize Key", -1));
-			break;
-		case MOCK_PUBLIC_KEY_PREFIX:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public prefix key", -1));
-			break;
-		default:
-			assert_fail ("Unknown object matched", NULL);
-			break;
+			case MOCK_DATA_OBJECT:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_DATA);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "TEST LABEL", -1));
+				break;
+			case MOCK_PUBLIC_KEY_CAPITALIZE:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public Capitalize Key", -1));
+				break;
+			case MOCK_PUBLIC_KEY_PREFIX:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public prefix key", -1));
+				break;
+			default:
+				assert_fail ("Unknown object matched", NULL);
+				break;
 		}
 
 		at++;
@@ -1311,7 +1311,7 @@ test_get_attributes (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, at);
 
 	p11_kit_iter_free (iter);
@@ -1351,21 +1351,21 @@ test_load_attributes (void)
 
 		object = p11_kit_iter_get_object (iter);
 		switch (object) {
-		case MOCK_DATA_OBJECT:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_DATA);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "TEST LABEL", -1));
-			break;
-		case MOCK_PUBLIC_KEY_CAPITALIZE:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public Capitalize Key", -1));
-			break;
-		case MOCK_PUBLIC_KEY_PREFIX:
-			assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
-			assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public prefix key", -1));
-			break;
-		default:
-			assert_fail ("Unknown object matched", NULL);
-			break;
+			case MOCK_DATA_OBJECT:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_DATA);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "TEST LABEL", -1));
+				break;
+			case MOCK_PUBLIC_KEY_CAPITALIZE:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public Capitalize Key", -1));
+				break;
+			case MOCK_PUBLIC_KEY_PREFIX:
+				assert (p11_attrs_find_ulong (attrs, CKA_CLASS, &ulong) && ulong == CKO_PUBLIC_KEY);
+				assert (p11_attr_match_value (p11_attrs_find (attrs, CKA_LABEL), "Public prefix key", -1));
+				break;
+			default:
+				assert_fail ("Unknown object matched", NULL);
+				break;
 		}
 
 		at++;
@@ -1375,7 +1375,7 @@ test_load_attributes (void)
 
 	assert (rv == CKR_CANCEL);
 
-	/* Three modules, each with 1 slot, and 3 public objects */
+        /* Three modules, each with 1 slot, and 3 public objects */
 	assert_num_eq (9, at);
 
 	p11_kit_iter_free (iter);
@@ -1558,7 +1558,7 @@ test_destroy_object (void)
 
 	p11_kit_iter_begin (iter, modules);
 
-	/* Should have matched */
+        /* Should have matched */
 	rv = p11_kit_iter_next (iter);
 	assert_num_eq (rv, CKR_OK);
 
@@ -1598,7 +1598,7 @@ test_exhaustive_match (void)
 	for (i = 0; i < ELEMS (counts); i++) {
 		modules = initialize_and_get_modules ();
 
-		iter = p11_kit_iter_new (NULL, (P11KitIterBehavior) i << 3);
+		iter = p11_kit_iter_new (NULL, (P11KitIterBehavior)i << 3);
 		p11_kit_iter_begin (iter, modules);
 
 		count = 0;
@@ -1616,7 +1616,7 @@ test_exhaustive_match (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_library_init ();

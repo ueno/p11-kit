@@ -86,7 +86,7 @@ typedef void (*sighandler_t)(int);
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -135,8 +135,10 @@ server_free (Server *server)
 }
 
 static Server *
-server_new (const char **tokens, size_t n_tokens, const char *provider,
-	    const char *socket_name)
+server_new (const char **tokens,
+            size_t       n_tokens,
+            const char  *provider,
+            const char  *socket_name)
 {
 	Server *server;
 
@@ -159,21 +161,21 @@ server_new (const char **tokens, size_t n_tokens, const char *provider,
 		server->socket_name = socket_name + 10;
 #ifdef HAVE_VSOCK
 	} else if (strncmp (socket_name, "vsock:", 6) == 0) {
-		if (!p11_vsock_parse_addr(socket_name + 6,
-					  &server->vsock_cid,
-					  &server->vsock_port)) {
+		if (!p11_vsock_parse_addr (socket_name + 6,
+					   &server->vsock_cid,
+					   &server->vsock_port)) {
 			p11_message (_("failed to parse vsock address: '%s'"),
 				     socket_name + 6);
 			free (server);
 			return NULL;
 		}
 		if (server->vsock_cid == VMADDR_CID_ANY) {
-			/* We need to print the right CID so that clients can
-			 * know the address to connect to. Just binding to
-			 * VMADDR_CID_ANY isn't stunningly useful unless the
-			 * client knows the CID through other means */
+                        /* We need to print the right CID so that clients can
+                         * know the address to connect to. Just binding to
+                         * VMADDR_CID_ANY isn't stunningly useful unless the
+                         * client knows the CID through other means */
 			p11_vsock_get_local_cid (&server->vsock_cid);
-			/* On error, we'll just report 0xFFFFFFFF */
+                        /* On error, we'll just report 0xFFFFFFFF */
 		}
 		server->socket_name = NULL;
 #endif /* HAVE_VSOCK */
@@ -183,8 +185,8 @@ server_new (const char **tokens, size_t n_tokens, const char *provider,
 #endif /* OS_UNIX */
 
 #ifdef OS_WIN32
-	/* On Windows, we need to load module by ourselves as we don't
-	 * launch "p11-kit remote" */
+        /* On Windows, we need to load module by ourselves as we don't
+         * launch "p11-kit remote" */
 	if (strncmp (tokens[0], "pkcs11:", 7) == 0) {
 		if (server->provider) {
 			server->module = p11_kit_module_load (server->provider, 0);
@@ -217,7 +219,8 @@ static bool csh_opt = false;
 #define P11_KIT_SERVER_PID_ENV "P11_KIT_SERVER_PID"
 
 static SIGHANDLER_T
-ocsignal (int signum, SIGHANDLER_T handler)
+ocsignal (int          signum,
+          SIGHANDLER_T handler)
 {
 	struct sigaction new_action, old_action;
 
@@ -262,7 +265,7 @@ handle_term (int signo)
 
 static int
 set_cloexec_on_fd (void *data,
-                   int fd)
+                   int   fd)
 {
 	int *max_fd = data;
 	if (fd >= *max_fd)
@@ -271,7 +274,7 @@ set_cloexec_on_fd (void *data,
 }
 
 static int
-exec_external (int argc,
+exec_external (int   argc,
 	       char *argv[])
 {
 	const char *private_dir;
@@ -284,7 +287,7 @@ exec_external (int argc,
 	if (!private_dir || !private_dir[0])
 		private_dir = PRIVATEDIR;
 
-	/* Add our libexec directory to the path */
+        /* Add our libexec directory to the path */
 	path = p11_path_build (private_dir, argv[0], NULL);
 	return_val_if_fail (path != NULL, -1);
 
@@ -297,14 +300,14 @@ exec_external (int argc,
 
 static int
 create_unix_socket (const char *address,
-		    uid_t uid,
-		    gid_t gid)
+                    uid_t       uid,
+                    gid_t       gid)
 {
 	int rc, sd;
 	struct sockaddr_un sa;
 	const char *socket_file;
 
-	memset (&sa, 0, sizeof(sa));
+	memset (&sa, 0, sizeof (sa));
 	sa.sun_family = AF_UNIX;
 
 	return_val_if_fail (strlen (address) < sizeof (sa.sun_path) - 1, -1);
@@ -354,7 +357,7 @@ create_vsock_socket (unsigned int cid,
 	int rc, sd;
 	struct sockaddr_vm sa;
 
-	memset (&sa, 0, sizeof(sa));
+	memset (&sa, 0, sizeof (sa));
 	sa.svm_family = AF_VSOCK;
 	sa.svm_cid = cid;
 	sa.svm_port = port;
@@ -365,7 +368,7 @@ create_vsock_socket (unsigned int cid,
 		return -1;
 	}
 
-	rc = bind (sd, (struct sockaddr *)&sa, sizeof(sa));
+	rc = bind (sd, (struct sockaddr *)&sa, sizeof (sa));
 	if (rc == -1) {
 		close (sd);
 		p11_message_err (errno, _("could not bind socket %u:%u"), cid, port);
@@ -384,9 +387,9 @@ create_vsock_socket (unsigned int cid,
 #endif /* HAVE_VSOCK */
 
 static bool
-check_credentials (int fd,
-		   uid_t uid,
-		   gid_t gid)
+check_credentials (int   fd,
+                   uid_t uid,
+                   gid_t gid)
 {
 	int rc;
 	uid_t tuid;
@@ -417,7 +420,9 @@ check_credentials (int fd,
 }
 
 static bool
-print_environment (pid_t pid, Server *server, bool csh)
+print_environment (pid_t   pid,
+                   Server *server,
+                   bool    csh)
 {
 	char *path, *address;
 	int rc = -1;
@@ -459,8 +464,8 @@ print_environment (pid_t pid, Server *server, bool csh)
 }
 
 static int
-server_loop (Server *server,
-	     bool foreground,
+server_loop (Server          *server,
+	     bool             foreground,
 	     struct timespec *timeout)
 {
 	int ret;
@@ -484,7 +489,7 @@ server_loop (Server *server,
 	ocsignal (SIGTERM, handle_term);
 	ocsignal (SIGINT, handle_term);
 
-	/* run as daemon */
+        /* run as daemon */
 	if (!foreground) {
 		pid = fork ();
 		if (pid == -1) {
@@ -527,15 +532,15 @@ server_loop (Server *server,
 
 	sigprocmask (SIG_BLOCK, &blockset, NULL);
 
-	/* for testing purposes, even when started in foreground,
-	 * print the envvars */
+        /* for testing purposes, even when started in foreground,
+         * print the envvars */
 	if (foreground) {
 		if (!print_environment (getpid (), server, csh_opt))
 			return 1;
 		fflush (stdout);
 	}
 
-	/* accept connections */
+        /* accept connections */
 	ret = 0;
 	for (;;) {
 		if (need_children_cleanup)
@@ -551,7 +556,7 @@ server_loop (Server *server,
 		if (ret == -1 && errno == EINTR)
 			continue;
 
-		/* timeout */
+                /* timeout */
 		if (ret == 0 && children_avail == 0 && timeout != NULL) {
 			p11_message (_("no connections to %s for %lu secs, exiting"), server->socket_name, timeout->tv_sec);
 			break;
@@ -572,54 +577,54 @@ server_loop (Server *server,
 
 			pid = fork ();
 			switch (pid) {
-			case -1:
-				p11_message_err (errno, _("failed to fork for accept"));
-				continue;
-			/* Child */
-			case 0:
-				sigprocmask (SIG_UNBLOCK, &blockset, NULL);
-				if (dup2 (cfd, STDIN_FILENO) < 0 ||
-				    dup2 (cfd, STDOUT_FILENO) < 0) {
-					errn = errno;
-					p11_message_err (errn, "couldn't dup file descriptors in remote child");
-					_exit (errn);
-				}
+				case -1:
+					p11_message_err (errno, _("failed to fork for accept"));
+					continue;
+                                /* Child */
+				case 0:
+					sigprocmask (SIG_UNBLOCK, &blockset, NULL);
+					if (dup2 (cfd, STDIN_FILENO) < 0 ||
+					    dup2 (cfd, STDOUT_FILENO) < 0) {
+						errn = errno;
+						p11_message_err (errn, "couldn't dup file descriptors in remote child");
+						_exit (errn);
+					}
 
-				/* Close file descriptors, except for above on exec */
-				max_fd = STDERR_FILENO + 1;
-				fdwalk (set_cloexec_on_fd, &max_fd);
+                                        /* Close file descriptors, except for above on exec */
+					max_fd = STDERR_FILENO + 1;
+					fdwalk (set_cloexec_on_fd, &max_fd);
 
-				/* Execute 'p11-kit remote'; this shouldn't return */
-				args = calloc (3 + server->n_tokens + 1, sizeof (char *));
-				if (args == NULL) {
-					errn = errno;
-					p11_message_err (errn, "couldn't allocate memory for 'p11-kit remote' arguments");
-					_exit (errn);
-				}
+                                        /* Execute 'p11-kit remote'; this shouldn't return */
+					args = calloc (3 + server->n_tokens + 1, sizeof (char *));
+					if (args == NULL) {
+						errn = errno;
+						p11_message_err (errn, "couldn't allocate memory for 'p11-kit remote' arguments");
+						_exit (errn);
+					}
 
-				n_args = 0;
-				args[n_args] = P11_KIT_REMOTE;
-				n_args++;
-
-				if (server->provider) {
-					args[n_args] = "--provider";
+					n_args = 0;
+					args[n_args] = P11_KIT_REMOTE;
 					n_args++;
-					args[n_args] = (char *)server->provider;
-					n_args++;
-				}
 
-				for (i = 0; i < server->n_tokens; i++, n_args++)
-					args[n_args] = (char *)server->tokens[i];
+					if (server->provider) {
+						args[n_args] = "--provider";
+						n_args++;
+						args[n_args] = (char *)server->provider;
+						n_args++;
+					}
 
-				exec_external (n_args, args);
-				free (args);
+					for (i = 0; i < server->n_tokens; i++, n_args++)
+						args[n_args] = (char *)server->tokens[i];
 
-				errn = errno;
-				p11_message_err (errn, "couldn't execute 'p11-kit remote'");
-				_exit (errn);
-			default:
-				children_avail++;
-				break;
+					exec_external (n_args, args);
+					free (args);
+
+					errn = errno;
+					p11_message_err (errn, "couldn't execute 'p11-kit remote'");
+					_exit (errn);
+				default:
+					children_avail++;
+					break;
 			}
 			close (cfd);
 		}
@@ -631,7 +636,7 @@ server_loop (Server *server,
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	char *socket_base = NULL, *socket_name = NULL;
@@ -701,74 +706,74 @@ main (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_verbose:
-			p11_kit_be_loud ();
-			break;
-		case opt_quiet:
-			quiet = true;
-			break;
-		case opt_timeout:
-			ts.tv_sec = atoi (optarg);
-			ts.tv_nsec = 0;
-			timeout = &ts;
-			break;
-		case opt_name:
-			name = optarg;
-			break;
-		case opt_group:
-			grp = getgrnam (optarg);
-			if (grp == NULL) {
-				p11_message (_("unknown group: %s"), optarg);
-				return 2;
-			}
-			gid = grp->gr_gid;
-			break;
-		case opt_user:
-			pwd = getpwnam (optarg);
-			if (pwd == NULL) {
-				p11_message (_("unknown user: %s"), optarg);
-				return 2;
-			}
-			uid = pwd->pw_uid;
-			break;
-		case opt_run_as_group:
-			grp = getgrnam (optarg);
-			if (grp == NULL) {
-				p11_message (_("unknown group: %s"), optarg);
-				return 2;
-			}
-			run_as_gid = grp->gr_gid;
-			break;
-		case opt_run_as_user:
-			pwd = getpwnam (optarg);
-			if (pwd == NULL) {
-				p11_message (_("unknown user: %s"), optarg);
-				return 2;
-			}
-			run_as_uid = pwd->pw_uid;
-			break;
-		case opt_foreground:
-			foreground = true;
-			break;
-		case opt_provider:
-			provider = optarg;
-			break;
-		case opt_kill:
-			kill_opt = true;
-			break;
-		case opt_csh:
-			csh_opt = true;
-			break;
-		case opt_sh:
-			csh_opt = false;
-			break;
-		case opt_help:
-		case '?':
-			p11_tool_usage (usages, options);
-			return 0;
-		default:
-			assert_not_reached ();
-			break;
+			case opt_verbose:
+				p11_kit_be_loud ();
+				break;
+			case opt_quiet:
+				quiet = true;
+				break;
+			case opt_timeout:
+				ts.tv_sec = atoi (optarg);
+				ts.tv_nsec = 0;
+				timeout = &ts;
+				break;
+			case opt_name:
+				name = optarg;
+				break;
+			case opt_group:
+				grp = getgrnam (optarg);
+				if (grp == NULL) {
+					p11_message (_("unknown group: %s"), optarg);
+					return 2;
+				}
+				gid = grp->gr_gid;
+				break;
+			case opt_user:
+				pwd = getpwnam (optarg);
+				if (pwd == NULL) {
+					p11_message (_("unknown user: %s"), optarg);
+					return 2;
+				}
+				uid = pwd->pw_uid;
+				break;
+			case opt_run_as_group:
+				grp = getgrnam (optarg);
+				if (grp == NULL) {
+					p11_message (_("unknown group: %s"), optarg);
+					return 2;
+				}
+				run_as_gid = grp->gr_gid;
+				break;
+			case opt_run_as_user:
+				pwd = getpwnam (optarg);
+				if (pwd == NULL) {
+					p11_message (_("unknown user: %s"), optarg);
+					return 2;
+				}
+				run_as_uid = pwd->pw_uid;
+				break;
+			case opt_foreground:
+				foreground = true;
+				break;
+			case opt_provider:
+				provider = optarg;
+				break;
+			case opt_kill:
+				kill_opt = true;
+				break;
+			case opt_csh:
+				csh_opt = true;
+				break;
+			case opt_sh:
+				csh_opt = false;
+				break;
+			case opt_help:
+			case '?':
+				p11_tool_usage (usages, options);
+				return 0;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 
@@ -804,7 +809,7 @@ main (int argc,
 			perror ("strtol");
 			exit (1);
 		}
-		if (kill ((pid_t) pidval, SIGTERM) == -1) {
+		if (kill ((pid_t)pidval, SIGTERM) == -1) {
 			perror ("kill");
 			exit (1);
 		}
@@ -888,7 +893,7 @@ main (int argc,
 	server->gid = gid;
 	ret = server_loop (server, foreground, timeout);
 
- out:
+out:
 	server_free (server);
 
 	if (socket_name)
@@ -912,45 +917,45 @@ main (int argc,
 
 #define DYN_ADVAPI32
 
-typedef DWORD   (WINAPI *GetSecurityInfoFunc)
-                                  (HANDLE handle,
-                                   SE_OBJECT_TYPE ObjectType,
-                                   SECURITY_INFORMATION SecurityInfo,
-                                   PSID *ppsidOwner,
-                                   PSID *ppsidGroup,
-                                   PACL *ppDacl,
-                                   PACL *ppSacl,
-                                   PSECURITY_DESCRIPTOR *ppSecurityDescriptor);
-typedef DWORD   (WINAPI *SetSecurityInfoFunc)
-                                  (HANDLE handle,
-                                   SE_OBJECT_TYPE ObjectType,
-                                   SECURITY_INFORMATION SecurityInfo,
-                                   PSID psidOwner,
-                                   PSID psidGroup,
-                                   PACL pDacl,
-                                   PACL pSacl);
+typedef DWORD (WINAPI *GetSecurityInfoFunc)
+	(HANDLE handle,
+	SE_OBJECT_TYPE ObjectType,
+	SECURITY_INFORMATION SecurityInfo,
+	PSID *ppsidOwner,
+	PSID *ppsidGroup,
+	PACL *ppDacl,
+	PACL *ppSacl,
+	PSECURITY_DESCRIPTOR *ppSecurityDescriptor);
+typedef DWORD (WINAPI *SetSecurityInfoFunc)
+	(HANDLE handle,
+	SE_OBJECT_TYPE ObjectType,
+	SECURITY_INFORMATION SecurityInfo,
+	PSID psidOwner,
+	PSID psidGroup,
+	PACL pDacl,
+	PACL pSacl);
 typedef WINBOOL (WINAPI *OpenProcessTokenFunc)
-                                  (HANDLE ProcessHandle,
-                                   DWORD DesiredAccess,
-                                   PHANDLE TokenHandle);
+	(HANDLE ProcessHandle,
+	DWORD DesiredAccess,
+	PHANDLE TokenHandle);
 typedef WINBOOL (WINAPI *GetTokenInformationFunc)
-                                  (HANDLE TokenHandle,
-                                   TOKEN_INFORMATION_CLASS TokenInformationClass,
-                                   LPVOID TokenInformation,
-                                   DWORD TokenInformationLength,
-                                   PDWORD ReturnLength);
+	(HANDLE TokenHandle,
+	TOKEN_INFORMATION_CLASS TokenInformationClass,
+	LPVOID TokenInformation,
+	DWORD TokenInformationLength,
+	PDWORD ReturnLength);
 typedef WINBOOL (WINAPI *InitializeSecurityDescriptorFunc)
-                                  (PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                                   DWORD dwRevision);
+	(PSECURITY_DESCRIPTOR pSecurityDescriptor,
+	DWORD dwRevision);
 typedef WINBOOL (WINAPI *SetSecurityDescriptorOwnerFunc)
-                                  (PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                                   PSID pOwner,
-                                   WINBOOL bOwnerDefaulted);
-typedef DWORD   (WINAPI *SetEntriesInAclAFunc)
-                                  (ULONG cCountOfExplicitEntries,
-                                   PEXPLICIT_ACCESS_A pListOfExplicitEntries,
-                                   PACL OldAcl,
-                                   PACL *NewAcl);
+	(PSECURITY_DESCRIPTOR pSecurityDescriptor,
+	PSID pOwner,
+	WINBOOL bOwnerDefaulted);
+typedef DWORD (WINAPI *SetEntriesInAclAFunc)
+	(ULONG cCountOfExplicitEntries,
+	PEXPLICIT_ACCESS_A pListOfExplicitEntries,
+	PACL OldAcl,
+	PACL *NewAcl);
 
 #ifdef DYN_ADVAPI32
 static GetSecurityInfoFunc pGetSecurityInfo;
@@ -986,7 +991,7 @@ server_thread (LPVOID lpvParam)
 	Server *server = data->server;
 	int fd;
 
-	fd = _open_osfhandle ((intptr_t) data->handle, _O_BINARY);
+	fd = _open_osfhandle ((intptr_t)data->handle, _O_BINARY);
 	if (fd < 0) {
 		free (data);
 		return 1;
@@ -1007,9 +1012,9 @@ server_thread (LPVOID lpvParam)
 }
 
 static bool
-make_private_security_descriptor (DWORD permissions,
+make_private_security_descriptor (DWORD                 permissions,
 				  PSECURITY_DESCRIPTOR *psd,
-				  PACL *acl);
+				  PACL                 *acl);
 
 static int
 server_loop (Server *server)
@@ -1069,9 +1074,9 @@ server_loop (Server *server)
 				free (data);
 				return 1;
 			} else
-				CloseHandle(hthread);
+				CloseHandle (hthread);
 		} else {
-			CloseHandle(hpipe);
+			CloseHandle (hpipe);
 		}
 	}
 
@@ -1087,7 +1092,7 @@ load_windows_functions (void)
 	return_val_if_fail (advapi32_lib != NULL, false);
 
 #define GET_WINDOWS_FUNCTION(func) \
-	p ## func = (func ## Func) GetProcAddress (advapi32_lib, # func); \
+	p ## func = (func ## Func)GetProcAddress (advapi32_lib, # func); \
 	return_val_if_fail (p ## func != NULL, false)
 
 	GET_WINDOWS_FUNCTION (GetSecurityInfo);
@@ -1102,7 +1107,7 @@ load_windows_functions (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	const char *pipe_base = "\\\\.\\pipe\\";
@@ -1144,25 +1149,25 @@ main (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_verbose:
-			p11_kit_be_loud ();
-			break;
-		case opt_quiet:
-			quiet = true;
-			break;
-		case opt_name:
-			name = optarg;
-			break;
-		case opt_provider:
-			provider = optarg;
-			break;
-		case opt_help:
-		case '?':
-			p11_tool_usage (usages, options);
-			return 0;
-		default:
-			assert_not_reached ();
-			break;
+			case opt_verbose:
+				p11_kit_be_loud ();
+				break;
+			case opt_quiet:
+				quiet = true;
+				break;
+			case opt_name:
+				name = optarg;
+				break;
+			case opt_provider:
+				provider = optarg;
+				break;
+			case opt_help:
+			case '?':
+				p11_tool_usage (usages, options);
+				return 0;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 
@@ -1192,7 +1197,7 @@ main (int argc,
 
 	ret = server_loop (server);
 
- out:
+out:
 	server_free (server);
 
 	if (pipe_name)
@@ -1265,12 +1270,12 @@ get_user_sid (void)
 	if (!CopySid (sidlen, sid, user->User.Sid))
 		goto cleanup;
 
-	/* Success. Move sid into the return value slot, and null it out
-	 * to stop the cleanup code freeing it. */
+        /* Success. Move sid into the return value slot, and null it out
+         * to stop the cleanup code freeing it. */
 	ret = user_sid = sid;
 	sid = NULL;
 
- cleanup:
+cleanup:
 	if (proc != NULL)
 		CloseHandle (proc);
 	if (tok != NULL)
@@ -1334,9 +1339,9 @@ get_sids (void)
 }
 
 static bool
-make_private_security_descriptor (DWORD permissions,
-				  PSECURITY_DESCRIPTOR *psd,
-				  PACL *acl)
+make_private_security_descriptor (DWORD                 permissions,
+                                  PSECURITY_DESCRIPTOR *psd,
+                                  PACL                 *acl)
 {
 	EXPLICIT_ACCESS ea[3];
 	int acl_err;
@@ -1347,7 +1352,7 @@ make_private_security_descriptor (DWORD permissions,
 	if (!get_sids ())
 		goto cleanup;
 
-	memset (ea, 0, sizeof(ea));
+	memset (ea, 0, sizeof (ea));
 	ea[0].grfAccessPermissions = permissions;
 	ea[0].grfAccessMode = REVOKE_ACCESS;
 	ea[0].grfInheritance = NO_INHERITANCE;
@@ -1370,7 +1375,7 @@ make_private_security_descriptor (DWORD permissions,
 		goto cleanup;
 	}
 
-	*psd = (PSECURITY_DESCRIPTOR) LocalAlloc (LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
+	*psd = (PSECURITY_DESCRIPTOR)LocalAlloc (LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
 	if (!*psd) {
 		p11_message (_("unable to allocate security descriptor: %lu"),
 			     GetLastError ());
@@ -1397,7 +1402,7 @@ make_private_security_descriptor (DWORD permissions,
 
 	return true;
 
- cleanup:
+cleanup:
 	if (*psd) {
 		LocalFree (*psd);
 		*psd = NULL;

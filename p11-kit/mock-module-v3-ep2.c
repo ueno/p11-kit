@@ -56,7 +56,8 @@ C_GetFunctionList (CK_FUNCTION_LIST_PTR_PTR list)
 	return CKR_OK;
 }
 
-static void mock_initialize_interface (void)
+static void
+mock_initialize_interface (void)
 {
 	mock_module_init ();
 	mock_module_v3.C_GetFunctionList = C_GetFunctionList;
@@ -68,7 +69,8 @@ static void mock_initialize_interface (void)
 __declspec(dllexport)
 #endif
 CK_RV
-C_GetInterfaceList (CK_INTERFACE_PTR pInterfacesList, CK_ULONG_PTR pulCount)
+C_GetInterfaceList (CK_INTERFACE_PTR pInterfacesList,
+                    CK_ULONG_PTR     pulCount)
 {
 	mock_initialize_interface ();
 
@@ -85,7 +87,7 @@ C_GetInterfaceList (CK_INTERFACE_PTR pInterfacesList, CK_ULONG_PTR pulCount)
 		return CKR_BUFFER_TOO_SMALL;
 	}
 
-	memcpy (pInterfacesList, mock_interfaces, MOCK_INTERFACES * sizeof(CK_INTERFACE));
+	memcpy (pInterfacesList, mock_interfaces, MOCK_INTERFACES * sizeof (CK_INTERFACE));
 	*pulCount = MOCK_INTERFACES;
 
 	return CKR_OK;
@@ -95,8 +97,10 @@ C_GetInterfaceList (CK_INTERFACE_PTR pInterfacesList, CK_ULONG_PTR pulCount)
 __declspec(dllexport)
 #endif
 CK_RV
-C_GetInterface (CK_UTF8CHAR_PTR pInterfaceName, CK_VERSION_PTR pVersion,
-                CK_INTERFACE_PTR_PTR ppInterface, CK_FLAGS flags)
+C_GetInterface (CK_UTF8CHAR_PTR      pInterfaceName,
+                CK_VERSION_PTR       pVersion,
+                CK_INTERFACE_PTR_PTR ppInterface,
+                CK_FLAGS             flags)
 {
 	int i;
 
@@ -106,25 +110,25 @@ C_GetInterface (CK_UTF8CHAR_PTR pInterfaceName, CK_VERSION_PTR pVersion,
 		return CKR_ARGUMENTS_BAD;
 
 	if (pInterfaceName == NULL_PTR) {
-		/* return default interface */
+                /* return default interface */
 		*ppInterface = &mock_interfaces[0];
 		return CKR_OK;
 	}
 
 	for (i = 0; i < MOCK_INTERFACES; i++) {
-		/* Version is the first member of CK_FUNCTION_LIST */
+                /* Version is the first member of CK_FUNCTION_LIST */
 		CK_VERSION_PTR interface_version = (CK_VERSION_PTR)mock_interfaces[i].pFunctionList;
 
-		/* The interface name is not null here */
+                /* The interface name is not null here */
 		if (strcmp ((char *)pInterfaceName, mock_interfaces[i].pInterfaceName) != 0)
 			continue;
 
-		/* If version is not null, it must match */
+                /* If version is not null, it must match */
 		if (pVersion != NULL_PTR && (pVersion->major != interface_version->major ||
 					     pVersion->minor != interface_version->minor))
 			continue;
 
-		/* If any flags specified, it must be supported by the interface */
+                /* If any flags specified, it must be supported by the interface */
 		if ((flags & mock_interfaces[i].flags) != flags)
 			continue;
 

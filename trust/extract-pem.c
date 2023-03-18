@@ -48,14 +48,14 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 bool
 p11_extract_pem_bundle (p11_enumerate *ex,
-                        const char *destination)
+                        const char    *destination)
 {
 	char *comment;
 	p11_buffer buf;
@@ -95,10 +95,10 @@ p11_extract_pem_bundle (p11_enumerate *ex,
 		ret = false;
 	}
 
-	/*
-	 * This will produce an empty file (which is a valid PEM bundle) if no
-	 * certificates were found.
-	 */
+        /*
+         * This will produce an empty file (which is a valid PEM bundle) if no
+         * certificates were found.
+         */
 
 	if (!p11_save_finish_file (file, NULL, ret))
 		ret = false;
@@ -108,8 +108,8 @@ p11_extract_pem_bundle (p11_enumerate *ex,
 
 static bool
 extract_pem_directory (p11_enumerate *ex,
-                       const char *destination,
-                       bool hash)
+                       const char    *destination,
+                       bool           hash)
 {
 	p11_save_file *file;
 	p11_save_dir *dir;
@@ -145,7 +145,7 @@ extract_pem_directory (p11_enumerate *ex,
 
 		if (ret && hash) {
 			filename = p11_path_base (path);
-			ret = p11_openssl_symlink(ex, dir, filename);
+			ret = p11_openssl_symlink (ex, dir, filename);
 			free (filename);
 		}
 
@@ -168,7 +168,7 @@ extract_pem_directory (p11_enumerate *ex,
 
 bool
 p11_extract_pem_directory (p11_enumerate *ex,
-                           const char *destination)
+                           const char    *destination)
 {
 	bool ret = true;
 	ret = extract_pem_directory (ex, destination, false);
@@ -177,7 +177,7 @@ p11_extract_pem_directory (p11_enumerate *ex,
 
 bool
 p11_extract_pem_directory_hash (p11_enumerate *ex,
-                           const char *destination)
+                                const char    *destination)
 {
 	bool ret = true;
 	ret = extract_pem_directory (ex, destination, true);

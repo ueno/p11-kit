@@ -53,13 +53,13 @@
 
 bool
 p11_oid_simple (const unsigned char *oid,
-                int len)
+		int                  len)
 {
 	return (oid != NULL &&
-	        len > 3 &&                   /* minimum length */
-	        oid[0] == 0x06 &&            /* simple encoding */
-	        (oid[1] & 128) == 0 &&       /* short form length */
-	        (size_t)oid[1] == len - 2);  /* matches length */
+		len > 3 &&                   /* minimum length */
+		oid[0] == 0x06 &&            /* simple encoding */
+		(oid[1] & 128) == 0 &&       /* short form length */
+		(size_t)oid[1] == len - 2);  /* matches length */
 }
 
 unsigned int
@@ -84,7 +84,7 @@ p11_oid_equal (const void *oid_one,
 	len_two = p11_oid_length (oid_two);
 
 	return (len_one == len_two &&
-	        memcmp (oid_one, oid_two, len_one) == 0);
+		memcmp (oid_one, oid_two, len_one) == 0);
 }
 
 int

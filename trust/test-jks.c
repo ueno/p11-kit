@@ -141,7 +141,7 @@ static CK_ATTRIBUTE certificate_filter[] = {
 
 static void
 setup_objects (const CK_ATTRIBUTE *attrs,
-               ...)
+	       ...)
 {
 	static CK_ULONG id_value = 8888;
 
@@ -168,12 +168,12 @@ test_file_multiple (void)
 	bool ret;
 
 	setup_objects (cacert3_authority_attrs,
-	               extension_eku_server,
-	               extension_reject_email,
-	               NULL);
+		       extension_eku_server,
+		       extension_reject_email,
+		       NULL);
 
 	setup_objects (verisign_v1_attrs,
-	               NULL);
+		       NULL);
 
 	p11_kit_iter_add_filter (test.ex.iter, certificate_filter, 1);
 	p11_kit_iter_begin_with (test.ex.iter, &test.module, 0, 0);
@@ -207,7 +207,7 @@ test_file_duplicated (void)
 	p11_parser_formats (parser, p11_parser_format_x509, NULL);
 
 	ret = p11_parse_file (parser, SRCDIR "/trust/fixtures/duplicated1.der", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 
 	assert_num_eq (1, parsed->num);
 	duplicated1 = parsed->elem[0];
@@ -224,7 +224,7 @@ test_file_duplicated (void)
 	p11_parser_formats (parser, p11_parser_format_x509, NULL);
 
 	ret = p11_parse_file (parser, SRCDIR "/trust/fixtures/duplicated2.der", NULL,
-	                      P11_PARSE_FLAG_NONE);
+			      P11_PARSE_FLAG_NONE);
 
 	assert_num_eq (1, parsed->num);
 	duplicated2 = parsed->elem[0];
@@ -253,7 +253,7 @@ test_file_duplicated (void)
 extern time_t _p11_extract_jks_timestamp;
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	mock_module_init ();

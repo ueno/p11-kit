@@ -55,7 +55,7 @@ test_with_err (void)
 	char *expected;
 
 #ifdef HAVE_STRERROR_L
-	p11_message_locale = newlocale (LC_ALL_MASK, "POSIX", (locale_t) 0);
+	p11_message_locale = newlocale (LC_ALL_MASK, "POSIX", (locale_t)0);
 #endif
 
 	errno = E2BIG;
@@ -73,7 +73,7 @@ test_with_err (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_test (test_with_err, "/message/with-err");

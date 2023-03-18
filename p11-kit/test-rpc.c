@@ -244,10 +244,12 @@ static void
 test_byte_array (void)
 {
 	p11_buffer buffer;
-	unsigned char bytes[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-	                          0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-	                          0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-	                          0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F };
+	unsigned char bytes[] = {
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+	};
 
 	const unsigned char *val;
 	size_t length = ~0;
@@ -256,7 +258,7 @@ test_byte_array (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	/* Invalid read */
+        /* Invalid read */
 
 	next = 0;
 	ret = p11_rpc_buffer_get_byte_array (&buffer, &next, &val, &length);
@@ -264,7 +266,7 @@ test_byte_array (void)
 	assert_num_eq (0, next);
 	assert_num_eq (~0, length);
 
-	/* Test full array */
+        /* Test full array */
 
 	p11_buffer_reset (&buffer, 0);
 	p11_buffer_add (&buffer, (unsigned char *)"padding", 7);
@@ -306,7 +308,7 @@ test_byte_array_null (void)
 	assert_num_eq (true, ret);
 	assert_num_eq (11, next);
 	assert_num_eq (0, length);
-	assert_ptr_eq (NULL, (void*)val);
+	assert_ptr_eq (NULL, (void *)val);
 
 	p11_buffer_uninit (&buffer);
 }
@@ -326,11 +328,11 @@ test_byte_array_too_long (void)
 	p11_buffer_add (&buffer, (unsigned char *)"padding", 7);
 	assert (!p11_buffer_failed (&buffer));
 
-	/* Passing a too short buffer here shouldn't matter, as length is checked for sanity */
+        /* Passing a too short buffer here shouldn't matter, as length is checked for sanity */
 	p11_rpc_buffer_add_byte_array (&buffer, (unsigned char *)"", 0x9fffffff);
 	assert (p11_buffer_failed (&buffer));
 
-	/* Force write a too long byte arary to buffer */
+        /* Force write a too long byte arary to buffer */
 	p11_buffer_reset (&buffer, 0);
 	p11_rpc_buffer_add_uint32 (&buffer, 0x9fffffff);
 
@@ -339,7 +341,7 @@ test_byte_array_too_long (void)
 	assert_num_eq (false, ret);
 	assert_num_eq (0, next);
 	assert_num_eq (~0, length);
-	assert_ptr_eq (NULL, (void*)val);
+	assert_ptr_eq (NULL, (void *)val);
 
 	p11_buffer_uninit (&buffer);
 }
@@ -347,11 +349,13 @@ test_byte_array_too_long (void)
 static void
 test_byte_array_static (void)
 {
-	unsigned char data[] = { 'p', 'a', 'd', 0x00, 0x00, 0x00, 0x00, 0x20,
-	                         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-	                         0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-	                         0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-	                         0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F };
+	unsigned char data[] = {
+		'p', 'a', 'd', 0x00, 0x00, 0x00, 0x00, 0x20,
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+	};
 	p11_buffer buf = { data, 0x40, };
 	const unsigned char *val;
 	size_t length = ~0;
@@ -370,10 +374,12 @@ static void
 test_byte_value (void)
 {
 	p11_buffer buffer;
-	unsigned char bytes[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-	                          0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-	                          0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-	                          0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F };
+	unsigned char bytes[] = {
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+	};
 
 	char val[16];
 	size_t offset = 0;
@@ -382,7 +388,7 @@ test_byte_value (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_byte_value (&buffer, bytes, sizeof(bytes));
+	p11_rpc_buffer_add_byte_value (&buffer, bytes, sizeof (bytes));
 	assert (p11_buffer_failed (&buffer));
 
 	p11_buffer_reset (&buffer, 0);
@@ -395,7 +401,7 @@ test_byte_value (void)
 
 	assert_num_eq (bytes[0], val[0]);
 
-	/* Read out of bound */
+        /* Read out of bound */
 	ret = p11_rpc_buffer_get_byte_value (&buffer, &offset, val, &val_size);
 	assert_num_eq (false, ret);
 
@@ -416,7 +422,7 @@ test_ulong_value (void)
 	ret = p11_rpc_buffer_get_ulong_value (&buf, &offset, &val, &val_size);
 	assert_num_eq (true, ret);
 	assert_num_eq (12, offset);
-	assert_num_eq (sizeof(val), val_size);
+	assert_num_eq (sizeof (val), val_size);
 	assert_num_eq (0x23456789, val);
 
 	p11_buffer_init (&buffer, 0);
@@ -437,18 +443,18 @@ test_ulong_value (void)
 	val = ULONG_VAL;
 	p11_rpc_buffer_add_ulong_value (&buffer, &val, SIZEOF_UNSIGNED_LONG);
 	assert (!p11_buffer_failed (&buffer));
-	/* The value is always stored as 64-bit integer */
+        /* The value is always stored as 64-bit integer */
 	assert_num_eq (7 + 8, buffer.len);
 
 	val = ULONG_MAX;
 	offset = 7;
 	ret = p11_rpc_buffer_get_ulong_value (&buffer, &offset, &val, &val_size);
 	assert_num_eq (true, ret);
-	/* The value is always stored as 64-bit integer */
+        /* The value is always stored as 64-bit integer */
 	assert_num_eq (7 + 8, offset);
 	assert_num_eq (ULONG_VAL, *(CK_ULONG *)&val);
 
-	/* Read out of bound */
+        /* Read out of bound */
 	val = ULONG_MAX;
 	ret = p11_rpc_buffer_get_ulong_value (&buffer, &offset, &val, &val_size);
 	assert_num_eq (false, ret);
@@ -478,15 +484,15 @@ test_attribute_array_value (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_attribute_array_value(&buffer, attrs, sizeof(attrs));
+	p11_rpc_buffer_add_attribute_array_value (&buffer, attrs, sizeof (attrs));
 	assert (!p11_buffer_failed (&buffer));
 
 	offset2 = offset;
-	ret = p11_rpc_buffer_get_attribute_array_value(&buffer, &offset, NULL, &val_size);
+	ret = p11_rpc_buffer_get_attribute_array_value (&buffer, &offset, NULL, &val_size);
 	assert_num_eq (true, ret);
 
 	offset = offset2;
-	ret = p11_rpc_buffer_get_attribute_array_value(&buffer, &offset, val, &val_size);
+	ret = p11_rpc_buffer_get_attribute_array_value (&buffer, &offset, val, &val_size);
 	assert_num_eq (true, ret);
 	assert_num_eq (val[0].type, CKA_MODIFIABLE);
 	assert_num_eq (*(CK_BBOOL *)val[0].pValue, CK_TRUE);
@@ -510,15 +516,15 @@ test_mechanism_type_array_value (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_mechanism_type_array_value(&buffer, mechs, sizeof(mechs));
+	p11_rpc_buffer_add_mechanism_type_array_value (&buffer, mechs, sizeof (mechs));
 	assert (!p11_buffer_failed (&buffer));
 
 	offset2 = offset;
-	ret = p11_rpc_buffer_get_mechanism_type_array_value(&buffer, &offset, NULL, &val_size);
+	ret = p11_rpc_buffer_get_mechanism_type_array_value (&buffer, &offset, NULL, &val_size);
 	assert_num_eq (true, ret);
 
 	offset = offset2;
-	ret = p11_rpc_buffer_get_mechanism_type_array_value(&buffer, &offset, val, &val_size);
+	ret = p11_rpc_buffer_get_mechanism_type_array_value (&buffer, &offset, val, &val_size);
 	assert_num_eq (true, ret);
 	assert_num_eq (val[0], CKM_RSA_PKCS);
 	assert_num_eq (val[1], CKM_DSA);
@@ -542,10 +548,10 @@ test_date_value (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_date_value(&buffer, &date, sizeof(date));
+	p11_rpc_buffer_add_date_value (&buffer, &date, sizeof (date));
 	assert (!p11_buffer_failed (&buffer));
 
-	ret = p11_rpc_buffer_get_date_value(&buffer, &offset, &val, &val_size);
+	ret = p11_rpc_buffer_get_date_value (&buffer, &offset, &val, &val_size);
 	assert_num_eq (true, ret);
 
 	assert (memcmp (val.year, date.year, 4) == 0);
@@ -566,10 +572,10 @@ test_date_value_empty (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_date_value(&buffer, NULL, 0);
+	p11_rpc_buffer_add_date_value (&buffer, NULL, 0);
 	assert (!p11_buffer_failed (&buffer));
 
-	ret = p11_rpc_buffer_get_date_value(&buffer, &offset, &val, &val_size);
+	ret = p11_rpc_buffer_get_date_value (&buffer, &offset, &val, &val_size);
 	assert_num_eq (true, ret);
 
 	assert_num_eq (0, val_size);
@@ -581,10 +587,12 @@ static void
 test_byte_array_value (void)
 {
 	p11_buffer buffer;
-	unsigned char bytes[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-	                          0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-	                          0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-	                          0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F };
+	unsigned char bytes[] = {
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+	};
 
 	unsigned char val[32];
 	size_t offset = 0;
@@ -593,10 +601,10 @@ test_byte_array_value (void)
 
 	p11_buffer_init (&buffer, 0);
 
-	p11_rpc_buffer_add_byte_array_value(&buffer, bytes, sizeof(bytes));
+	p11_rpc_buffer_add_byte_array_value (&buffer, bytes, sizeof (bytes));
 	assert (!p11_buffer_failed (&buffer));
 
-	ret = p11_rpc_buffer_get_byte_array_value(&buffer, &offset, val, &val_size);
+	ret = p11_rpc_buffer_get_byte_array_value (&buffer, &offset, val, &val_size);
 	assert_num_eq (true, ret);
 
 	assert_num_eq (bytes[0], val[0]);
@@ -678,8 +686,8 @@ test_message_write (void)
 	CK_ATTRIBUTE attrs[] = {
 		{ CKA_MODIFIABLE, &truev, sizeof (truev) },
 		{ CKA_LABEL, labelv, sizeof (labelv) },
-		/* These are cases when C_GetAttributeValue is called
-		 * to obtain the length */
+                /* These are cases when C_GetAttributeValue is called
+                 * to obtain the length */
 		{ CKA_COPYABLE, NULL, sizeof (truev) },
 		{ CKA_BITS_PER_PIXEL, NULL, sizeof (zerov) }
 	};
@@ -688,7 +696,7 @@ test_message_write (void)
 	ret = p11_buffer_init (&buffer, 0);
 	assert_num_eq (true, ret);
 	p11_rpc_message_init (&msg, &buffer, &buffer);
-	ret = p11_rpc_message_write_attribute_array (&msg, attrs, ELEMS(attrs));
+	ret = p11_rpc_message_write_attribute_array (&msg, attrs, ELEMS (attrs));
 	assert_num_eq (true, ret);
 	p11_rpc_message_clear (&msg);
 	p11_buffer_uninit (&buffer);
@@ -699,7 +707,7 @@ static unsigned int rpc_initialized = 0;
 
 static CK_RV
 rpc_initialize (p11_rpc_client_vtable *vtable,
-                void *init_reserved)
+                void                  *init_reserved)
 {
 	assert_str_eq (vtable->data, "vtable-data");
 	assert_num_cmp (p11_forkid, !=, rpc_initialized);
@@ -710,7 +718,7 @@ rpc_initialize (p11_rpc_client_vtable *vtable,
 
 static CK_RV
 rpc_authenticate (p11_rpc_client_vtable *vtable,
-		  uint8_t *version)
+                  uint8_t               *version)
 {
 	assert_str_eq (vtable->data, "vtable-data");
 	assert_ptr_not_null (version);
@@ -720,7 +728,7 @@ rpc_authenticate (p11_rpc_client_vtable *vtable,
 
 static CK_RV
 rpc_initialize_fails (p11_rpc_client_vtable *vtable,
-                      void *init_reserved)
+                      void                  *init_reserved)
 {
 	assert_str_eq (vtable->data, "vtable-data");
 	assert_num_cmp (p11_forkid, !=, rpc_initialized);
@@ -729,7 +737,7 @@ rpc_initialize_fails (p11_rpc_client_vtable *vtable,
 
 static CK_RV
 rpc_initialize_device_removed (p11_rpc_client_vtable *vtable,
-                               void *init_reserved)
+                               void                  *init_reserved)
 {
 	assert_str_eq (vtable->data, "vtable-data");
 	assert_num_cmp (p11_forkid, !=, rpc_initialized);
@@ -738,14 +746,14 @@ rpc_initialize_device_removed (p11_rpc_client_vtable *vtable,
 
 static CK_RV
 rpc_transport (p11_rpc_client_vtable *vtable,
-               p11_buffer *request,
-               p11_buffer *response)
+               p11_buffer            *request,
+               p11_buffer            *response)
 {
 	bool ret;
 
 	assert_str_eq (vtable->data, "vtable-data");
 
-	/* Just pass directly to the server code */
+        /* Just pass directly to the server code */
 	ret = p11_rpc_server_handle (&base.funcs, request, response);
 	assert (ret == true);
 
@@ -754,7 +762,7 @@ rpc_transport (p11_rpc_client_vtable *vtable,
 
 static void
 rpc_finalize (p11_rpc_client_vtable *vtable,
-              void *fini_reserved)
+              void                  *fini_reserved)
 {
 	assert_str_eq (vtable->data, "vtable-data");
 	assert_num_cmp (p11_forkid, ==, rpc_initialized);
@@ -769,7 +777,7 @@ test_initialize (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	rpc_initialized = 0;
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
@@ -796,7 +804,7 @@ test_not_initialized (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	rpc_initialized = 0;
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
@@ -817,7 +825,7 @@ test_initialize_fails_on_client (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	rpc_initialized = 0;
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
@@ -833,8 +841,8 @@ test_initialize_fails_on_client (void)
 
 static CK_RV
 rpc_transport_fails (p11_rpc_client_vtable *vtable,
-                     p11_buffer *request,
-                     p11_buffer *response)
+                     p11_buffer            *request,
+                     p11_buffer            *response)
 {
 	return CKR_FUNCTION_REJECTED;
 }
@@ -847,7 +855,7 @@ test_transport_fails (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	rpc_initialized = 0;
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
@@ -869,7 +877,7 @@ test_initialize_fails_on_server (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 	base.funcs.C_Initialize = mock_X_Initialize__fails;
 
@@ -885,14 +893,14 @@ test_initialize_fails_on_server (void)
 
 static CK_RV
 rpc_transport_bad_parse (p11_rpc_client_vtable *vtable,
-                         p11_buffer *request,
-                         p11_buffer *response)
+                         p11_buffer            *request,
+                         p11_buffer            *response)
 {
 	int rc;
 
 	assert_str_eq (vtable->data, "vtable-data");
 
-	/* Just zero bytes is an invalid message */
+        /* Just zero bytes is an invalid message */
 	rc = p11_buffer_reset (response, 2);
 	assert (rc >= 0);
 
@@ -909,7 +917,7 @@ test_transport_bad_parse (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	rpc_initialized = 0;
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
@@ -928,8 +936,8 @@ test_transport_bad_parse (void)
 
 static CK_RV
 rpc_transport_short_error (p11_rpc_client_vtable *vtable,
-                           p11_buffer *request,
-                           p11_buffer *response)
+                           p11_buffer            *request,
+                           p11_buffer            *response)
 {
 	int rc;
 
@@ -957,7 +965,7 @@ test_transport_short_error (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
 	ret = p11_rpc_client_init (&mixin, &vtable);
@@ -975,8 +983,8 @@ test_transport_short_error (void)
 
 static CK_RV
 rpc_transport_invalid_error (p11_rpc_client_vtable *vtable,
-                             p11_buffer *request,
-                             p11_buffer *response)
+                             p11_buffer            *request,
+                             p11_buffer            *response)
 {
 	int rc;
 
@@ -1004,7 +1012,7 @@ test_transport_invalid_error (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
 	ret = p11_rpc_client_init (&mixin, &vtable);
@@ -1022,8 +1030,8 @@ test_transport_invalid_error (void)
 
 static CK_RV
 rpc_transport_wrong_response (p11_rpc_client_vtable *vtable,
-                              p11_buffer *request,
-                              p11_buffer *response)
+                              p11_buffer            *request,
+                              p11_buffer            *response)
 {
 	int rc;
 
@@ -1049,7 +1057,7 @@ test_transport_wrong_response (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
 	ret = p11_rpc_client_init (&mixin, &vtable);
@@ -1067,8 +1075,8 @@ test_transport_wrong_response (void)
 
 static CK_RV
 rpc_transport_bad_contents (p11_rpc_client_vtable *vtable,
-                            p11_buffer *request,
-                            p11_buffer *response)
+                            p11_buffer            *request,
+                            p11_buffer            *response)
 {
 	int rc;
 
@@ -1096,7 +1104,7 @@ test_transport_bad_contents (void)
 	bool ret;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, &mock_module_no_slots, NULL);
 
 	ret = p11_rpc_client_init (&mixin, &vtable);
@@ -1138,14 +1146,14 @@ mixin_free (void *data)
 
 static CK_FUNCTION_LIST_PTR
 setup_test_rpc_module (p11_rpc_client_vtable *vtable,
-                       CK_FUNCTION_LIST *module_template,
-                       CK_SESSION_HANDLE *session)
+                       CK_FUNCTION_LIST      *module_template,
+                       CK_SESSION_HANDLE     *session)
 {
 	CK_FUNCTION_LIST *rpc_module;
 	p11_virtual *mixin;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	p11_virtual_init (&base, &p11_virtual_base, module_template, NULL);
 
 	mixin = calloc (1, sizeof (p11_virtual));
@@ -1163,7 +1171,7 @@ setup_test_rpc_module (p11_rpc_client_vtable *vtable,
 
 	if (session) {
 		rv = (rpc_module->C_OpenSession) (MOCK_SLOT_ONE_ID, CKF_RW_SESSION | CKF_SERIAL_SESSION,
-		                                  NULL, NULL, session);
+						  NULL, NULL, session);
 		assert (rv == CKR_OK);
 	}
 
@@ -1192,7 +1200,7 @@ test_get_info_stand_in (void)
 	char *string;
 
 	rpc_module = setup_test_rpc_module (&test_device_removed_vtable,
-	                                    &mock_module_no_slots, NULL);
+					    &mock_module_no_slots, NULL);
 
 	rv = (rpc_module->C_GetInfo) (&info);
 	assert (rv == CKR_OK);
@@ -1221,7 +1229,7 @@ test_get_slot_list_no_device (void)
 	CK_RV rv;
 
 	rpc_module = setup_test_rpc_module (&test_device_removed_vtable,
-	                                    &mock_module_no_slots, NULL);
+					    &mock_module_no_slots, NULL);
 
 	rv = (rpc_module->C_GetSlotList) (CK_TRUE, NULL, &count);
 	assert (rv == CKR_OK);
@@ -1254,7 +1262,7 @@ invoke_in_thread (void *arg)
 	assert_num_eq (rv, CKR_OK);
 
 	assert (memcmp (info.manufacturerID, MOCK_INFO.manufacturerID,
-	                sizeof (info.manufacturerID)) == 0);
+			sizeof (info.manufacturerID)) == 0);
 
 	return NULL;
 }
@@ -1290,9 +1298,9 @@ test_simultaneous_functions (void)
 	real_module.C_GetInfo = delayed_C_GetInfo;
 
 	rpc_module = setup_test_rpc_module (&test_normal_vtable,
-	                                    &real_module, NULL);
+					    &real_module, NULL);
 
-	/* Make the invoked function (above) wait */
+        /* Make the invoked function (above) wait */
 	p11_mutex_lock (&delay_mutex);
 
 	for (i = 0; i < num_threads; i++) {
@@ -1300,7 +1308,7 @@ test_simultaneous_functions (void)
 		assert_num_eq (0, ret);
 	}
 
-	/* Let the invoked functions return */
+        /* Let the invoked functions return */
 	p11_mutex_unlock (&delay_mutex);
 
 	for (i = 0; i < num_threads; i++)
@@ -1323,12 +1331,12 @@ test_fork_and_reinitialize (void)
 	int i;
 
 	rpc_module = setup_test_rpc_module (&test_normal_vtable,
-	                                    &mock_module_no_slots, NULL);
+					    &mock_module_no_slots, NULL);
 
 	pid = fork ();
 	assert_num_cmp (pid, >=, 0);
 
-	/* The child */
+        /* The child */
 	if (pid == 0) {
 		rv = (rpc_module->C_Initialize) (NULL);
 		assert_num_eq (CKR_OK, rv);
@@ -1360,7 +1368,7 @@ test_fork_and_reinitialize (void)
 #include "test-mock.c"
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	CK_MECHANISM_TYPE mechanisms[] = {
@@ -1376,7 +1384,7 @@ main (int argc,
 	mock_module_init ();
 	p11_library_init ();
 
-	/* Override the mechanisms that the RPC mechanism will handle */
+        /* Override the mechanisms that the RPC mechanism will handle */
 	p11_rpc_mechanisms_override_supported = mechanisms;
 
 	p11_test (test_new_free, "/rpc/new-free");
@@ -1420,5 +1428,5 @@ main (int argc,
 
 	test_mock_add_tests ("/rpc");
 
-	return  p11_test_run (argc, argv);
+	return p11_test_run (argc, argv);
 }

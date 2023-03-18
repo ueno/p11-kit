@@ -423,9 +423,9 @@ test_build_certificate_staple_ca (void)
 	CK_ATTRIBUTE *extra;
 	CK_RV rv;
 
-	/* Adding the attached extension *first*, and then the certificate */
+        /* Adding the attached extension *first*, and then the certificate */
 
-	/* Add a attached certificate */
+        /* Add a attached certificate */
 	rv = p11_index_add (test.index, attached, 4, NULL);
 	assert_num_eq (CKR_OK, rv);
 
@@ -437,10 +437,10 @@ test_build_certificate_staple_ca (void)
 	attrs = p11_attrs_merge (attrs, p11_attrs_dup (input), true);
 	attrs = p11_attrs_merge (attrs, extra, false);
 
-	/*
-	 * Even though the certificate is not a valid CA, the presence of the
-	 * attached certificate extension transforms it into a CA.
-	 */
+        /*
+         * Even though the certificate is not a valid CA, the presence of the
+         * attached certificate extension transforms it into a CA.
+         */
 	test_check_attrs (expected, attrs);
 	p11_attrs_free (attrs);
 }
@@ -474,19 +474,19 @@ test_build_certificate_staple_ca_backwards (void)
 	CK_ATTRIBUTE *attrs;
 	CK_OBJECT_HANDLE handle;
 
-	/* Adding the certificate *first*, and then the attached extension */
+        /* Adding the certificate *first*, and then the attached extension */
 
 	rv = p11_index_add (test.index, input, 4, &handle);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Add a attached certificate */
+        /* Add a attached certificate */
 	rv = p11_index_add (test.index, attached, 4, NULL);
 	assert_num_eq (CKR_OK, rv);
 
-	/*
-	 * Even though the certificate is not a valid CA, the presence of the
-	 * attached certificate extension transforms it into a CA.
-	 */
+        /*
+         * Even though the certificate is not a valid CA, the presence of the
+         * attached certificate extension transforms it into a CA.
+         */
 	attrs = p11_index_lookup (test.index, handle);
 	test_check_attrs (expected, attrs);
 }
@@ -1141,7 +1141,7 @@ test_invalid_schema (void)
 
 	p11_message_quiet ();
 
-	/* Missing CKA_HASH_OF_SUBJECT_PUBLIC_KEY and CKA_HASH_OF_ISSUER_PUBLIC_KEY */
+        /* Missing CKA_HASH_OF_SUBJECT_PUBLIC_KEY and CKA_HASH_OF_ISSUER_PUBLIC_KEY */
 	rv = p11_builder_build (test.builder, test.index, attrs, input, &extra);
 	assert_num_eq (CKR_TEMPLATE_INCONSISTENT, rv);
 
@@ -1151,9 +1151,9 @@ test_invalid_schema (void)
 static void
 test_create_not_settable (void)
 {
-	/*
-	 * CKA_PUBLIC_KEY_INFO cannot be created/modified
-	 */
+        /*
+         * CKA_PUBLIC_KEY_INFO cannot be created/modified
+         */
 
 	CK_ATTRIBUTE input[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -1184,10 +1184,10 @@ test_create_not_settable (void)
 static void
 test_create_but_loadable (void)
 {
-	/*
-	 * CKA_PUBLIC_KEY_INFO cannot be set on creation, but can be set if we're
-	 * loading from our store. This is signified by batching.
-	 */
+        /*
+         * CKA_PUBLIC_KEY_INFO cannot be set on creation, but can be set if we're
+         * loading from our store. This is signified by batching.
+         */
 
 	CK_ATTRIBUTE input[] = {
 		{ CKA_CLASS, &certificate, sizeof (certificate) },
@@ -1472,10 +1472,10 @@ test_modify_unchanged (void)
 		{ CKA_INVALID },
 	};
 
-	/*
-	 * Although CKA_CLASS is read-only, changing to same value
-	 * shouldn't fail
-	 */
+        /*
+         * Although CKA_CLASS is read-only, changing to same value
+         * shouldn't fail
+         */
 
 	CK_ATTRIBUTE modify[] = {
 		{ CKA_CLASS, &data, sizeof (data) },
@@ -1730,11 +1730,11 @@ test_changed_trusted_certificate (void)
 		{ CKA_INVALID },
 	};
 
-	/*
-	 * We should get an NSS trust object and various assertions here.
-	 * The first two attributes of each object are enough to look it up,
-	 * and then we check the rest of the attributes match.
-	 */
+        /*
+         * We should get an NSS trust object and various assertions here.
+         * The first two attributes of each object are enough to look it up,
+         * and then we check the rest of the attributes match.
+         */
 
 	CK_ATTRIBUTE *expected[] = {
 		nss_trust_server_and_client_distrust_email,
@@ -1749,10 +1749,10 @@ test_changed_trusted_certificate (void)
 	CK_RV rv;
 	int i;
 
-	/*
-	 * A trusted cetrificate, trusted for server and client purposes,
-	 * and explicitly rejects the email and timestamping purposes.
-	 */
+        /*
+         * A trusted cetrificate, trusted for server and client purposes,
+         * and explicitly rejects the email and timestamping purposes.
+         */
 	p11_index_load (test.index);
 	rv = p11_index_take (test.index, p11_attrs_dup (cacert3_trusted_certificate), NULL);
 	assert_num_eq (CKR_OK, rv);
@@ -1763,7 +1763,7 @@ test_changed_trusted_certificate (void)
 	p11_index_finish (test.index);
 
 
-	/* The other objects */
+        /* The other objects */
 	for (i = 0; expected[i]; i++) {
 		handle = p11_index_find (test.index, expected[i], 2);
 		assert (handle != 0);
@@ -1835,11 +1835,11 @@ test_changed_distrust_value (void)
 		{ CKA_INVALID, }
 	};
 
-	/*
-	 * We should get an NSS trust object and various assertions here.
-	 * The first two attributes of each object are enough to look it up,
-	 * and then we check the rest of the attributes match.
-	 */
+        /*
+         * We should get an NSS trust object and various assertions here.
+         * The first two attributes of each object are enough to look it up,
+         * and then we check the rest of the attributes match.
+         */
 
 	CK_ATTRIBUTE *expected[] = {
 		nss_trust_nothing,
@@ -1859,10 +1859,10 @@ test_changed_distrust_value (void)
 	CK_RV rv;
 	int i;
 
-	/*
-	 * A distrusted certificate with a value, plus some extra
-	 * extensions (which should be ignored).
-	 */
+        /*
+         * A distrusted certificate with a value, plus some extra
+         * extensions (which should be ignored).
+         */
 	p11_index_load (test.index);
 	rv = p11_index_take (test.index, p11_attrs_dup (distrust_cert), NULL);
 	assert_num_eq (CKR_OK, rv);
@@ -1872,7 +1872,7 @@ test_changed_distrust_value (void)
 	assert_num_eq (CKR_OK, rv);
 	p11_index_finish (test.index);
 
-	/* The other objects */
+        /* The other objects */
 	for (i = 0; expected[i]; i++) {
 		handle = p11_index_find (test.index, expected[i], 2);
 		assert (handle != 0);
@@ -1921,11 +1921,11 @@ test_changed_distrust_serial (void)
 		{ CKA_INVALID, }
 	};
 
-	/*
-	 * We should get an NSS trust object and various assertions here.
-	 * The first two attributes of each object are enough to look it up,
-	 * and then we check the rest of the attributes match.
-	 */
+        /*
+         * We should get an NSS trust object and various assertions here.
+         * The first two attributes of each object are enough to look it up,
+         * and then we check the rest of the attributes match.
+         */
 
 	CK_ATTRIBUTE *expected[] = {
 		nss_trust_distrust,
@@ -1945,9 +1945,9 @@ test_changed_distrust_serial (void)
 	CK_RV rv;
 	int i;
 
-	/*
-	 * A distrusted certificate without a value.
-	 */
+        /*
+         * A distrusted certificate without a value.
+         */
 	p11_index_load (test.index);
 	rv = p11_index_take (test.index, p11_attrs_dup (distrust_cert), NULL);
 	assert_num_eq (CKR_OK, rv);
@@ -2045,10 +2045,10 @@ test_changed_dup_certificates (void)
 	CK_OBJECT_HANDLE handle;
 	CK_RV rv;
 
-	/*
-	 * A trusted certificate, should create trutsed nss trust
-	 * and anchor assertions
-	 */
+        /*
+         * A trusted certificate, should create trutsed nss trust
+         * and anchor assertions
+         */
 	p11_index_load (test.index);
 	rv = p11_index_take (test.index, p11_attrs_dup (trusted_cert), &handle1);
 	assert_num_eq (CKR_OK, rv);
@@ -2063,7 +2063,7 @@ test_changed_dup_certificates (void)
 	handle = p11_index_find (test.index, anchor_assertion, -1);
 	assert (handle != 0);
 
-	/* Now we add a distrusted certificate, should update the objects */
+        /* Now we add a distrusted certificate, should update the objects */
 	p11_index_load (test.index);
 	rv = p11_index_take (test.index, p11_attrs_dup (distrust_cert), &handle2);
 	assert_num_eq (CKR_OK, rv);
@@ -2078,7 +2078,7 @@ test_changed_dup_certificates (void)
 	handle = p11_index_find (test.index, distrust_assertion, -1);
 	assert (handle != 0);
 
-	/* Now remove the trusted cetrificate, should update again */
+        /* Now remove the trusted cetrificate, should update again */
 	rv = p11_index_remove (test.index, handle2);
 	assert_num_eq (CKR_OK, rv);
 
@@ -2091,7 +2091,7 @@ test_changed_dup_certificates (void)
 	handle = p11_index_find (test.index, distrust_assertion, -1);
 	assert (handle == 0);
 
-	/* Now remove the original certificate, unknown nss and no assertions */
+        /* Now remove the original certificate, unknown nss and no assertions */
 	rv = p11_index_remove (test.index, handle1);
 	assert_num_eq (CKR_OK, rv);
 
@@ -2120,10 +2120,10 @@ test_changed_without_id (void)
 		{ CKA_INVALID },
 	};
 
-	/*
-	 * A cetrificate without a CKA_ID that's created should still
-	 * automatically create compat objects.
-	 */
+        /*
+         * A cetrificate without a CKA_ID that's created should still
+         * automatically create compat objects.
+         */
 
 	CK_OBJECT_HANDLE handle;
 	CK_RV rv;
@@ -2177,15 +2177,15 @@ test_changed_staple_ca (void)
 	rv = p11_index_take (test.index, p11_attrs_dup (input), NULL);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Not a CA at this point, until we staple */
+        /* Not a CA at this point, until we staple */
 	category = 0;
 	assert (p11_index_find (test.index, match, -1) == 0);
 
-	/* Add a attached basic constraint */
+        /* Add a attached basic constraint */
 	rv = p11_index_add (test.index, attached, 4, NULL);
 	assert_num_eq (CKR_OK, rv);
 
-	/* Now should be a CA */
+        /* Now should be a CA */
 	category = 2;
 	assert (p11_index_find (test.index, match, -1) != 0);
 
@@ -2253,7 +2253,7 @@ test_changed_staple_ku (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

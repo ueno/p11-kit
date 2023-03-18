@@ -105,26 +105,26 @@ test_asn1_cache (void)
 	assert_ptr_not_null (defs);
 
 	asn = p11_asn1_decode (defs, "PKIX1.ExtKeyUsageSyntax",
-	                       test_eku_server_and_client,
-	                       sizeof (test_eku_server_and_client), NULL);
+			       test_eku_server_and_client,
+			       sizeof (test_eku_server_and_client), NULL);
 	assert_ptr_not_null (defs);
 
-	/* Place the parsed data in the cache */
+        /* Place the parsed data in the cache */
 	p11_asn1_cache_take (cache, asn, "PKIX1.ExtKeyUsageSyntax",
-	                     test_eku_server_and_client,
-	                     sizeof (test_eku_server_and_client));
+			     test_eku_server_and_client,
+			     sizeof (test_eku_server_and_client));
 
-	/* Get it back out */
+        /* Get it back out */
 	check = p11_asn1_cache_get (cache, "PKIX1.ExtKeyUsageSyntax",
-	                            test_eku_server_and_client,
-	                            sizeof (test_eku_server_and_client));
+				    test_eku_server_and_client,
+				    sizeof (test_eku_server_and_client));
 	assert_ptr_eq (asn, check);
 
-	/* Flush should remove it */
+        /* Flush should remove it */
 	p11_asn1_cache_flush (cache);
 	check = p11_asn1_cache_get (cache, "PKIX1.ExtKeyUsageSyntax",
-	                            test_eku_server_and_client,
-	                            sizeof (test_eku_server_and_client));
+				    test_eku_server_and_client,
+				    sizeof (test_eku_server_and_client));
 	assert_ptr_eq (NULL, check);
 
 	p11_asn1_cache_free (cache);
@@ -140,8 +140,8 @@ test_asn1_free (void)
 	assert_ptr_not_null (defs);
 
 	asn = p11_asn1_decode (defs, "PKIX1.ExtKeyUsageSyntax",
-	                       test_eku_server_and_client,
-	                       sizeof (test_eku_server_and_client), NULL);
+			       test_eku_server_and_client,
+			       sizeof (test_eku_server_and_client), NULL);
 	assert_ptr_not_null (asn);
 
 	p11_asn1_free (asn);
@@ -150,7 +150,7 @@ test_asn1_free (void)
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_fixture (setup, teardown);

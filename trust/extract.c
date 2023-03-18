@@ -61,22 +61,22 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
 
 static bool
-format_argument (const char *optarg,
+format_argument (const char       *optarg,
                  p11_extract_func *func)
 {
 	int i;
 
-	/*
-	 * Certain formats do not support expressive trust information.
-	 * So the caller should limit the supported purposes when asking
-	 * for trust information.
-	 */
+        /*
+         * Certain formats do not support expressive trust information.
+         * So the caller should limit the supported purposes when asking
+         * for trust information.
+         */
 
 	static const struct {
 		const char *format;
@@ -115,17 +115,17 @@ format_argument (const char *optarg,
 }
 
 static bool
-validate_filter_and_format (p11_enumerate *ex,
-                            p11_extract_func func)
+validate_filter_and_format (p11_enumerate    *ex,
+                            p11_extract_func  func)
 {
 	int i;
 
-	/*
-	 * These are the extract functions that contain purpose information.
-	 * If we're being asked to export anchors, and the extract function does
-	 * not support, and the caller has not specified a purpose, then add a
-	 * default purpose to limit to.
-	 */
+        /*
+         * These are the extract functions that contain purpose information.
+         * If we're being asked to export anchors, and the extract function does
+         * not support, and the caller has not specified a purpose, then add a
+         * default purpose to limit to.
+         */
 
 	static p11_extract_func supports_trust_policy[] = {
 		p11_extract_openssl_bundle,
@@ -140,20 +140,18 @@ validate_filter_and_format (p11_enumerate *ex,
 
 	if ((ex->flags & P11_ENUMERATE_ANCHORS) &&
 	    (ex->flags & P11_ENUMERATE_BLOCKLIST)) {
-		/*
-		 * If we're extracting *both* anchors and blocklist, then we must have
-		 * a format that can represent the different types of information.
-		 */
+                /*
+                 * If we're extracting *both* anchors and blocklist, then we must have
+                 * a format that can represent the different types of information.
+                 */
 
 		p11_message (_("format does not support trust policy"));
 		return false;
-
 	} else if (ex->flags & P11_ENUMERATE_ANCHORS) {
-
-		/*
-		 * If we're extracting anchors, then we must have either limited the
-		 * purposes, or have a format that can represent multiple purposes.
-		 */
+                /*
+                 * If we're extracting anchors, then we must have either limited the
+                 * purposes, or have a format that can represent multiple purposes.
+                 */
 
 		if (!ex->limit_to_purposes) {
 			p11_message (_("format requires a purpose, specify it with --purpose; defaulting to 'server-auth'"));
@@ -168,7 +166,7 @@ validate_filter_and_format (p11_enumerate *ex,
 }
 
 int
-p11_trust_extract (int argc,
+p11_trust_extract (int    argc,
                    char **argv)
 {
 	p11_extract_func format = NULL;
@@ -208,8 +206,7 @@ p11_trust_extract (int argc,
 		  "  trust-policy      anchors and blocklist\n"
 		  "  certificates      all certificates\n"
 		  "  pkcs11:object=xx  a PKCS#11 URI",
-		  "what",
-		},
+		  "what", },
 		{ opt_format,
 		  "format to extract to\n"
 		  "  x509-file           DER X.509 certificate file\n"
@@ -221,8 +218,7 @@ p11_trust_extract (int argc,
 		  "  openssl-directory   directory of OpenSSL specific files\n"
 		  "  java-cacerts        java keystore cacerts file\n"
 		  "  edk2-cacerts        cacerts file for EDK2 HTTPS config",
-		  "type"
-		},
+		  "type"},
 		{ opt_purpose,
 		  "limit to certificates usable for the purpose\n"
 		  "  server-auth       for authenticating servers\n"
@@ -230,8 +226,7 @@ p11_trust_extract (int argc,
 		  "  email             for email protection\n"
 		  "  code-signing      for authenticating signed code\n"
 		  "  1.2.3.4.5...      an arbitrary object id",
-		  "usage"
-		},
+		  "usage"},
 		{ opt_overwrite, "overwrite output file or directory" },
 		{ opt_comment, "add comments to bundles if possible" },
 		{ opt_verbose, "show verbose debug output", },
@@ -243,36 +238,36 @@ p11_trust_extract (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_verbose:
-		case opt_quiet:
-			break;
+			case opt_verbose:
+			case opt_quiet:
+				break;
 
-		case opt_overwrite:
-			ex.flags |= P11_SAVE_OVERWRITE;
-			break;
-		case opt_comment:
-			ex.flags |= P11_EXTRACT_COMMENT;
-			break;
-		case opt_filter:
-			if (!p11_enumerate_opt_filter (&ex, optarg))
+			case opt_overwrite:
+				ex.flags |= P11_SAVE_OVERWRITE;
+				break;
+			case opt_comment:
+				ex.flags |= P11_EXTRACT_COMMENT;
+				break;
+			case opt_filter:
+				if (!p11_enumerate_opt_filter (&ex, optarg))
+					exit (2);
+				break;
+			case opt_purpose:
+				if (!p11_enumerate_opt_purpose (&ex, optarg))
+					exit (2);
+				break;
+			case opt_format:
+				if (!format_argument (optarg, &format))
+					exit (2);
+				break;
+			case 'h':
+				p11_tool_usage (usages, options);
+				exit (0);
+			case '?':
 				exit (2);
-			break;
-		case opt_purpose:
-			if (!p11_enumerate_opt_purpose (&ex, optarg))
-				exit (2);
-			break;
-		case opt_format:
-			if (!format_argument (optarg, &format))
-				exit (2);
-			break;
-		case 'h':
-			p11_tool_usage (usages, options);
-			exit (0);
-		case '?':
-			exit (2);
-		default:
-			assert_not_reached ();
-			break;
+			default:
+				assert_not_reached ();
+				break;
 		}
 	}
 
@@ -296,25 +291,25 @@ p11_trust_extract (int argc,
 		exit (1);
 
 	ex.flags |= P11_ENUMERATE_CORRELATE;
-	ret = (format) (&ex, argv[0]) ? 0 : 1;
+	ret = (format)(&ex, argv[0]) ? 0 : 1;
 
 	p11_enumerate_cleanup (&ex);
 	return ret;
 }
 
 int
-p11_trust_extract_compat (int argc,
-                          char *argv[])
+p11_trust_extract_compat (int   argc,
+			  char *argv[])
 {
 	char *path = NULL;
 	int error;
 
 	argv[argc] = NULL;
 
-	/*
-	 * For compatibility with people who deployed p11-kit 0.18.x
-	 * before trust stuff was put into its own branch.
-	 */
+        /*
+         * For compatibility with people who deployed p11-kit 0.18.x
+         * before trust stuff was put into its own branch.
+         */
 	path = p11_path_build (PRIVATEDIR, "p11-kit-extract-trust" EXEEXT, NULL);
 	return_val_if_fail (path != NULL, 1);
 	execv (path, argv);
@@ -322,14 +317,14 @@ p11_trust_extract_compat (int argc,
 
 	if (error == ENOENT) {
 		free (path);
-		/* "trust-extract-compat" is supposed to be a script, not a binary */
+                /* "trust-extract-compat" is supposed to be a script, not a binary */
 		path = p11_path_build (PRIVATEDIR, "trust-extract-compat", NULL);
 		return_val_if_fail (path != NULL, 1);
 		execv (path, argv);
 		error = errno;
 	}
 
-	/* At this point we have no command */
+        /* At this point we have no command */
 	p11_message_err (error, _("could not run %s command"), path);
 
 	free (path);

@@ -70,7 +70,7 @@ mock_C_Initialize__with_fork (CK_VOID_PTR init_args)
 	rv = mock_C_Initialize (init_args);
 	assert (rv == CKR_OK);
 
-	/* Fork during the initialization */
+        /* Fork during the initialization */
 	child = fork ();
 	if (child == 0) {
 		close (1);
@@ -94,7 +94,7 @@ test_fork_initialization (void)
 
 	mock_module_reset ();
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__with_fork;
 
@@ -139,7 +139,7 @@ test_recursive_initialization (void)
 {
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__with_recursive;
 
@@ -171,7 +171,7 @@ static int finalization_count = 0;
 static CK_RV
 mock_C_Initialize__threaded_race (CK_VOID_PTR init_args)
 {
-	/* Atomically increment value */
+        /* Atomically increment value */
 	p11_mutex_lock (&race_mutex);
 	initialization_count += 1;
 	p11_mutex_unlock (&race_mutex);
@@ -183,7 +183,7 @@ mock_C_Initialize__threaded_race (CK_VOID_PTR init_args)
 static CK_RV
 mock_C_Finalize__threaded_race (CK_VOID_PTR reserved)
 {
-	/* Atomically increment value */
+        /* Atomically increment value */
 	p11_mutex_lock (&race_mutex);
 	finalization_count += 1;
 	p11_mutex_unlock (&race_mutex);
@@ -228,7 +228,7 @@ test_threaded_initialization (void)
 	int ret;
 	int i;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__threaded_race;
 	module.C_Finalize = mock_C_Finalize__threaded_race;
@@ -284,7 +284,7 @@ test_threaded_initialization (void)
 
 	p11_unlock ();
 
-	/* C_Initialize should have been called exactly once */
+        /* C_Initialize should have been called exactly once */
 	assert_num_eq (1, initialization_count);
 	assert_num_eq (1, finalization_count);
 }
@@ -320,7 +320,7 @@ test_mutexes (void)
 	CK_FUNCTION_LIST_PTR result;
 	CK_RV rv;
 
-	/* Build up our own function list */
+        /* Build up our own function list */
 	memcpy (&module, &mock_module_no_slots, sizeof (CK_FUNCTION_LIST));
 	module.C_Initialize = mock_C_Initialize__test_mutexes;
 
@@ -379,7 +379,7 @@ test_initalize_fail (void)
 
 	p11_kit_be_loud ();
 
-	/* Failed modules get removed from the list */
+        /* Failed modules get removed from the list */
 	assert_ptr_eq (&mock_module_no_slots, modules[0]);
 	assert_ptr_eq (NULL, modules[1]);
 	assert_ptr_eq (NULL, modules[2]);
@@ -390,18 +390,17 @@ test_initalize_fail (void)
 static void
 test_finalize_fail (void)
 {
-
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_mutex_init (&race_mutex);
 	mock_module_init ();
 	p11_library_init ();
 
-	/* These only work when managed */
+        /* These only work when managed */
 	p11_test (test_recursive_initialization, "/init/test_recursive_initialization");
 	p11_test (test_threaded_initialization, "/init/test_threaded_initialization");
 	p11_test (test_mutexes, "/init/test_mutexes");

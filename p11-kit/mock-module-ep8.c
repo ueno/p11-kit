@@ -49,18 +49,18 @@ static int called = 0;
 static CK_SLOT_ID last_id = 1;
 
 static CK_RV
-override_get_slot_list (CK_BBOOL token_present,
-                    CK_SLOT_ID_PTR slot_list,
-                    CK_ULONG_PTR count)
+override_get_slot_list (CK_BBOOL       token_present,
+                        CK_SLOT_ID_PTR slot_list,
+                        CK_ULONG_PTR   count)
 {
 	if (count == NULL)
 		return CKR_ARGUMENTS_BAD;
 
-	/* For odd numbered calls, the module will return 1 slot with a slot ID
-	 * returned previously.
-	 *
-	 * For even numbered calls, the module will return 2 slots, being the new
-	 * slot put first in the list */
+        /* For odd numbered calls, the module will return 1 slot with a slot ID
+         * returned previously.
+         *
+         * For even numbered calls, the module will return 2 slots, being the new
+         * slot put first in the list */
 	if (called % 2) {
 		if (slot_list == NULL) {
 			*count = 1;
@@ -103,8 +103,7 @@ C_GetFunctionList (CK_FUNCTION_LIST_PTR_PTR list)
 	mock_module.C_GetFunctionList = C_GetFunctionList;
 	if (list == NULL)
 		return CKR_ARGUMENTS_BAD;
-	mock_module.C_GetSlotList= override_get_slot_list;
+	mock_module.C_GetSlotList = override_get_slot_list;
 	*list = &mock_module;
 	return CKR_OK;
 }
-

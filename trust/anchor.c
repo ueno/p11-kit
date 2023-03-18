@@ -57,10 +57,10 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
-#define dngettext(Domain,String1,String2,N) ((N) == 1 ? (String1) : (String2))
+#define dngettext(Domain, String1, String2, N) ((N) == 1 ? (String1) : (String2))
 #endif
 
 static p11_parser *
@@ -101,9 +101,9 @@ iter_match_anchor (p11_kit_iter *iter,
 }
 
 static p11_array *
-uris_or_files_to_iters (int argc,
-                        char *argv[],
-                        int behavior)
+uris_or_files_to_iters (int   argc,
+			char *argv[],
+			int   behavior)
 {
 	int flags = P11_KIT_URI_FOR_OBJECT_ON_TOKEN_AND_MODULE;
 	p11_parser *parser = NULL;
@@ -118,8 +118,7 @@ uris_or_files_to_iters (int argc,
 	return_val_if_fail (iters != NULL, NULL);
 
 	for (i = 0; i < argc; i++) {
-
-		/* A PKCS#11 URI */
+                /* A PKCS#11 URI */
 		if (strncmp (argv[i], "pkcs11:", 7) == 0) {
 			uri = p11_kit_uri_new ();
 			if (p11_kit_uri_parse (argv[i], flags, uri) != P11_KIT_URI_OK) {
@@ -134,22 +133,21 @@ uris_or_files_to_iters (int argc,
 
 			if (!p11_array_push (iters, iter))
 				return_val_if_reached (NULL);
-
 		} else {
 			if (parser == NULL)
 				parser = create_arg_file_parser ();
 
 			ret = p11_parse_file (parser, argv[i], NULL, P11_PARSE_FLAG_ANCHOR);
 			switch (ret) {
-			case P11_PARSE_SUCCESS:
-				p11_debug ("parsed file: %s", argv[i]);
-				break;
-			case P11_PARSE_UNRECOGNIZED:
-				p11_message (_("unrecognized file format: %s"), argv[i]);
-				break;
-			default:
-				p11_message (_("failed to parse file: %s"), argv[i]);
-				break;
+				case P11_PARSE_SUCCESS:
+					p11_debug ("parsed file: %s", argv[i]);
+					break;
+				case P11_PARSE_UNRECOGNIZED:
+					p11_message (_("unrecognized file format: %s"), argv[i]);
+					break;
+				default:
+					p11_message (_("failed to parse file: %s"), argv[i]);
+					break;
 			}
 
 			if (ret != P11_PARSE_SUCCESS)
@@ -179,8 +177,8 @@ uris_or_files_to_iters (int argc,
 }
 
 static p11_array *
-files_to_attrs (int argc,
-                char *argv[])
+files_to_attrs (int   argc,
+		char *argv[])
 {
 	p11_parser *parser;
 	p11_array *parsed;
@@ -197,15 +195,15 @@ files_to_attrs (int argc,
 	for (i = 0; i < argc; i++) {
 		ret = p11_parse_file (parser, argv[i], NULL, P11_PARSE_FLAG_ANCHOR);
 		switch (ret) {
-		case P11_PARSE_SUCCESS:
-			p11_debug ("parsed file: %s", argv[i]);
-			break;
-		case P11_PARSE_UNRECOGNIZED:
-			p11_message (_("unrecognized file format: %s"), argv[i]);
-			break;
-		default:
-			p11_message (_("failed to parse file: %s"), argv[i]);
-			break;
+			case P11_PARSE_SUCCESS:
+				p11_debug ("parsed file: %s", argv[i]);
+				break;
+			case P11_PARSE_UNRECOGNIZED:
+				p11_message (_("unrecognized file format: %s"), argv[i]);
+				break;
+			default:
+				p11_message (_("failed to parse file: %s"), argv[i]);
+				break;
 		}
 
 		if (ret != P11_PARSE_SUCCESS)
@@ -226,13 +224,12 @@ files_to_attrs (int argc,
 
 	p11_array_free (array);
 	return NULL;
-
 }
 
 static CK_SESSION_HANDLE
-session_for_store_on_module (const char *name,
+session_for_store_on_module (const char       *name,
                              CK_FUNCTION_LIST *module,
-                             bool *found_read_only)
+                             bool             *found_read_only)
 {
 	CK_SESSION_HANDLE session = 0;
 	CK_SLOT_ID *slots = NULL;
@@ -272,7 +269,7 @@ session_for_store_on_module (const char *name,
 		}
 
 		rv = (module->C_OpenSession) (slots[i], CKF_SERIAL_SESSION | CKF_RW_SESSION,
-		                              NULL, NULL, &session);
+					      NULL, NULL, &session);
 		if (rv != CKR_OK) {
 			p11_message (_("%s: couldn't open session: %s"), name, p11_kit_strerror (rv));
 			session = 0;
@@ -306,7 +303,7 @@ session_for_store (CK_FUNCTION_LIST **module)
 		if (session == 0UL) {
 			name = p11_kit_module_get_name (modules[i]);
 			session = session_for_store_on_module (name, modules[i],
-			                                       &found_read_only);
+							       &found_read_only);
 
 			if (session != 0UL) {
 				*module = modules[i];
@@ -332,9 +329,9 @@ session_for_store (CK_FUNCTION_LIST **module)
 }
 
 static bool
-create_anchor (CK_FUNCTION_LIST *module,
-               CK_SESSION_HANDLE session,
-               CK_ATTRIBUTE *attrs)
+create_anchor (CK_FUNCTION_LIST  *module,
+               CK_SESSION_HANDLE  session,
+               CK_ATTRIBUTE      *attrs)
 {
 	CK_BBOOL truev = CK_TRUE;
 	CK_OBJECT_HANDLE object;
@@ -361,12 +358,12 @@ create_anchor (CK_FUNCTION_LIST *module,
 
 	if (p11_attrs_find_ulong (attrs, CKA_CLASS, &klass)) {
 		switch (klass) {
-		case CKO_CERTIFICATE:
-			basics = basics_certificate;
-			break;
-		case CKO_X_CERTIFICATE_EXTENSION:
-			basics = basics_extension;
-			break;
+			case CKO_CERTIFICATE:
+				basics = basics_certificate;
+				break;
+			case CKO_X_CERTIFICATE_EXTENSION:
+				basics = basics_extension;
+				break;
 		}
 	}
 
@@ -380,7 +377,7 @@ create_anchor (CK_FUNCTION_LIST *module,
 	}
 
 	rv = (module->C_CreateObject) (session, attrs,
-	                               p11_attrs_count (attrs), &object);
+				       p11_attrs_count (attrs), &object);
 
 	p11_attrs_free (attrs);
 
@@ -393,10 +390,10 @@ create_anchor (CK_FUNCTION_LIST *module,
 }
 
 static bool
-modify_anchor (CK_FUNCTION_LIST *module,
-               CK_SESSION_HANDLE session,
-               CK_OBJECT_HANDLE object,
-               CK_ATTRIBUTE *attrs)
+modify_anchor (CK_FUNCTION_LIST  *module,
+               CK_SESSION_HANDLE  session,
+               CK_OBJECT_HANDLE   object,
+               CK_ATTRIBUTE      *attrs)
 {
 	CK_BBOOL truev = CK_TRUE;
 	CK_ATTRIBUTE *changes;
@@ -417,7 +414,7 @@ modify_anchor (CK_FUNCTION_LIST *module,
 
 	return_val_if_fail (attrs != NULL, FALSE);
 
-	/* Don't need the attributes anymore */
+        /* Don't need the attributes anymore */
 	p11_attrs_free (attrs);
 
 	if (p11_debugging) {
@@ -427,7 +424,7 @@ modify_anchor (CK_FUNCTION_LIST *module,
 	}
 
 	rv = (module->C_SetAttributeValue) (session, object, changes,
-	                                    p11_attrs_count (changes));
+					    p11_attrs_count (changes));
 
 	p11_attrs_free (changes);
 
@@ -440,9 +437,9 @@ modify_anchor (CK_FUNCTION_LIST *module,
 }
 
 static CK_OBJECT_HANDLE
-find_anchor (CK_FUNCTION_LIST *module,
-             CK_SESSION_HANDLE session,
-             CK_ATTRIBUTE *attrs)
+find_anchor (CK_FUNCTION_LIST  *module,
+             CK_SESSION_HANDLE  session,
+             CK_ATTRIBUTE      *attrs)
 {
 	CK_OBJECT_HANDLE object = 0UL;
 	CK_ATTRIBUTE *attr;
@@ -466,9 +463,9 @@ find_anchor (CK_FUNCTION_LIST *module,
 }
 
 static int
-anchor_store (int argc,
-	      char *argv[],
-	      bool *changed,
+anchor_store (int           argc,
+	      char         *argv[],
+	      bool         *changed,
 	      unsigned int *errors)
 {
 	CK_ATTRIBUTE *attrs;
@@ -550,7 +547,7 @@ description_for_object_at_iter (p11_kit_iter *iter)
 
 static bool
 remove_all (p11_kit_iter *iter,
-	    bool *changed,
+	    bool         *changed,
 	    unsigned int *errors)
 {
 	const char *desc;
@@ -561,18 +558,18 @@ remove_all (p11_kit_iter *iter,
 		p11_debug ("removing %s: %lu", desc, p11_kit_iter_get_object (iter));
 		rv = p11_kit_iter_destroy_object (iter);
 		switch (rv) {
-		case CKR_OK:
-			*changed = true;
-			continue;
-		case CKR_TOKEN_WRITE_PROTECTED:
-		case CKR_SESSION_READ_ONLY:
-		case CKR_ATTRIBUTE_READ_ONLY:
-			p11_message (_("couldn't remove read-only %s"), desc);
-			break;
-		default:
-			p11_message (_("couldn't remove %s: %s"), desc,
-			             p11_kit_strerror (rv));
-			break;
+			case CKR_OK:
+				*changed = true;
+				continue;
+			case CKR_TOKEN_WRITE_PROTECTED:
+			case CKR_SESSION_READ_ONLY:
+			case CKR_ATTRIBUTE_READ_ONLY:
+				p11_message (_("couldn't remove read-only %s"), desc);
+				break;
+			default:
+				p11_message (_("couldn't remove %s: %s"), desc,
+					     p11_kit_strerror (rv));
+				break;
 		}
 		(*errors)++;
 	}
@@ -581,9 +578,9 @@ remove_all (p11_kit_iter *iter,
 }
 
 static int
-anchor_remove (int argc,
-               char *argv[],
-               bool *changed,
+anchor_remove (int           argc,
+	       char         *argv[],
+	       bool         *changed,
 	       unsigned int *errors)
 {
 	CK_FUNCTION_LIST **modules;
@@ -620,7 +617,7 @@ anchor_remove (int argc,
 }
 
 int
-p11_trust_anchor (int argc,
+p11_trust_anchor (int    argc,
                   char **argv)
 {
 	bool changed = false;
@@ -649,7 +646,7 @@ p11_trust_anchor (int argc,
 
 	p11_tool_desc usages[] = {
 		{ 0, "usage: trust anchor --store <file> ...\n"
-		     "       trust anchor --remove <file or URI> ..."},
+		  "       trust anchor --remove <file or URI> ..."},
 		{ opt_verbose, "show verbose debug output", },
 		{ opt_quiet, "suppress command output", },
 		{ 0 },
@@ -657,29 +654,29 @@ p11_trust_anchor (int argc,
 
 	while ((opt = p11_tool_getopt (argc, argv, options)) != -1) {
 		switch (opt) {
-		case opt_store:
-		case opt_remove:
-			if (action == 0) {
-				action = opt;
-			} else {
-				p11_message (_("an action was already specified"));
+			case opt_store:
+			case opt_remove:
+				if (action == 0) {
+					action = opt;
+				} else {
+					p11_message (_("an action was already specified"));
+					return 2;
+				}
+				break;
+			case opt_verbose:
+			case opt_quiet:
+				break;
+			case opt_help:
+				p11_tool_usage (usages, options);
+				return 0;
+			case '?':
+				p11_tool_usage (usages, options);
 				return 2;
-			}
-			break;
-		case opt_verbose:
-		case opt_quiet:
-			break;
-		case opt_help:
-			p11_tool_usage (usages, options);
-			return 0;
-		case '?':
-			p11_tool_usage (usages, options);
-			return 2;
-		default:
-			assert_not_reached ();
-			break;
+			default:
+				assert_not_reached ();
+				break;
 		}
-	};
+	}
 
 	argc -= optind;
 	argv += optind;
@@ -687,7 +684,7 @@ p11_trust_anchor (int argc,
 	if (action == 0)
 		action = opt_store;
 
-	/* Store is different, and only accepts files */
+        /* Store is different, and only accepts files */
 	if (action == opt_store)
 		ret = anchor_store (argc, argv, &changed, &errors);
 
@@ -705,7 +702,7 @@ p11_trust_anchor (int argc,
 			     errors);
 	}
 
-	/* Extract the compat bundles after modification */
+        /* Extract the compat bundles after modification */
 	if (ret == 0 && changed) {
 		char *args[] = { argv[0], NULL };
 		ret = p11_trust_extract_compat (1, args);

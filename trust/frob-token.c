@@ -40,7 +40,7 @@
 #include "token.h"
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	p11_token *token;

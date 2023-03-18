@@ -46,14 +46,14 @@
 
 static bool
 buffer_realloc (p11_buffer *buffer,
-                size_t size)
+                size_t      size)
 {
 	void *data;
 
-	/* Memory owned elsewhere can't be reallocated */
+        /* Memory owned elsewhere can't be reallocated */
 	return_val_if_fail (buffer->frealloc != NULL, false);
 
-	/* Reallocate built in buffer using allocator */
+        /* Reallocate built in buffer using allocator */
 	data = (buffer->frealloc) (buffer->data, size);
 	if (!data && size > 0) {
 		p11_buffer_fail (buffer);
@@ -67,7 +67,7 @@ buffer_realloc (p11_buffer *buffer,
 
 bool
 p11_buffer_init (p11_buffer *buffer,
-                 size_t reserve)
+                 size_t      reserve)
 {
 	p11_buffer_init_full (buffer, NULL, 0, 0, realloc, free);
 	return buffer_realloc (buffer, reserve);
@@ -75,7 +75,7 @@ p11_buffer_init (p11_buffer *buffer,
 
 bool
 p11_buffer_init_null (p11_buffer *buffer,
-                      size_t reserve)
+                      size_t      reserve)
 {
 	p11_buffer_init_full (buffer, NULL, 0, P11_BUFFER_NULL, realloc, free);
 	return buffer_realloc (buffer, reserve);
@@ -83,11 +83,11 @@ p11_buffer_init_null (p11_buffer *buffer,
 
 void
 p11_buffer_init_full (p11_buffer *buffer,
-                      void *data,
-                      size_t len,
-                      int flags,
-                      void * (* frealloc) (void *, size_t),
-                      void (* ffree) (void *))
+		      void *data,
+		      size_t len,
+		      int flags,
+		      void *(*frealloc) (void *, size_t),
+		      void (* ffree) (void *))
 {
 	memset (buffer, 0, sizeof (*buffer));
 
@@ -113,7 +113,7 @@ p11_buffer_uninit (p11_buffer *buffer)
 
 void *
 p11_buffer_steal (p11_buffer *buffer,
-                  size_t *length)
+                  size_t     *length)
 {
 	void *data;
 
@@ -131,7 +131,7 @@ p11_buffer_steal (p11_buffer *buffer,
 
 bool
 p11_buffer_reset (p11_buffer *buffer,
-                  size_t reserve)
+                  size_t      reserve)
 {
 	buffer->flags &= ~P11_BUFFER_FAILED;
 	buffer->len = 0;
@@ -143,7 +143,7 @@ p11_buffer_reset (p11_buffer *buffer,
 
 void *
 p11_buffer_append (p11_buffer *buffer,
-                   size_t length)
+                   size_t      length)
 {
 	unsigned char *data;
 	size_t terminator;
@@ -155,14 +155,13 @@ p11_buffer_append (p11_buffer *buffer,
 
 	terminator = (buffer->flags & P11_BUFFER_NULL) ? 1 : 0;
 
-	/* Check for unlikely and unrecoverable integer overflow */
+        /* Check for unlikely and unrecoverable integer overflow */
 	return_val_if_fail (SIZE_MAX - (terminator + length) > buffer->len, NULL);
 
 	reserve = terminator + length + buffer->len;
 
 	if (reserve > buffer->size) {
-
-		/* Calculate a new length, minimize number of buffer allocations */
+                /* Calculate a new length, minimize number of buffer allocations */
 		return_val_if_fail (buffer->size < SIZE_MAX / 2, NULL);
 		newlen = buffer->size * 2;
 		if (!newlen)
@@ -185,7 +184,7 @@ p11_buffer_append (p11_buffer *buffer,
 void
 p11_buffer_add (p11_buffer *buffer,
                 const void *data,
-                ssize_t length)
+                ssize_t     length)
 {
 	void *at;
 

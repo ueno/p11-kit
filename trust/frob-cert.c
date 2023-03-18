@@ -51,13 +51,13 @@
 
 #define err_if_fail(ret, msg) \
 	do { if ((ret) != ASN1_SUCCESS) { \
-		fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
-		exit (1); \
-	} } while (0)
+		     fprintf (stderr, "%s: %s\n", msg, asn1_strerror (ret)); \
+		     exit (1); \
+	     } } while (0)
 
 static ssize_t
 tlv_length (const unsigned char *data,
-            size_t length)
+	    size_t               length)
 {
 	unsigned char cls;
 	int counter = 0;
@@ -79,7 +79,7 @@ tlv_length (const unsigned char *data,
 }
 
 int
-main (int argc,
+main (int   argc,
       char *argv[])
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };

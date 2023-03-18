@@ -14,7 +14,7 @@ int
 main (void)
 {
 	CK_C_INITIALIZE_ARGS args =
-		{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
+	{ NULL, NULL, NULL, NULL, CKF_OS_LOCKING_OK, NULL, };
 	CK_C_GetFunctionList C_GetFunctionList;
 	CK_SESSION_HANDLE session;
 	CK_FUNCTION_LIST *module;
@@ -26,7 +26,7 @@ main (void)
 
 	dl = dlopen (TRUST_SO, RTLD_LOCAL | RTLD_NOW);
 	if (dl == NULL)
-		fprintf (stderr, "%s\n", dlerror());
+		fprintf (stderr, "%s\n", dlerror ());
 	assert (dl != NULL);
 
 	C_GetFunctionList = dlsym (dl, "C_GetFunctionList");
@@ -57,11 +57,9 @@ main (void)
 	if (rv == CKR_OK) {
 		printf ("no reinitialization bug\n");
 		return 0;
-
 	} else if (rv == CKR_SESSION_HANDLE_INVALID) {
 		printf ("reinitialization bug present\n");
 		return 1;
-
 	} else {
 		printf ("another error: %lu\n", rv);
 		return 1;

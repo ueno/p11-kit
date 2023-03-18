@@ -58,7 +58,7 @@
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(x) dgettext(PACKAGE_NAME, x)
+#define _(x) dgettext (PACKAGE_NAME, x)
 #else
 #define _(x) (x)
 #endif
@@ -72,19 +72,19 @@ struct _p11_persist {
 
 bool
 p11_persist_magic (const unsigned char *data,
-                   size_t length)
+		   size_t               length)
 {
 	return (strnstr ((char *)data, "[" PERSIST_HEADER "]", length) != NULL);
 }
 
 bool
 p11_persist_is_generated (const unsigned char *data,
-			  size_t length)
+			  size_t               length)
 {
 	static const char comment[] =
 		"# This file has been auto-generated and written by p11-kit.";
 	return length >= sizeof (comment) - 1 &&
-		memcmp ((const char *)data, comment, sizeof (comment) - 1) == 0;
+	       memcmp ((const char *)data, comment, sizeof (comment) - 1) == 0;
 }
 
 p11_persist *
@@ -120,7 +120,7 @@ struct constant {
 };
 
 static bool
-parse_string (p11_lexer *lexer,
+parse_string (p11_lexer    *lexer,
               CK_ATTRIBUTE *attr)
 {
 	const char *value;
@@ -131,14 +131,14 @@ parse_string (p11_lexer *lexer,
 	value = lexer->tok.field.value;
 	end = value + strlen (value);
 
-	/* Not a string/binary value */
+        /* Not a string/binary value */
 	if (value == end || value[0] != '\"' || *(end - 1) != '\"')
 		return false;
 
-	/* Note that we don't skip whitespace when decoding, as you might in other URLs */
+        /* Note that we don't skip whitespace when decoding, as you might in other URLs */
 	data = p11_url_decode (value + 1, end - 1, "", &length);
 	if (data == NULL) {
-		p11_lexer_msg(lexer, "bad encoding of attribute value");
+		p11_lexer_msg (lexer, "bad encoding of attribute value");
 		return false;
 	}
 
@@ -149,7 +149,7 @@ parse_string (p11_lexer *lexer,
 
 static void
 format_string (CK_ATTRIBUTE *attr,
-               p11_buffer *buf)
+               p11_buffer   *buf)
 {
 	const unsigned char *value;
 
@@ -162,7 +162,7 @@ format_string (CK_ATTRIBUTE *attr,
 }
 
 static bool
-parse_bool (p11_lexer *lexer,
+parse_bool (p11_lexer    *lexer,
             CK_ATTRIBUTE *attr)
 {
 	const char *value = lexer->tok.field.value;
@@ -170,12 +170,10 @@ parse_bool (p11_lexer *lexer,
 
 	if (strcmp (value, "true") == 0) {
 		boolean = CK_TRUE;
-
 	} else if (strcmp (value, "false") == 0) {
 		boolean = CK_FALSE;
-
 	} else {
-		/* Not a valid boolean value */
+                /* Not a valid boolean value */
 		return false;
 	}
 
@@ -187,7 +185,7 @@ parse_bool (p11_lexer *lexer,
 
 static bool
 format_bool (CK_ATTRIBUTE *attr,
-             p11_buffer *buf)
+             p11_buffer   *buf)
 {
 	const CK_BBOOL *value;
 
@@ -195,35 +193,35 @@ format_bool (CK_ATTRIBUTE *attr,
 		return false;
 
 	switch (attr->type) {
-	case CKA_TOKEN:
-	case CKA_PRIVATE:
-	case CKA_TRUSTED:
-	case CKA_SENSITIVE:
-	case CKA_ENCRYPT:
-	case CKA_DECRYPT:
-	case CKA_WRAP:
-	case CKA_UNWRAP:
-	case CKA_SIGN:
-	case CKA_SIGN_RECOVER:
-	case CKA_VERIFY:
-	case CKA_VERIFY_RECOVER:
-	case CKA_DERIVE:
-	case CKA_EXTRACTABLE:
-	case CKA_LOCAL:
-	case CKA_NEVER_EXTRACTABLE:
-	case CKA_ALWAYS_SENSITIVE:
-	case CKA_MODIFIABLE:
-	case CKA_SECONDARY_AUTH:
-	case CKA_ALWAYS_AUTHENTICATE:
-	case CKA_WRAP_WITH_TRUSTED:
-	case CKA_RESET_ON_INIT:
-	case CKA_HAS_RESET:
-	case CKA_COLOR:
-	case CKA_X_DISTRUSTED:
-	case CKA_NSS_MOZILLA_CA_POLICY:
-		break;
-	default:
-		return false;
+		case CKA_TOKEN:
+		case CKA_PRIVATE:
+		case CKA_TRUSTED:
+		case CKA_SENSITIVE:
+		case CKA_ENCRYPT:
+		case CKA_DECRYPT:
+		case CKA_WRAP:
+		case CKA_UNWRAP:
+		case CKA_SIGN:
+		case CKA_SIGN_RECOVER:
+		case CKA_VERIFY:
+		case CKA_VERIFY_RECOVER:
+		case CKA_DERIVE:
+		case CKA_EXTRACTABLE:
+		case CKA_LOCAL:
+		case CKA_NEVER_EXTRACTABLE:
+		case CKA_ALWAYS_SENSITIVE:
+		case CKA_MODIFIABLE:
+		case CKA_SECONDARY_AUTH:
+		case CKA_ALWAYS_AUTHENTICATE:
+		case CKA_WRAP_WITH_TRUSTED:
+		case CKA_RESET_ON_INIT:
+		case CKA_HAS_RESET:
+		case CKA_COLOR:
+		case CKA_X_DISTRUSTED:
+		case CKA_NSS_MOZILLA_CA_POLICY:
+			break;
+		default:
+			return false;
 	}
 
 	value = attr->pValue;
@@ -238,7 +236,7 @@ format_bool (CK_ATTRIBUTE *attr,
 }
 
 static bool
-parse_ulong (p11_lexer *lexer,
+parse_ulong (p11_lexer    *lexer,
              CK_ATTRIBUTE *attr)
 {
 	unsigned long value;
@@ -247,7 +245,7 @@ parse_ulong (p11_lexer *lexer,
 	end = NULL;
 	value = strtoul (lexer->tok.field.value, &end, 10);
 
-	/* Not a valid number value */
+        /* Not a valid number value */
 	if (!end || *end != '\0')
 		return false;
 
@@ -259,7 +257,7 @@ parse_ulong (p11_lexer *lexer,
 
 static bool
 format_ulong (CK_ATTRIBUTE *attr,
-              p11_buffer *buf)
+              p11_buffer   *buf)
 {
 	char string[sizeof (CK_ULONG) * 4];
 	const CK_ULONG *value;
@@ -268,46 +266,46 @@ format_ulong (CK_ATTRIBUTE *attr,
 		return false;
 
 	switch (attr->type) {
-	case CKA_CERTIFICATE_CATEGORY:
-	case CKA_CERTIFICATE_TYPE:
-	case CKA_CLASS:
-	case CKA_JAVA_MIDP_SECURITY_DOMAIN:
-	case CKA_KEY_GEN_MECHANISM:
-	case CKA_KEY_TYPE:
-	case CKA_MECHANISM_TYPE:
-	case CKA_MODULUS_BITS:
-	case CKA_PRIME_BITS:
-	case CKA_SUB_PRIME_BITS:
-	case CKA_VALUE_BITS:
-	case CKA_VALUE_LEN:
-	case CKA_TRUST_DIGITAL_SIGNATURE:
-	case CKA_TRUST_NON_REPUDIATION:
-	case CKA_TRUST_KEY_ENCIPHERMENT:
-	case CKA_TRUST_DATA_ENCIPHERMENT:
-	case CKA_TRUST_KEY_AGREEMENT:
-	case CKA_TRUST_KEY_CERT_SIGN:
-	case CKA_TRUST_CRL_SIGN:
-	case CKA_TRUST_SERVER_AUTH:
-	case CKA_TRUST_CLIENT_AUTH:
-	case CKA_TRUST_CODE_SIGNING:
-	case CKA_TRUST_EMAIL_PROTECTION:
-	case CKA_TRUST_IPSEC_END_SYSTEM:
-	case CKA_TRUST_IPSEC_TUNNEL:
-	case CKA_TRUST_IPSEC_USER:
-	case CKA_TRUST_TIME_STAMPING:
-	case CKA_TRUST_STEP_UP_APPROVED:
-	case CKA_X_ASSERTION_TYPE:
-	case CKA_AUTH_PIN_FLAGS:
-	case CKA_HW_FEATURE_TYPE:
-	case CKA_PIXEL_X:
-	case CKA_PIXEL_Y:
-	case CKA_RESOLUTION:
-	case CKA_CHAR_ROWS:
-	case CKA_CHAR_COLUMNS:
-	case CKA_BITS_PER_PIXEL:
-		break;
-	default:
-		return false;
+		case CKA_CERTIFICATE_CATEGORY:
+		case CKA_CERTIFICATE_TYPE:
+		case CKA_CLASS:
+		case CKA_JAVA_MIDP_SECURITY_DOMAIN:
+		case CKA_KEY_GEN_MECHANISM:
+		case CKA_KEY_TYPE:
+		case CKA_MECHANISM_TYPE:
+		case CKA_MODULUS_BITS:
+		case CKA_PRIME_BITS:
+		case CKA_SUB_PRIME_BITS:
+		case CKA_VALUE_BITS:
+		case CKA_VALUE_LEN:
+		case CKA_TRUST_DIGITAL_SIGNATURE:
+		case CKA_TRUST_NON_REPUDIATION:
+		case CKA_TRUST_KEY_ENCIPHERMENT:
+		case CKA_TRUST_DATA_ENCIPHERMENT:
+		case CKA_TRUST_KEY_AGREEMENT:
+		case CKA_TRUST_KEY_CERT_SIGN:
+		case CKA_TRUST_CRL_SIGN:
+		case CKA_TRUST_SERVER_AUTH:
+		case CKA_TRUST_CLIENT_AUTH:
+		case CKA_TRUST_CODE_SIGNING:
+		case CKA_TRUST_EMAIL_PROTECTION:
+		case CKA_TRUST_IPSEC_END_SYSTEM:
+		case CKA_TRUST_IPSEC_TUNNEL:
+		case CKA_TRUST_IPSEC_USER:
+		case CKA_TRUST_TIME_STAMPING:
+		case CKA_TRUST_STEP_UP_APPROVED:
+		case CKA_X_ASSERTION_TYPE:
+		case CKA_AUTH_PIN_FLAGS:
+		case CKA_HW_FEATURE_TYPE:
+		case CKA_PIXEL_X:
+		case CKA_PIXEL_Y:
+		case CKA_RESOLUTION:
+		case CKA_CHAR_ROWS:
+		case CKA_CHAR_COLUMNS:
+		case CKA_BITS_PER_PIXEL:
+			break;
+		default:
+			return false;
 	}
 
 	value = attr->pValue;
@@ -318,15 +316,15 @@ format_ulong (CK_ATTRIBUTE *attr,
 }
 
 static bool
-parse_constant (p11_persist *persist,
-                p11_lexer *lexer,
+parse_constant (p11_persist  *persist,
+                p11_lexer    *lexer,
                 CK_ATTRIBUTE *attr)
 {
 	CK_ULONG value;
 
 	value = p11_constant_resolve (persist->constants, lexer->tok.field.value);
 
-	/* Not a valid constant */
+        /* Not a valid constant */
 	if (value == CKA_INVALID)
 		return false;
 
@@ -338,7 +336,7 @@ parse_constant (p11_persist *persist,
 
 static bool
 format_constant (CK_ATTRIBUTE *attr,
-                 p11_buffer *buf)
+                 p11_buffer   *buf)
 {
 	const p11_constant *table;
 	const CK_ULONG *value;
@@ -348,45 +346,45 @@ format_constant (CK_ATTRIBUTE *attr,
 		return false;
 
 	switch (attr->type) {
-	case CKA_TRUST_DIGITAL_SIGNATURE:
-	case CKA_TRUST_NON_REPUDIATION:
-	case CKA_TRUST_KEY_ENCIPHERMENT:
-	case CKA_TRUST_DATA_ENCIPHERMENT:
-	case CKA_TRUST_KEY_AGREEMENT:
-	case CKA_TRUST_KEY_CERT_SIGN:
-	case CKA_TRUST_CRL_SIGN:
-	case CKA_TRUST_SERVER_AUTH:
-	case CKA_TRUST_CLIENT_AUTH:
-	case CKA_TRUST_CODE_SIGNING:
-	case CKA_TRUST_EMAIL_PROTECTION:
-	case CKA_TRUST_IPSEC_END_SYSTEM:
-	case CKA_TRUST_IPSEC_TUNNEL:
-	case CKA_TRUST_IPSEC_USER:
-	case CKA_TRUST_TIME_STAMPING:
-		table = p11_constant_trusts;
-		break;
-	case CKA_CLASS:
-		table = p11_constant_classes;
-		break;
-	case CKA_CERTIFICATE_TYPE:
-		table = p11_constant_certs;
-		break;
-	case CKA_KEY_TYPE:
-		table = p11_constant_keys;
-		break;
-	case CKA_X_ASSERTION_TYPE:
-		table = p11_constant_asserts;
-		break;
-	case CKA_CERTIFICATE_CATEGORY:
-		table = p11_constant_categories;
-		break;
-	case CKA_KEY_GEN_MECHANISM:
-	case CKA_MECHANISM_TYPE:
-		table = p11_constant_mechanisms;
-		break;
-	default:
-		table = NULL;
-	};
+		case CKA_TRUST_DIGITAL_SIGNATURE:
+		case CKA_TRUST_NON_REPUDIATION:
+		case CKA_TRUST_KEY_ENCIPHERMENT:
+		case CKA_TRUST_DATA_ENCIPHERMENT:
+		case CKA_TRUST_KEY_AGREEMENT:
+		case CKA_TRUST_KEY_CERT_SIGN:
+		case CKA_TRUST_CRL_SIGN:
+		case CKA_TRUST_SERVER_AUTH:
+		case CKA_TRUST_CLIENT_AUTH:
+		case CKA_TRUST_CODE_SIGNING:
+		case CKA_TRUST_EMAIL_PROTECTION:
+		case CKA_TRUST_IPSEC_END_SYSTEM:
+		case CKA_TRUST_IPSEC_TUNNEL:
+		case CKA_TRUST_IPSEC_USER:
+		case CKA_TRUST_TIME_STAMPING:
+			table = p11_constant_trusts;
+			break;
+		case CKA_CLASS:
+			table = p11_constant_classes;
+			break;
+		case CKA_CERTIFICATE_TYPE:
+			table = p11_constant_certs;
+			break;
+		case CKA_KEY_TYPE:
+			table = p11_constant_keys;
+			break;
+		case CKA_X_ASSERTION_TYPE:
+			table = p11_constant_asserts;
+			break;
+		case CKA_CERTIFICATE_CATEGORY:
+			table = p11_constant_categories;
+			break;
+		case CKA_KEY_GEN_MECHANISM:
+		case CKA_MECHANISM_TYPE:
+			table = p11_constant_mechanisms;
+			break;
+		default:
+			table = NULL;
+	}
 
 	if (!table)
 		return false;
@@ -402,8 +400,8 @@ format_constant (CK_ATTRIBUTE *attr,
 }
 
 static bool
-parse_oid (p11_persist *persist,
-           p11_lexer *lexer,
+parse_oid (p11_persist  *persist,
+           p11_lexer    *lexer,
            CK_ATTRIBUTE *attr)
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };
@@ -415,7 +413,7 @@ parse_oid (p11_persist *persist,
 	value = lexer->tok.field.value;
 	length = strlen (value);
 
-	/* Not an OID value? */
+        /* Not an OID value? */
 	if (length < 4 ||
 	    strchr (value, '.') == NULL ||
 	    strspn (value, "0123456790.") != length ||
@@ -430,7 +428,7 @@ parse_oid (p11_persist *persist,
 		ret = asn1_array2tree (basic_asn1_tab, &persist->asn1_defs, message);
 		if (ret != ASN1_SUCCESS) {
 			p11_debug_precond ("failed to load BASIC definitions: %s: %s\n",
-			                   asn1_strerror (ret), message);
+					   asn1_strerror (ret), message);
 			return false;
 		}
 	}
@@ -438,7 +436,7 @@ parse_oid (p11_persist *persist,
 	ret = asn1_create_element (persist->asn1_defs, "BASIC.ObjectIdentifier", &asn);
 	if (ret != ASN1_SUCCESS) {
 		p11_debug_precond ("failed to create ObjectIdentifier element: %s\n",
-		                   asn1_strerror (ret));
+				   asn1_strerror (ret));
 		return false;
 	}
 
@@ -459,9 +457,9 @@ parse_oid (p11_persist *persist,
 }
 
 static bool
-format_oid (p11_persist *persist,
+format_oid (p11_persist  *persist,
             CK_ATTRIBUTE *attr,
-            p11_buffer *buf)
+            p11_buffer   *buf)
 {
 	char message[ASN1_MAX_ERROR_DESCRIPTION_SIZE] = { 0, };
 	asn1_node asn;
@@ -476,7 +474,7 @@ format_oid (p11_persist *persist,
 		ret = asn1_array2tree (basic_asn1_tab, &persist->asn1_defs, message);
 		if (ret != ASN1_SUCCESS) {
 			p11_debug_precond ("failed to load BASIC definitions: %s: %s\n",
-			                   asn1_strerror (ret), message);
+					   asn1_strerror (ret), message);
 			return false;
 		}
 	}
@@ -484,7 +482,7 @@ format_oid (p11_persist *persist,
 	ret = asn1_create_element (persist->asn1_defs, "BASIC.ObjectIdentifier", &asn);
 	if (ret != ASN1_SUCCESS) {
 		p11_debug_precond ("failed to create ObjectIdentifier element: %s\n",
-		                   asn1_strerror (ret));
+				   asn1_strerror (ret));
 		return false;
 	}
 
@@ -506,8 +504,8 @@ format_oid (p11_persist *persist,
 }
 
 static bool
-parse_value (p11_persist *persist,
-             p11_lexer *lexer,
+parse_value (p11_persist  *persist,
+             p11_lexer    *lexer,
              CK_ATTRIBUTE *attr)
 {
 	return parse_constant (persist, lexer, attr) ||
@@ -518,9 +516,9 @@ parse_value (p11_persist *persist,
 }
 
 static void
-format_value (p11_persist *persist,
+format_value (p11_persist  *persist,
               CK_ATTRIBUTE *attr,
-              p11_buffer *buf)
+              p11_buffer   *buf)
 {
 	assert (attr->ulValueLen != CK_UNAVAILABLE_INFORMATION);
 
@@ -530,13 +528,13 @@ format_value (p11_persist *persist,
 	    format_oid (persist, attr, buf))
 		return;
 
-	/* Everything else as string */
+        /* Everything else as string */
 	format_string (attr, buf);
 }
 
 static bool
-field_to_attribute (p11_persist *persist,
-                    p11_lexer *lexer,
+field_to_attribute (p11_persist   *persist,
+                    p11_lexer     *lexer,
                     CK_ATTRIBUTE **attrs)
 {
 	CK_ATTRIBUTE attr = { 0, };
@@ -545,7 +543,7 @@ field_to_attribute (p11_persist *persist,
 	end = NULL;
 	attr.type = strtoul (lexer->tok.field.name, &end, 10);
 
-	/* Not a valid number value, probably a constant */
+        /* Not a valid number value, probably a constant */
 	if (!end || *end != '\0') {
 		attr.type = p11_constant_resolve (persist->constants, lexer->tok.field.name);
 		if (attr.type == CKA_INVALID || !p11_constant_name (p11_constant_types, attr.type)) {
@@ -560,13 +558,13 @@ field_to_attribute (p11_persist *persist,
 	}
 
 	*attrs = p11_attrs_take (*attrs, attr.type,
-	                         attr.pValue, attr.ulValueLen);
+				 attr.pValue, attr.ulValueLen);
 	return true;
 }
 
 static CK_ATTRIBUTE *
 certificate_to_attributes (const unsigned char *der,
-                           size_t length)
+			   size_t               length)
 {
 	CK_OBJECT_CLASS klassv = CKO_CERTIFICATE;
 	CK_CERTIFICATE_TYPE x509 = CKC_X_509;
@@ -580,9 +578,9 @@ certificate_to_attributes (const unsigned char *der,
 
 static CK_ATTRIBUTE *
 public_key_to_attributes (const unsigned char *der,
-                          size_t length)
+			  size_t               length)
 {
-	/* Eventually we might choose to contribute a class here ... */
+        /* Eventually we might choose to contribute a class here ... */
 	CK_ATTRIBUTE public_key = { CKA_PUBLIC_KEY_INFO, (void *)der, length };
 	return p11_attrs_build (NULL, &public_key, NULL);
 }
@@ -594,10 +592,10 @@ typedef struct {
 } parse_block;
 
 static void
-on_pem_block (const char *type,
-              const unsigned char *contents,
-              size_t length,
-              void *user_data)
+on_pem_block (const char          *type,
+	      const unsigned char *contents,
+	      size_t               length,
+	      void                *user_data)
 {
 	parse_block *pb = user_data;
 	CK_ATTRIBUTE *attrs;
@@ -606,12 +604,10 @@ on_pem_block (const char *type,
 		attrs = certificate_to_attributes (contents, length);
 		pb->attrs = p11_attrs_merge (pb->attrs, attrs, false);
 		pb->result = true;
-
 	} else if (strcmp (type, "PUBLIC KEY") == 0) {
 		attrs = public_key_to_attributes (contents, length);
 		pb->attrs = p11_attrs_merge (pb->attrs, attrs, false);
 		pb->result = true;
-
 	} else {
 		p11_lexer_msg (pb->lexer, "unsupported pem block in store");
 		pb->result = false;
@@ -619,33 +615,33 @@ on_pem_block (const char *type,
 }
 
 static bool
-pem_to_attributes (p11_lexer *lexer,
+pem_to_attributes (p11_lexer     *lexer,
                    CK_ATTRIBUTE **attrs)
 {
 	parse_block pb = { lexer, *attrs, false };
 	unsigned int count;
 
 	count = p11_pem_parse (lexer->tok.pem.begin,
-	                       lexer->tok.pem.length,
-	                       on_pem_block, &pb);
+			       lexer->tok.pem.length,
+			       on_pem_block, &pb);
 
 	if (count == 0) {
 		p11_lexer_msg (lexer, "invalid pem block");
 		return false;
 	}
 
-	/* The lexer should have only matched one block */
+        /* The lexer should have only matched one block */
 	return_val_if_fail (count == 1, false);
 	*attrs = pb.attrs;
 	return pb.result;
 }
 
 bool
-p11_persist_read (p11_persist *persist,
-                  const char *filename,
-                  const unsigned char *data,
-                  size_t length,
-                  p11_array *objects)
+p11_persist_read (p11_persist         *persist,
+		  const char          *filename,
+		  const unsigned char *data,
+		  size_t               length,
+		  p11_array           *objects)
 {
 	p11_lexer lexer;
 	CK_ATTRIBUTE *attrs;
@@ -662,40 +658,40 @@ p11_persist_read (p11_persist *persist,
 	p11_lexer_init (&lexer, filename, (const char *)data, length);
 	while (p11_lexer_next (&lexer, &failed)) {
 		switch (lexer.tok_type) {
-		case TOK_SECTION:
-			if (attrs && !p11_array_push (objects, attrs))
-				return_val_if_reached (false);
-			attrs = NULL;
-			if (strcmp (lexer.tok.section.name, PERSIST_HEADER) != 0) {
-				p11_lexer_msg (&lexer, "unrecognized or invalid section header");
-				skip = true;
-			} else {
-				attrs = p11_attrs_build (NULL, NULL);
-				return_val_if_fail (attrs != NULL, false);
-				skip = false;
-			}
-			failed = false;
-			break;
-		case TOK_FIELD:
-			if (skip) {
+			case TOK_SECTION:
+				if (attrs && !p11_array_push (objects, attrs))
+					return_val_if_reached (false);
+				attrs = NULL;
+				if (strcmp (lexer.tok.section.name, PERSIST_HEADER) != 0) {
+					p11_lexer_msg (&lexer, "unrecognized or invalid section header");
+					skip = true;
+				} else {
+					attrs = p11_attrs_build (NULL, NULL);
+					return_val_if_fail (attrs != NULL, false);
+					skip = false;
+				}
 				failed = false;
-			} else if (!attrs) {
-				p11_lexer_msg (&lexer, "attribute before p11-kit section header");
-				failed = true;
-			} else {
-				failed = !field_to_attribute (persist, &lexer, &attrs);
-			}
-			break;
-		case TOK_PEM:
-			if (skip) {
-				failed = false;
-			} else if (!attrs) {
-				p11_lexer_msg (&lexer, "pem block before p11-kit section header");
-				failed = true;
-			} else {
-				failed = !pem_to_attributes (&lexer, &attrs);
-			}
-			break;
+				break;
+			case TOK_FIELD:
+				if (skip) {
+					failed = false;
+				} else if (!attrs) {
+					p11_lexer_msg (&lexer, "attribute before p11-kit section header");
+					failed = true;
+				} else {
+					failed = !field_to_attribute (persist, &lexer, &attrs);
+				}
+				break;
+			case TOK_PEM:
+				if (skip) {
+					failed = false;
+				} else if (!attrs) {
+					p11_lexer_msg (&lexer, "pem block before p11-kit section header");
+					failed = true;
+				} else {
+					failed = !pem_to_attributes (&lexer, &attrs);
+				}
+				break;
 		}
 
 		if (failed)
@@ -726,9 +722,9 @@ find_certificate_value (CK_ATTRIBUTE *attrs)
 }
 
 bool
-p11_persist_write (p11_persist *persist,
+p11_persist_write (p11_persist  *persist,
                    CK_ATTRIBUTE *attrs,
-                   p11_buffer *buf)
+                   p11_buffer   *buf)
 {
 	char string[sizeof (CK_ULONG) * 4];
 	CK_ATTRIBUTE *cert_value;
@@ -742,20 +738,19 @@ p11_persist_write (p11_persist *persist,
 	p11_buffer_add (buf, "[" PERSIST_HEADER "]\n", -1);
 
 	for (i = 0; !p11_attrs_terminator (attrs + i); i++) {
-
-		/* These are written later? */
+                /* These are written later? */
 		if (cert_value != NULL &&
 		    (attrs[i].type == CKA_CLASS ||
 		     attrs[i].type == CKA_CERTIFICATE_TYPE ||
 		     attrs[i].type == CKA_VALUE))
 			continue;
 
-		/* These are written later? */
+                /* These are written later? */
 		if (spki_value != NULL &&
 		    attrs[i].type == CKA_PUBLIC_KEY_INFO)
 			continue;
 
-		/* These are never written */
+                /* These are never written */
 		if (attrs[i].type == CKA_TOKEN ||
 		    attrs[i].type == CKA_X_ORIGIN ||
 		    attrs[i].type == CKA_X_GENERATED)

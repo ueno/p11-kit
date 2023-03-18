@@ -135,7 +135,7 @@ getprogname (void)
 
 #if defined (HAVE_GETEXECNAME)
 	const char *p;
-	name = getexecname();
+	name = getexecname ();
 	p = strrchr (name ? name : "", '/');
 	if (p != NULL)
 		name = p + 1;
@@ -144,25 +144,25 @@ getprogname (void)
 	name = program_invocation_name;
 	assert (name);
 	if (*name == '/') {
-		/*
-		 * Some programs pack command line arguments into argv[0].
-		 * Check if it is the case by reading /proc/self/exe and extract
-		 * the program name.
-		 *
-		 * Logic borrowed from:
-		 * <https://github.com/mesa3d/mesa/commit/759b94038987bb983398cd4b1d2cb1c8f79817a9>.
-		 */
+                /*
+                 * Some programs pack command line arguments into argv[0].
+                 * Check if it is the case by reading /proc/self/exe and extract
+                 * the program name.
+                 *
+                 * Logic borrowed from:
+                 * <https://github.com/mesa3d/mesa/commit/759b94038987bb983398cd4b1d2cb1c8f79817a9>.
+                 */
 		if (!p11_program_realpath)
 			p11_program_realpath = realpath ("/proc/self/exe", NULL);
 
 		if (p11_program_realpath &&
 		    strncmp (p11_program_realpath, name,
 			     strlen (p11_program_realpath)) == 0)
-			/* Use the executable path if the prefix matches. */
+                        /* Use the executable path if the prefix matches. */
 			name = strrchr (p11_program_realpath, '/') + 1;
 		else
-			/* Otherwise fall back to
-			 * program_invocation_short_name. */
+                        /* Otherwise fall back to
+                         * program_invocation_short_name. */
 			name = program_invocation_short_name;
 	} else {
 		name = program_invocation_short_name;
@@ -251,10 +251,10 @@ struct _p11_mmap {
 };
 
 p11_mmap *
-p11_mmap_open (const char *path,
-               struct stat *sb,
-               void **data,
-               size_t *size)
+p11_mmap_open (const char  *path,
+	       struct stat *sb,
+	       void       **data,
+	       size_t      *size)
 {
 	struct stat stb;
 	p11_mmap *map;
@@ -278,7 +278,7 @@ p11_mmap_open (const char *path,
 		}
 	}
 
-	/* Workaround for broken ZFS on Linux */
+        /* Workaround for broken ZFS on Linux */
 	if (S_ISDIR (sb->st_mode)) {
 		errno = EISDIR;
 		close (map->fd);
@@ -321,16 +321,16 @@ p11_mmap_close (p11_mmap *map)
 char *
 p11_dl_error (void)
 {
-	DWORD code = GetLastError();
+	DWORD code = GetLastError ();
 	LPVOID msg_buf;
 	char *result;
 
 	FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER |
-	                FORMAT_MESSAGE_FROM_SYSTEM |
-	                FORMAT_MESSAGE_IGNORE_INSERTS,
-	                NULL, code,
-	                MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-	                (LPSTR)&msg_buf, 0, NULL);
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, code,
+			MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPSTR)&msg_buf, 0, NULL);
 
 	result = strdup (msg_buf);
 	LocalFree (msg_buf);
@@ -338,15 +338,15 @@ p11_dl_error (void)
 }
 
 int
-p11_thread_create (p11_thread_t *thread,
-                   p11_thread_routine routine,
-                   void *arg)
+p11_thread_create (p11_thread_t       *thread,
+                   p11_thread_routine  routine,
+                   void               *arg)
 {
 	assert (thread);
 
 	*thread = CreateThread (NULL, 0,
-	                        (LPTHREAD_START_ROUTINE)routine,
-	                        arg, 0, NULL);
+				(LPTHREAD_START_ROUTINE)routine,
+				arg, 0, NULL);
 
 	if (*thread == NULL)
 		return GetLastError ();
@@ -374,10 +374,10 @@ struct _p11_mmap {
 };
 
 p11_mmap *
-p11_mmap_open (const char *path,
-               struct stat *sb,
-               void **data,
-               size_t *size)
+p11_mmap_open (const char  *path,
+	       struct stat *sb,
+	       void       **data,
+	       size_t      *size)
 {
 	HANDLE mapping;
 	LARGE_INTEGER large;
@@ -390,7 +390,7 @@ p11_mmap_open (const char *path,
 		return NULL;
 	}
 
-	map->file  = CreateFile (path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+	map->file = CreateFile (path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
 	if (map->file == INVALID_HANDLE_VALUE) {
 		errn = GetLastError ();
 		free (map);
@@ -465,7 +465,7 @@ p11_mmap_close (p11_mmap *map)
 char *
 strnstr (const char *s,
          const char *find,
-         size_t slen)
+         size_t      slen)
 {
 	char c, sc;
 	size_t len;
@@ -479,7 +479,7 @@ strnstr (const char *s,
 			} while (sc != c);
 			if (len > slen)
 				return (NULL);
-		} while (strncmp(s, find, len) != 0);
+		} while (strncmp (s, find, len) != 0);
 		s--;
 	}
 	return ((char *)s);
@@ -491,7 +491,7 @@ strnstr (const char *s,
 
 void *
 memdup (const void *data,
-        size_t length)
+        size_t      length)
 {
 	void *dup;
 
@@ -527,11 +527,11 @@ memdup (const void *data,
 
 char *
 strndup (const char *data,
-         size_t length);
+	 size_t      length);
 
 char *
 strndup (const char *data,
-         size_t length)
+         size_t      length)
 {
 	char *ret;
 
@@ -549,9 +549,9 @@ strndup (const char *data,
 #ifndef HAVE_REALLOCARRAY
 
 void *
-reallocarray (void *ptr,
-	      size_t nmemb,
-	      size_t size)
+reallocarray (void   *ptr,
+              size_t  nmemb,
+              size_t  size)
 {
 	assert (nmemb >= 0 && size >= 0);
 	if (nmemb != 0 && SIZE_MAX / nmemb < size) {
@@ -569,7 +569,7 @@ reallocarray (void *ptr,
 
 char *
 strconcat (const char *first,
-           ...)
+	   ...)
 {
 	size_t length = 0;
 	const char *arg;
@@ -578,7 +578,7 @@ strconcat (const char *first,
 
 	va_start (va, first);
 
-	for (arg = first; arg; arg = va_arg (va, const char*)) {
+	for (arg = first; arg; arg = va_arg (va, const char *)) {
 		size_t old_length = length;
 		length += strlen (arg);
 		if (length < old_length) {
@@ -591,14 +591,14 @@ strconcat (const char *first,
 
 	at = result = malloc (length + 1);
 	if (result == NULL)
-	       return NULL;
+		return NULL;
 
 	va_start (va, first);
 
-	for (arg = first; arg; arg = va_arg (va, const char*)) {
-	       length = strlen (arg);
-	       memcpy (at, arg, length);
-	       at += length;
+	for (arg = first; arg; arg = va_arg (va, const char *)) {
+		length = strlen (arg);
+		memcpy (at, arg, length);
+		at += length;
 	}
 
 	va_end (va);
@@ -612,12 +612,14 @@ strconcat (const char *first,
 #ifndef HAVE_VASPRINTF
 #include <stdio.h>
 
-int vasprintf(char **strp, const char *fmt, va_list ap);
+int vasprintf (char      **strp,
+	       const char *fmt,
+	       va_list     ap);
 
 int
-vasprintf (char **strp,
-           const char *fmt,
-           va_list ap)
+vasprintf (char       **strp,
+           const char  *fmt,
+           va_list      ap)
 {
 	char *buf = NULL;
 	char *nbuf;
@@ -666,12 +668,14 @@ vasprintf (char **strp,
 
 #ifndef HAVE_ASPRINTF
 
-int asprintf(char **strp, const char *fmt, ...);
+int asprintf (char      **strp,
+	      const char *fmt,
+	      ...);
 
 int
-asprintf (char **strp,
-          const char *fmt,
-          ...)
+asprintf (char      **strp,
+	  const char *fmt,
+	  ...)
 {
 	va_list va;
 	int ret;
@@ -689,13 +693,13 @@ asprintf (char **strp,
 
 struct tm *
 gmtime_r (const time_t *timep,
-          struct tm *result)
+	  struct tm    *result)
 {
 #ifdef OS_WIN32
-	/*
-	 * On win32 gmtime() returns thread local storage, so we can
-	 * just copy it out into the buffer without worrying about races.
-	 */
+        /*
+         * On win32 gmtime() returns thread local storage, so we can
+         * just copy it out into the buffer without worrying about races.
+         */
 	struct tm *tg;
 	tg = gmtime (timep);
 	if (!tg)
@@ -715,9 +719,9 @@ gmtime_r (const time_t *timep,
 
 static int
 _gettemp (char *path,
-          int *doopen,
-          int domkdir,
-          int slen)
+          int  *doopen,
+          int   domkdir,
+          int   slen)
 {
 	static const char padchar[] =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -749,28 +753,28 @@ _gettemp (char *path,
 		return (0);
 	}
 
-	/* Fill space with random characters */
+        /* Fill space with random characters */
 	while (trv >= path && *trv == 'X') {
 		rnd = rand () % (sizeof (padchar) - 1);
 		*trv-- = padchar[rnd];
 	}
 	start = trv + 1;
 
-	/* save first combination of random characters */
+        /* save first combination of random characters */
 	memcpy (carrybuf, start, suffp - start);
 
-	/*
-	 * check the target directory.
-	 */
+        /*
+         * check the target directory.
+         */
 	if (doopen != NULL || domkdir) {
 		for (; trv > path; --trv) {
 			if (*trv == '/') {
 				*trv = '\0';
-				rval = stat(path, &sbuf);
+				rval = stat (path, &sbuf);
 				*trv = '/';
 				if (rval != 0)
 					return (0);
-				if (!S_ISDIR(sbuf.st_mode)) {
+				if (!S_ISDIR (sbuf.st_mode)) {
 					errno = ENOTDIR;
 					return (0);
 				}
@@ -801,32 +805,32 @@ _gettemp (char *path,
 #endif
 			return (errno == ENOENT);
 
-		/* If we have a collision, cycle through the space of filenames */
+                /* If we have a collision, cycle through the space of filenames */
 		for (trv = start, carryp = carrybuf;;) {
-			/* have we tried all possible permutations? */
+                        /* have we tried all possible permutations? */
 			if (trv == suffp)
 				return (0); /* yes - exit with EEXIST */
-			pad = strchr(padchar, *trv);
+			pad = strchr (padchar, *trv);
 			if (pad == NULL) {
-				/* this should never happen */
+                                /* this should never happen */
 				errno = EIO;
 				return (0);
 			}
-			/* increment character */
+                        /* increment character */
 			*trv = (*++pad == '\0') ? padchar[0] : *pad;
-			/* carry to next position? */
+                        /* carry to next position? */
 			if (*trv == *carryp) {
-				/* increment position and loop */
+                                /* increment position and loop */
 				++trv;
 				++carryp;
 			} else {
-				/* try with new name */
+                                /* try with new name */
 				break;
 			}
 		}
 	}
 
-	/*NOTREACHED*/
+        /*NOTREACHED*/
 }
 
 #endif /* !HAVE_MKDTEMP || !HAVE_MKSTEMP */
@@ -861,21 +865,19 @@ getauxval (unsigned long type)
 	static unsigned long secure = 0UL;
 	static bool check_secure_initialized = false;
 
-	/*
-	 * This is the only one our stand-in impl supports and is
-	 * also the only type we define in compat.h header
-	 */
+        /*
+         * This is the only one our stand-in impl supports and is
+         * also the only type we define in compat.h header
+         */
 	assert (type == AT_SECURE);
 
 	if (!check_secure_initialized) {
 #if defined(HAVE___LIBC_ENABLE_SECURE)
 		extern int __libc_enable_secure;
 		secure = __libc_enable_secure;
-
 #elif defined(HAVE_ISSETUGID) && \
-	!((defined __APPLE__ && defined __MACH__) || (defined __FreeBSD__))
+		!((defined __APPLE__ && defined __MACH__) || (defined __FreeBSD__))
 		secure = issetugid ();
-
 #elif defined(OS_UNIX)
 		uid_t ruid, euid, suid; /* Real, effective and saved user ID's */
 		gid_t rgid, egid, sgid; /* Real, effective and saved group ID's */
@@ -892,7 +894,7 @@ getauxval (unsigned long type)
 		}
 
 		secure = (ruid != euid || ruid != suid ||
-		          rgid != egid || rgid != sgid);
+			  rgid != egid || rgid != sgid);
 #endif /* OS_UNIX */
 		check_secure_initialized = true;
 	}
@@ -913,9 +915,9 @@ secure_getenv (const char *name)
 #ifndef HAVE_STRERROR_R
 
 int
-strerror_r (int errnum,
-            char *buf,
-            size_t buflen)
+strerror_r (int     errnum,
+            char   *buf,
+            size_t  buflen)
 {
 #ifdef OS_WIN32
 #if _WIN32_WINNT < 0x502 /* WinXP or older */
@@ -927,13 +929,12 @@ strerror_r (int errnum,
 		p = sys_errlist[errnum];
 	if (buf == NULL || buflen == 0)
 		return EINVAL;
-	strncpy(buf, p, buflen);
-	buf[buflen-1] = 0;
+	strncpy (buf, p, buflen);
+	buf[buflen - 1] = 0;
 	return 0;
 #else /* Server 2003 or newer */
 	return strerror_s (buf, buflen, errnum);
 #endif /*_WIN32_WINNT*/
-
 #else
 	#error no strerror_r implementation
 #endif
@@ -947,7 +948,7 @@ p11_dl_close (void *dl)
 #ifdef OS_WIN32
 	FreeLibrary (dl);
 #else
-	(void) dlclose (dl);
+	(void)dlclose (dl);
 #endif
 }
 
@@ -963,8 +964,8 @@ p11_dl_close (void *dl)
 #endif
 
 int
-fdwalk (int (* cb) (void *data, int fd),
-        void *data)
+fdwalk (int ( * cb ) (void *data, int fd),
+	void *data)
 {
 	int open_max;
 	int res = 0;
@@ -986,16 +987,16 @@ fdwalk (int (* cb) (void *data, int fd),
 			long num;
 
 			end = NULL;
-			num = (int) strtol (de->d_name, &end, 10);
+			num = (int)strtol (de->d_name, &end, 10);
 
-			/* didn't parse or is the opendir() fd */
+                        /* didn't parse or is the opendir() fd */
 			if (!end || *end != '\0' ||
 			    (int)num == dirfd (dir))
 				continue;
 
 			fd = num;
 
-			/* call the callback */
+                        /* call the callback */
 			res = cb (data, fd);
 			if (res != 0)
 				break;
@@ -1006,13 +1007,13 @@ fdwalk (int (* cb) (void *data, int fd),
 	}
 #endif
 
-	/* No /proc, brute force */
+        /* No /proc, brute force */
 #ifdef HAVE_SYS_RESOURCE_H
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0 && rl.rlim_max != RLIM_INFINITY)
 		open_max = rl.rlim_max;
 	else
 #endif
-		open_max = sysconf (_SC_OPEN_MAX);
+	open_max = sysconf (_SC_OPEN_MAX);
 
 	for (fd = 0; fd < open_max; fd++) {
 		res = cb (data, fd);

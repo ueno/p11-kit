@@ -42,16 +42,16 @@
 #include "test.h"
 
 static CK_RV
-override_wait_for_slot_event (CK_FLAGS flags,
-			      CK_SLOT_ID_PTR slot,
-			      CK_VOID_PTR reserved)
+override_wait_for_slot_event (CK_FLAGS       flags,
+                              CK_SLOT_ID_PTR slot,
+                              CK_VOID_PTR    reserved)
 {
 	if (flags & CKF_DONT_BLOCK) {
 		*slot = MOCK_SLOT_ONE_ID;
 		return CKR_OK;
 	}
 
-	return mock_C_WaitForSlotEvent(flags, slot, reserved);
+	return mock_C_WaitForSlotEvent (flags, slot, reserved);
 }
 
 #ifdef OS_WIN32
