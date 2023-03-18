@@ -4,6 +4,16 @@ env:
   BUILDDIR: "builddir"
   INSTALLDIR: "installdir"
 jobs:
+  code-format:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/p11-glue/p11-kit:master
+    steps:
+      # Checkout repo
+      - uses: actions/checkout@v2
+      - name: Run uncrustify
+        run: build/run-uncrustify.sh
+
   autotools:
     runs-on: ubuntu-latest
     container:
